@@ -24,3 +24,4 @@ def send_sms(request):
         return HttpResponse('成功')
     else:
         return HttpResponse(res['errmsg'])
+
