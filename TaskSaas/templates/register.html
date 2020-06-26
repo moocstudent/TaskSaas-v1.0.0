@@ -3,12 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .account {
+            width: 400px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
-<body>
-<h1>注册</h1>
-{% for field in form %}
-    <p>{{ field.label }}:{{ field }}</p>
-{% endfor %}
 
+<body>
+<div class="account">
+    <h1 style="text-align: center">注册</h1>
+    <form>
+        {% for field in form %}
+            {% if field.name == 'code' %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="clearfix">
+                        <div class="col-md">{{ field }}</div>
+                        <div class="col-md" style="padding-top: 10px"><input type="button" class="btn btn-default" value="点击获取验证码"></div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">注册</button>
+    </form>
+</div>
 </body>
+
 </html>
