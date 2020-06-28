@@ -20,7 +20,6 @@ def send_sms(request):
 
     code = random.randrange(1000, 9999)
     res = send_sms_single('15773154328', template_id, [code, ])
-    print(res)
     if res['result'] == 0:
         return HttpResponse('成功')
     else:
@@ -32,6 +31,9 @@ from TaskSaas import models
 
 
 class RegisterModelForm(forms.ModelForm):
+    """
+    注册表单自动生成
+    """
     mobile_phone = forms.CharField(label='手机号码',
                                    validators=[RegexValidator(r'^(1[3|4|5|6|7|8|9])\d{9}$', '手机号码格式错误'), ])
     password = forms.CharField(label='密码', widget=forms.PasswordInput())
@@ -40,7 +42,7 @@ class RegisterModelForm(forms.ModelForm):
 
     class Meta:
         model = models.UserInfo
-        fields = ['username','email','password','confirm_password','mobile_phone','code']
+        fields = ['username', 'email', 'password', 'confirm_password', 'mobile_phone', 'code']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,4 +53,4 @@ class RegisterModelForm(forms.ModelForm):
 
 def register(request):
     form = RegisterModelForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'TaskSaas/register.html', {'form': form})
