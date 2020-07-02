@@ -3,7 +3,7 @@ import random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
-def check_code(width=120, height=30, char_length=4, font_file='domi.ttf', font_size=28):
+def check_code(width=120, height=30, char_length=4, font_file='utils/Monaco.ttf', font_size=28):
     code = []
     img = Image.new(mode='RGB', size=(width, height), color=(255, 255, 255))
     draw = ImageDraw.Draw(img, mode='RGB')
@@ -28,18 +28,18 @@ def check_code(width=120, height=30, char_length=4, font_file='domi.ttf', font_s
         char = rndChar()
         code.append(char)
         h = random.randint(0, 4)
-        draw.text([i * width / char_length, h], char, font=font, fill='blue')
+        draw.text([i * width / char_length, h], char, font=font, fill=rndColor())
 
     # 写干扰点
     for i in range(40):
-        draw.point([random.randint(0, width), random.randint(0, height)], fill='black')
+        draw.point([random.randint(0, width), random.randint(0, height)], fill=rndColor())
 
     # 写干扰圆圈
     for i in range(30):
-        draw.point([random.randint(0, width), random.randint(0, height)], fill='black')
+        draw.point([random.randint(0, width), random.randint(0, height)], fill=rndColor())
         x = random.randint(0, width)
         y = random.randint(0, height)
-        draw.arc((x, y, x + 4, y + 4), 0, 90, fill='black')
+        draw.arc((x, y, x + 4, y + 4), 0, 90, fill=rndColor())
 
     # 画干扰线
     for i in range(2):
@@ -48,15 +48,7 @@ def check_code(width=120, height=30, char_length=4, font_file='domi.ttf', font_s
         x2 = random.randint(0, width)
         y2 = random.randint(0, height)
 
-        draw.line((x1, y1, x2, y2), fill='black')
+        draw.line((x1, y1, x2, y2), fill=rndColor())
 
     img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)
     return img, ''.join(code)
-
-
-if __name__ == '__main__':
-    from io import BytesIO
-# img_object,code=check_code()
-# stream = BytesIO()
-# img_object.save(stream, 'png')
-# stream.getvalue()

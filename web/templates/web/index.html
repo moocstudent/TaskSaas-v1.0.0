@@ -1,0 +1,26 @@
+{% extends 'layout/basic.html' %}
+{% load static %}
+
+{% block title %} 首页 {% endblock %}
+
+{% block css %}
+    <style>
+        img {
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <img src="{% static 'web/image/image-1.png' %}">
+        <img src="{% static 'web/image/image-2.png' %}">
+        <img src="{% static 'web/image/image-3.png' %}">
+        <img src="{% static 'web/image/image-4.png' %}">
+    </div>
+{% endblock %}
+
+
+{% block js %}
+
+{% endblock %}

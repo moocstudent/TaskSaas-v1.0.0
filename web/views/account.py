@@ -2,9 +2,14 @@
 用户账号相关功能：注册/短信/登陆/注销
 '''
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from web.forms.account import RegisterModelForm, SendSmsForm, LoginSmsForm
+from django.shortcuts import render, redirect
+
+from web import models
+from web.forms.account import RegisterModelForm, SendSmsForm, LoginSmsForm, LoginForm
 from django.conf import settings
+from io import BytesIO
+from utils.image_code import check_code
+from django.db.models import Q
 
 
 def register(request):
@@ -56,7 +61,50 @@ def login_sms(request):
         user_object = form.cleaned_data['mobile_phone']
         # 将用户信息放入session
         request.session['user_id'] = user_object.id
-        request.session['user_name'] = user_object.username
+        request.session.set_expiry(60 * 60 * 24 * 14)
 
         return JsonResponse({'status': True, 'data': '/index/'})
     return JsonResponse({'status': False, 'error': form.errors})
+
+
+def login(request):
+    """
+    用户名密码登陆
+    :param request:
+    :return:
+    """
+    if request.method == 'GET':
+        form = LoginForm(request)
+        return render(request, 'web/login.html', {'form': form})
+    form = LoginForm(request, data=request.POST)
+    if form.is_valid():
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+
+        user_object = models.UserInfo.objects.filter(Q(email=username) | Q(mobile_phone=username)) \
+            .filter(password=password).first()
+
+        if user_object:
+            # 登陆成功
+            request.session['user_id'] = user_object.id
+            request.session.set_expiry(60 * 60 * 24 * 14)
+
+            return redirect('index')
+        form.add_error('username', '用户名或密码错误')
+    return render(request, 'web/login.html', {'form': form})
+
+
+def image_code(request):
+    """
+    生成图片验证码
+    """
+
+    image_object, code = check_code()
+
+    request.session['image_code'] = code
+    request.session.set_expiry(60)  # 60秒过期
+
+    stream = BytesIO()
+    image_object.save(stream, 'png')
+
+    return HttpResponse(stream.getvalue())
