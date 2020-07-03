@@ -108,3 +108,8 @@ def image_code(request):
     image_object.save(stream, 'png')
 
     return HttpResponse(stream.getvalue())
+
+
+def logout(request):
+    request.session.flush()
+    return redirect('index')
