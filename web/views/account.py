@@ -1,6 +1,9 @@
 '''
 用户账号相关功能：注册/短信/登陆/注销
 '''
+import datetime
+import uuid
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
@@ -26,7 +29,19 @@ def register(request):
 
     if form.is_valid():
         # 验证通过，写入数据库(密码转换成密文)
-        form.save()
+        instance = form.save()
+
+        policy_object = models.PricePolicy.objects.filter(category=1, title='个人免费版').first()
+        # 创建交易记录
+        models.Transaction.objects.create(
+            status=2,
+            order=str(uuid.uuid4()),
+            user=instance,
+            place_policy=policy_object,
+            count=0,
+            price=0,
+            start_datetime=datetime.datetime.now(),
+        )
         return JsonResponse({'status': True, 'data': '/login/'})
 
     return JsonResponse({'status': False, 'error': form.errors})
