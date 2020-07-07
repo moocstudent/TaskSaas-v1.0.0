@@ -11,6 +11,7 @@ class Web(object):
     def __init__(self):
         self.user = None,
         self.price_policy = None
+        self.project = None
 
 
 class AuthMiddleWare(MiddlewareMixin):
@@ -64,3 +65,27 @@ class AuthMiddleWare(MiddlewareMixin):
             else:
                 request.price_policy = _object.price_policy
         """
+
+    def process_view(self, request, view, args, kwargs):
+        # 判断URL是否以manage开头，如果是则判断项目ID是否是我的or我参与的
+        if not request.path_info.startswith("/manage/"):
+            return
+
+        # project_id 是我创建or我参与的
+        project_id = kwargs.get('project_id')
+
+        # 是否自己创建
+        project_object = models.Project.objects.filter(creator=request.web.user, id=project_id).first()
+        if project_object:
+            # 是自己创建的项目，pass
+            request.web.project = project_object
+            return
+
+        # 是否自己参与
+        project_user_object = models.ProjectUser.objects.filter(user=request.web.user, project_id=project_id).first()
+        if project_user_object:
+            # 是自己创建的项目，pass
+            request.web.project = project_user_object.project
+            return
+
+        return redirect('project_list')
