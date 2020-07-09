@@ -13,7 +13,7 @@ def all_project_list(request):
     # 2.获取参与的所有项目
     join_project = models.ProjectUser.objects.filter(user=request.web.user)
 
-    return {'my': my_project, 'join': join_project}
+    return {'my': my_project, 'join': join_project, 'request': request}
 
 
 @register.inclusion_tag('inclusion/manage_menu_list.html')

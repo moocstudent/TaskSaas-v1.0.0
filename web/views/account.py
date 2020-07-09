@@ -37,7 +37,7 @@ def register(request):
             status=2,
             order=str(uuid.uuid4()),
             user=instance,
-            place_policy=policy_object,
+            price_policy=policy_object,
             count=0,
             price=0,
             start_datetime=datetime.datetime.now(),

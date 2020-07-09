@@ -1,8 +1,11 @@
+import time
+
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 from web import models
 from web.forms.project import ProjectModelForm
+from utils.tencent.cos import create_bucket
 
 
 def project_list(request):
@@ -39,7 +42,15 @@ def project_list(request):
 
     form = ProjectModelForm(request, data=request.POST)
     if form.is_valid():
-        # 验证通过:项目名，颜色，描述+creater
+        name = form.cleaned_data['name']
+        # 为项目创建一个桶&区域
+        bucket = "{}-{}-{}-1302500499".format(name, request.web.user.mobile_phone, str(int(time.time())))
+        region = "ap-chengdu"
+        create_bucket(bucket, region)
+
+        # 验证通过:项目名，颜色，描述+creater+COSbucketname+COSregion
+        form.instance.region = region
+        form.instance.bucket = bucket
         form.instance.creator = request.web.user
         form.save()
         return JsonResponse({'status': True, })

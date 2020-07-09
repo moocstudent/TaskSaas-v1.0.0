@@ -152,6 +152,11 @@ WHITE_REGEX_URL_LIST = [
     '/index/',
 ]
 
+# COS文件存储相关ID/KEY
+SECRET_ID = '替换为用户的 secretId'  # 替换为用户的 secretId
+SECRET_KEY = '替换为用户的 secretKey'  # 替换为用户的 secretKey
+REGION = 'ap-chengdu'
+
 try:
     from .local_settings import *
 except ImportError:

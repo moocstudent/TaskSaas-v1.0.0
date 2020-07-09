@@ -81,13 +81,17 @@
         .color-radio input[type='radio']:checked + .cycle {
             border: 2px solid black;
         }
+
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container-fluid project">
-        <a class="btn btn-primary" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus-circle"
+        <div style="margin: 10px 0;">
+               <a class="btn btn-primary" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus-circle"
                                                                                   aria-hidden="true"></i>新建项目</a>
+
+        </div>
 
 
         <!-- Modal -->
@@ -97,7 +101,7 @@
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">新建项目</h4>
+                        <h6 class="modal-title" id="myModalLabel">新建项目</h6>
                     </div>
                     <div class="modal-body">
                         <form id="addForm">
