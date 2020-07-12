@@ -58,3 +58,42 @@ def upload_file(bucket, region, file_object, key, ):
     )
 
     return "https://{}.cos.{}.myqcloud.com/{}".format(bucket, region, key)
+
+
+def delete_file(bucket, region, key, ):
+    """
+    COS删除文件
+    :param bucket:
+    :param key:
+    :param region:
+    :return:
+    """
+    config = CosConfig(Region=region, SecretId=settings.SECRET_ID, SecretKey=settings.SECRET_KEY, )
+    client = CosS3Client(config)
+
+    client.delete_object(
+        Bucket=bucket,
+        Key=key,
+    )
+
+
+def delete_file_list(bucket, region, key_list):
+    """
+    COS批量删除文件
+    :param bucket:
+    :param key_list:
+    :param region:
+    :return:
+    """
+    config = CosConfig(Region=region, SecretId=settings.SECRET_ID, SecretKey=settings.SECRET_KEY, )
+    client = CosS3Client(config)
+
+    objects = {
+        "Quiet": "true",
+        "Object": key_list
+    }
+
+    client.delete_objects(
+        Bucket=bucket,
+        Delete=objects
+    )
