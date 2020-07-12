@@ -21,6 +21,23 @@ def create_bucket(bucket, region='ap-chengdu'):
         ACL='public-read'  # private/public-read/public-read-write
     )
 
+    # 跨域解决
+    cors_config = {
+        'CORSRule': [{
+            'AllowedOrigin': '*',
+            'AllowedMethod': ['GET', 'PUT', 'HEAD', 'POST', 'DELETE'],
+            'AllowedHeader': '*',
+            'ExposeHeader': '*',
+            'MaxAgeSeconds': 500
+        }
+        ]
+    }
+
+    client.put_bucket_cors(
+        Bucket=bucket,
+        CORSConfiguration=cors_config
+    )
+
 
 def upload_file(bucket, region, file_object, key, ):
     """
