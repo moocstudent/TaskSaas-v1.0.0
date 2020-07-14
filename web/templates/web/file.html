@@ -1,4 +1,5 @@
 {% extends 'layout/manage.html' %}
+{% load static %}
 {% block title %}{% endblock %}
 
 {% block css %}
@@ -15,6 +16,31 @@
 
         .panel-default > .panel-heading span {
             padding: 0 5px;
+        }
+
+        .panel-default > .panel-heading .function .upload {
+            overflow: hidden;
+        }
+
+        .panel-default > .panel-heading .function .upload input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 76px;
+            left: -2px;
+            overflow: hidden;
+        }
+
+        .upload-progress {
+            position: fixed;
+            right: 2px;
+            bottom: 2px;
+            width: 400px;
+        }
+
+        .upload-progress .progress-error {
+            color: red;
         }
     </style>
 {% endblock %}
@@ -38,7 +64,14 @@
                         </a>
                     {% endfor %}
                 </div>
-                <div>
+                <div class="function">
+                    <div class="btn btn-primary btn-xs upload" style="position:relative ">
+                        <div><i class="fa fa-upload" aria-hidden="true"></i> 上传文件</div>
+                        <input type="file" multiple name="uploadFile" id="uploadFile">
+
+                    </div>
+
+
                     <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#addModal" data-whatever="新建文件夹">
                         <i class="fa fa-plus-circle" aria-hidden="true"></i>新建文件夹
                     </a>
@@ -50,14 +83,13 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>文件名</th>
-                    <th>大小</th>
+                    <th>字节大小</th>
                     <th>最后更新者</th>
                     <th>最后更新时间</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="rowList">
                 {% for item in file_object_list %}
                     <tr>
                         <td>
@@ -88,6 +120,11 @@
                                    data-fid="{{ item.id }}"
                                    data-whatever="修改文件夹">
                                     <i class="fa fa-edit" aria-hidden="true"></i>
+                                </a>
+                            {% else %}
+                                <a class=" btn btn-default btn-xs download"
+                                   href="{% url 'file_download' project_id=request.web.project.id file_id=item.id %}">
+                                    <i class="fa fa-cloud-download" aria-hidden="true"></i>
                                 </a>
                             {% endif %}
                             <a type="button" class="btn btn-danger btn-xs"
@@ -156,18 +193,174 @@
         </div>
     </div>
 
+    <div id="uploadProgress" class="upload-progress hide">
+        <div class="panel panel-primary">
+            <div class="panel-heading"><i class="fa fa-cloud-upload" aria-hidden="true"></i>上传进度</div>
+            <table class="table">
+                <tbody id="progressList">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="hide">
+        <table id="progressTemplate">
+            <tr>
+                <td>
+                    <div class="name">视频</div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100" style="width: 0;">
+                            0%
+                        </div>
+                    </div>
+                    <div class="progress-error"></div>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div class="hide">
+        <table id="rowTpl">
+            <tr>
+                <td>
+                    <i class="fa fa-file" aria-hidden="true"></i> <span class="name"></span>
+                </td>
+                <td class="file-size"></td>
+                <td class="update_user__username"></td>
+                <td class="update_datetime"></td>
+                <td>
+                    <a class="btn btn-default btn-xs download">
+                        <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                    </a>
+                    <a class="btn btn-danger btn-xs delete"
+                       data-toggle="modal"
+                       data-target="#alertModal">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
 {% endblock %}
 
 {% block js %}
+    <script src="{% static 'web/js/cos-js-sdk-v5.min.js' %}"></script>
     <script>
         var FOLDER_URL = '{% url 'file' project_id=request.web.project.id %}';
         var FILE_DELETE_URL = '{% url 'file_delete' project_id=request.web.project.id %}';
+        var COS_CREDENTIAL = '{% url 'cos_credential' project_id=request.web.project.id %}';
+        var FILE_POST = '{% url 'file_post' project_id=request.web.project.id %}';
+        var CURRENT_FOLDER_ID = "{{ folder_object.id }}";
 
         $(function () {
             initAddModal();
             bindModalSubmit();
             bindDeleteSubmit();
+            bindUploadFile();
         });
+
+        function bindUploadFile() {
+            //获取临时凭证
+            $('#uploadFile').change(function () {
+                $('#progressList').empty();
+
+                var filelist = $(this)[0].files;
+
+                //获取本次要上传的文件的名称和大小
+                var checkFileList = [];
+                $.each(filelist, function (index, fileObject) {
+                    checkFileList.push({"name": fileObject.name, "size": fileObject.size})
+                });
+                //将数据发送到django后台，进行容量的校验
+                //没有问题，返回临时凭证，否则返回错误信息
+                var cos_credential = new COS({
+                    getAuthorization: function (options, callback) {
+                        $.post(COS_CREDENTIAL, JSON.stringify(checkFileList), function (res) {
+
+                            if (res.status) {
+                                var credentials = res.data && res.data.credentials;
+                                if (!res.data || !credentials) return console.error('credentials invalid');
+                                callback({
+                                    TmpSecretId: credentials.tmpSecretId,
+                                    TmpSecretKey: credentials.tmpSecretKey,
+                                    XCosSecurityToken: credentials.sessionToken,
+                                    StartTime: res.data.startTime,
+                                    ExpiredTime: res.data.expiredTime
+                                });
+
+                                //授权通过之后，展示进度条
+                                $('#uploadProgress').removeClass('hide');
+
+                            } else {
+                                alert(res.error)
+                            }
+                        })
+                    }
+                });
+
+                $.each(filelist, function (index, fileObject) {
+                    //上传文件
+                    var fileName = fileObject.name;
+                    var fileSize = fileObject.size;
+                    var key = (new Date()).getTime() + "_" + fileName;
+
+
+                    var $tr = $('#progressTemplate').find('tr').clone();
+                    $tr.find('.name').text(fileName);
+                    $('#progressList').append($tr);
+
+                    //异步上传
+                    cos_credential.putObject({
+                        Bucket: '{{request.web.project.bucket}}',
+                        Region: '{{request.web.project.region}}',
+                        Key: key,
+                        Body: fileObject,
+                        onProgress: function (progressData) {
+                            console.log("文件上传进度--->", fileName, JSON.stringify(progressData))
+
+                            var percent = progressData.percent * 100 + '%';
+                            $tr.find('.progress-bar').text(percent)
+                            $tr.find('.progress-bar').css('width', percent)
+                        }
+                    }, function (err, data) {
+                        console.log(err || data);
+                        if (data && data.statusCode == 200) {
+                            //上传成功，将本次上传的文件上传到后台
+                            $.post(FILE_POST, {
+                                name: fileName,
+                                key: key,
+                                file_size: fileSize,
+                                parent: CURRENT_FOLDER_ID,
+                                etag: data.ETag,
+                                file_path: data.Location
+                            }, function (res) {
+                                //数据库加入成功
+                                var newTr = $('#rowTpl').find('tr').clone();
+                                newTr.find('.name').text(res.data.name);
+                                newTr.find('.file-size').text(res.data.file_size);
+                                newTr.find('.update_user__username').text(res.data.username);
+                                newTr.find('.update_datetime').text(res.data.datetime);
+                                newTr.find('.delete').attr('data-fid', res.data.id);
+                                newTr.find('.download').attr('href', res.data.download_url);
+                                $('#rowList').append(newTr);
+
+                                $tr.remove();
+                            })
+                        } else {
+                            $tr.find('.progress-error').text('上传失败！')
+                        }
+                    });
+                })
+            });
+        }
+
 
         function bindDeleteSubmit() {
             $("#btnDelete").click(function () {

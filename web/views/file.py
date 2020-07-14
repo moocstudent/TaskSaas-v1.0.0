@@ -1,9 +1,15 @@
-from django.http import JsonResponse
+import json
+import requests
+
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
+
+from django.views.decorators.csrf import csrf_exempt
 
 from web import models
-from web.forms.file import FileFolderModelForm
-from utils.tencent.cos import delete_file, delete_file_list
+from web.forms.file import FileFolderModelForm, FileModelForm
+from utils.tencent.cos import delete_file, delete_file_list, credential
 
 
 def file(request, project_id):
@@ -36,7 +42,8 @@ def file(request, project_id):
         context = {
             'form': form,
             'file_object_list': file_object_list,
-            'breadcrimb_list': breadcrumb_list
+            'breadcrimb_list': breadcrumb_list,
+            'folder_object': parent_object
         }
         return render(request, "web/file.html", context)
 
@@ -113,3 +120,97 @@ def file_delete(request, project_id):
     # 删除数据库文件
     delete_object.delete()
     return JsonResponse({'status': True})
+
+
+@csrf_exempt
+def cos_credential(request, project_id):
+    """
+    获取COS临时凭证
+    :param request:
+    :param project_id:
+    :return:
+    """
+    per_file_limit = request.web.price_policy.per_file_size * 1024 * 1024
+    total_file_limit = request.web.price_policy.project_space * 1024 * 1024 * 1024
+    total_size = 0
+
+    # 获取要上传的每个文件以及文件的大小
+    file_list = json.loads(request.body.decode('utf-8'))
+    for item in file_list:
+        # 字节转换
+        print(item)
+        if item['size'] > per_file_limit:
+            return JsonResponse({'status': False,
+                                 'error': '单文件超出限制(最大{}M)，文件:{}'.format(request.web.price_policy.per_file_size,
+                                                                        item['name'])})
+
+        total_size += item['size']
+
+    if total_size + request.web.project.user_space > total_file_limit:
+        return JsonResponse({'status': False,
+                             'error': '该项目已超出文件限制(最大{}M)!'.format(request.web.price_policy.project_space)})
+
+    # 做容量限制
+    data_dict = credential(request.web.project.bucket, request.web.project.region)
+    return JsonResponse({'status': True, 'data': data_dict})
+
+
+@csrf_exempt
+def file_post(request, project_id):
+    """
+    上传成功的文件传到数据库
+    :param request:
+    :param project_id:
+
+    name: fileName,
+    key: key,
+    file_size: fileSize,
+    parent: CURRENT_FOLDER_ID,
+    etag: data.ETag,
+    file_path: data.Location
+    """
+
+    form = FileModelForm(request, data=request.POST)
+    if form.is_valid():
+        # 校验通过
+        data_dict = form.cleaned_data
+        data_dict.pop('etag')
+        data_dict.update({'project': request.web.project, 'file_type': 1, 'update_user': request.web.user})
+        instance = models.FileRepository.objects.create(**data_dict)
+
+        # 项目的已使用空间更新
+        request.web.project.user_space += data_dict['file_size']
+        request.web.project.save()
+
+        result = {
+            'id': instance.id,
+            'name': instance.name,
+            'file_size': instance.file_size,
+            'username': instance.update_user.username,
+            'datetime': instance.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
+            'file_type': instance.get_file_type_display(),
+            'download_url': reverse('file_download',
+                                    kwargs={'project_id': request.web.project.id, 'file_id': instance.id})
+        }
+
+        return JsonResponse({'status': True, 'data': result})
+
+    return JsonResponse({'status': False, 'data': "文件错误"})
+
+
+def file_download(request, project_id, file_id):
+    """下载文件"""
+    # 文件内容
+    # 响应头
+    # with open('xxx.jpg', mode='rb') as f:
+    #     data = f.read()
+
+    file_object = models.FileRepository.objects.filter(project_id=project_id, id=file_id).first()
+
+    res = requests.get(file_object.file_path)
+    data = res.content
+
+    response = HttpResponse(data)
+    response['Content-Disposition'] = "attachment;filename={}".format(file_object.name)
+
+    return response
