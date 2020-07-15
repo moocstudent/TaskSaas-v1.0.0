@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from web.views import account, home, project, manage, wiki, file
+from web.views import account, home, project, manage, wiki, file, setting
 
 urlpatterns = [
     url(r'^register/', account.register, name='register'),
@@ -36,7 +36,9 @@ urlpatterns = [
         url(r'^file/post/$', file.file_post, name='file_post'),
         url(r'^file/download/(?P<file_id>\d+)$', file.file_download, name='file_download'),
 
-        url(r'^setting/$', manage.setting, name='setting'),
+        url(r'^setting/$', setting.setting, name='setting'),
+        url(r'^setting/delete/$', setting.setting_delete, name='setting_delete'),
+
     ], None, None)),
 
 ]
