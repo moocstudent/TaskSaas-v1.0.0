@@ -12,6 +12,8 @@ class UserInfo(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32)
 
     # price_policy = models.ForeignKey(verbose_name='价格策略', to='PricePolicy', null=True, blank=True)
+    def __str__(self):
+        return self.username
 
 
 class PricePolicy(models.Model):
@@ -199,8 +201,28 @@ class Module(models.Model):
 
 class IssuesType(models.Model):
     """问题类型 例如：任务，功能，Bug"""
+
+    PROJECT_INIT_LIST = ["任务", "功能", "Bug"]
+
     title = models.CharField(verbose_name='类型名称', max_length=32)
     project = models.ForeignKey(verbose_name='项目', to='Project')
 
     def __str__(self):
         return self.title
+
+
+class IssuesReply(models.Model):
+    """ 问题回复"""
+
+    reply_type_choices = (
+        (1, '修改记录'),
+        (2, '回复')
+    )
+    reply_type = models.IntegerField(verbose_name='类型', choices=reply_type_choices)
+
+    issues = models.ForeignKey(verbose_name='问题', to='Issues')
+    content = models.TextField(verbose_name='描述')
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', related_name='create_reply')
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+
+    reply = models.ForeignKey(verbose_name='回复', to='self', null=True, blank=True)
