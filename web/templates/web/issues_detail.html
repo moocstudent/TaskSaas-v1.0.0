@@ -6,6 +6,58 @@
     <link rel="stylesheet" href="{% static 'web/plugin/editor-md/css/editormd.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-select/css/bootstrap-select.min.css' %}">
+    <style>
+        .comment-area .item {
+            margin-top: 20px;
+        }
+
+        .comment-area .left-avatar {
+            float: left;
+            margin-right: 10px;
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #304659;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 50%;
+        }
+
+        .comment-area .right-info {
+            padding-left: 35px;
+        }
+
+        .comment-area .right-info .desc .msg {
+            display: inline-block;
+            padding-right: 20px;
+            color: #8c8c8c;
+        }
+
+        .comment-area .child {
+            padding-left: 55px;
+        }
+
+        .comment-area .error-msg {
+            color: red;
+        }
+
+        .comment-area .reply-user {
+            display: inline-block;
+            background-color: #ddd;
+            color: black;
+            padding: 6px 8px;
+            margin-left: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .editormd-fullscreen {
+            z-index: 1001;
+        }
+    </style>
+
+
 {% endblock %}
 
 {% block content %}
@@ -217,7 +269,36 @@
     </div>
 
 
+    <div class="hide" id="recordTemplate">
+        <div class="item clearfix">
+            <div class="left-avatar"></div>
+            <div class="right-info">
+                <pre></pre>
+                <div class="desc">
+                    <div class="msg">
+                        <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                        <span class="type"></span>
+                    </div>
+                    <div class="msg">
+                        <i class="fa fa-user-o" aria-hidden="true"></i>
+                        <span class="user"></span>
+                    </div>
+                    <div class="msg">
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        <span class="date"></span>
+                    </div>
 
+                    <a href="#commentText" class="reply">
+                        <i class="fa fa-commenting-o" aria-hidden="true"></i> 回复
+                    </a>
+
+                </div>
+            </div>
+            <div class="child">
+
+            </div>
+        </div>
+    </div>
 
 
 {% endblock %}
@@ -231,10 +312,19 @@
 
     <script>
         var WIKI_UPLOAD_URL = "{% url 'wiki_upload' project_id=request.web.project.id %}";
+        var ISSUES_RECORD_API = "{% url 'issues_record' project_id=request.web.project.id issues_id=issues_object.id %}";
+        var ISSUES_CHANGE_API = "{% url 'issues_change' project_id=request.web.project.id issues_id=issues_object.id %}";
+        var EDITOR;
+
 
         $(function () {
             initEditorMd();
             initDatePicker();
+            initIssuesRecord();
+            bindReply();
+            bindCancelReplyUser();
+            bindSubmit();
+            bindChangeIssues();
         });
 
         /**
@@ -254,7 +344,7 @@
          * 初始化markdown编辑器
          */
         function initEditorMd() {
-            editormd('editor', {
+            EDITOR = editormd('editor', {
                 placeholder: "请输入内容",
                 height: 300,
                 path: "{% static 'web/plugin/editor-md/lib/' %}",
@@ -274,10 +364,149 @@
             })
         }
 
+
+        /**
+         * 初始化评论
+         */
+        function initIssuesRecord() {
+            $.ajax({
+                url: ISSUES_RECORD_API,
+                type: 'GET',
+                dataType: 'JSON',
+                success: function (res) {
+                    if (res.status) {
+                        $.each(res.data, function (index, item) {
+                            createRecordNode(item);
+                        });
+                    }
+                }
+            })
+        }
+
+        /**
+         * 创造节点
+         * @param nodeDict
+         */
+        function createRecordNode(nodeDict) {
+            var $item = $("#recordTemplate").find('.item').clone();
+            $item.find('.left-avatar').html(nodeDict.creator[0].toUpperCase());
+            $item.find('pre').html(nodeDict.content);
+            $item.find('.user').html(nodeDict.creator);
+            $item.find('.type').html(nodeDict.reply_type_text);
+            $item.find('.date').html(nodeDict.datetime);
+            $item.attr({id: nodeDict.id, username: nodeDict.creator});
+
+            if (nodeDict.parent_id) {
+                // 挂在谁下
+                $('#' + nodeDict.parent_id).children('.child').append($item);
+            } else {
+                // 根下
+                $('.comment-list').append($item);
+            }
+        }
+
+        /**
+         回复问题
+         */
+        function bindReply() {
+            $('.comment-list').on('click', '.reply', function () {
+                var $item = $(this).parent().parent().parent();
+                var id = $item.attr('id');
+                var username = $item.attr('username');
+                $('#replyUser').removeClass('hide').attr('parent-id', id).children('span').text(username);
+            })
+        }
+
+        /**
+         取消回复
+         */
+        function bindCancelReplyUser() {
+
+            $('#replyUser').click(function () {
+                $(this).addClass('hide').removeAttr('parent-id').children('span').text("");
+            })
+        }
+
+        /**
+         * 点击评论
+         */
+        function bindSubmit() {
+            $('#btnSubmit').click(function () {
+                $('#commentText .error-msg').text('');
+                $.ajax({
+                    url: ISSUES_RECORD_API,
+                    type: 'POST',
+                    data: {
+                        content: $('#content').val(),
+                        reply: $('#replyUser').attr('parent-id')
+                    },
+                    dataType: 'JSON',
+                    success: function (res) {
+                        if (res.status) {
+                            //添加节点
+                            createRecordNode(res.data);
+                            //清空页面
+                            $('#content').val('');
+                            $('#replyUser').addClass('hide').removeAttr('parent-id').children('span').text('');
+
+                        } else {
+                            $.each(res.error, function (k, v) {
+                                $('#content').next('.error-msg').text(v[0]);
+                            })
+                        }
+                    }
+                })
+            });
+
+        }
+
+        /**
+         * 表单数据更新
+         */
+        function bindChangeIssues() {
+            $('#editForm').find('.form-control ').change(function () {
+                //内容变更
+                var postDict = {
+                    name: $(this).attr('name'),
+                    value: $(this).val()
+                };
+                postAjaxData(postDict);
+            })
+        }
+
+        /**
+         * MARKDOWN编辑器数据保存
+         */
         function saveDesc() {
             var postDict = {name: 'desc', value: EDITOR.getValue()};
             postAjaxData(postDict);
         }
+
+        /**
+         * 将获取到的数据通过ajax发送到后台
+         * @param postDict
+         */
+        function postAjaxData(postDict) {
+            $('#id_' + postDict.name).parent().next('.error-msg').text("");
+            console.log(postDict);
+            $.ajax({
+                url: ISSUES_CHANGE_API,
+                type: 'POST',
+                header: {
+                    "Content-Type": "application/json;charset=utf-8"
+                },
+                data: JSON.stringify(postDict),
+                dataType: 'JSON',
+                success: function (res) {
+                    if (res.status) {
+                        createRecordNode(res.data);
+                    } else {
+                        $('#id_' + postDict.name).parent().next('.error-msg').text(res.error);
+                    }
+                }
+            })
+        }
+
     </script>
 
 {% endblock %}

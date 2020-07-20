@@ -41,10 +41,16 @@ class IssuesModelForm(BootStrapForm, forms.ModelForm):
         total_user_list.extend(project_user_list)
 
         self.fields['assign'].choices = [('', '没有选中任何项')] + total_user_list
-        self.fields['attention'].choices = [('', '没有选中任何项')] + total_user_list
+        self.fields['attention'].choices = total_user_list
 
         # 当前项目已创建的问题
         parent_list = [('', '没有选中任何项')]
         parent_object_list = models.Issues.objects.filter(project=request.web.project).values_list('id', 'subject')
         parent_list.extend(parent_object_list)
         self.fields['parent'].choices = parent_list
+
+
+class IssuesReplyModelForm(forms.ModelForm):
+    class Meta:
+        model = models.IssuesReply
+        fields = ['content', 'reply', ]
