@@ -138,7 +138,6 @@ def cos_credential(request, project_id):
     file_list = json.loads(request.body.decode('utf-8'))
     for item in file_list:
         # 字节转换
-        print(item)
         if item['size'] > per_file_limit:
             return JsonResponse({'status': False,
                                  'error': '单文件超出限制(最大{}M)，文件:{}'.format(request.web.price_policy.per_file_size,
