@@ -181,7 +181,7 @@ class Issues(models.Model):
     parent = models.ForeignKey(verbose_name='父问题', to='self', related_name='child', null=True, blank=True,
                                on_delete=models.SET_NULL)
 
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', related_name='create_problems')
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True,blank=True, related_name='create_problems')
 
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)

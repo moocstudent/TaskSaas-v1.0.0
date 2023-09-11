@@ -31,17 +31,17 @@ def register(request):
         # 验证通过，写入数据库(密码转换成密文)
         instance = form.save()
 
-        policy_object = models.PricePolicy.objects.filter(category=1, title='个人免费版').first()
-        # 创建交易记录
-        models.Transaction.objects.create(
-            status=2,
-            order=str(uuid.uuid4()),
-            user=instance,
-            price_policy=policy_object,
-            count=0,
-            price=0,
-            start_datetime=datetime.datetime.now(),
-        )
+        # policy_object = models.PricePolicy.objects.filter(category=1, title='个人免费版').first()
+        # # 创建交易记录
+        # models.Transaction.objects.create(
+        #     status=2,
+        #     order=str(uuid.uuid4()),
+        #     user=instance,
+        #     price_policy=policy_object,
+        #     count=0,
+        #     price=0,
+        #     start_datetime=datetime.datetime.now(),
+        # )
         return JsonResponse({'status': True, 'data': '/login/'})
 
     return JsonResponse({'status': False, 'error': form.errors})
@@ -95,10 +95,11 @@ def login(request):
     if form.is_valid():
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
+        print('password',password)
 
-        user_object = models.UserInfo.objects.filter(Q(email=username) | Q(mobile_phone=username)) \
+        user_object = models.UserInfo.objects.filter(Q(email=username) | Q(username=username)) \
             .filter(password=password).first()
-
+        print('user_obj',user_object)
         if user_object:
             # 登陆成功
             request.session['user_id'] = user_object.id

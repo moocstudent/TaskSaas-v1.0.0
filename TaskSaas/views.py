@@ -34,15 +34,15 @@ class RegisterModelForm(forms.ModelForm):
     """
     注册表单自动生成
     """
-    mobile_phone = forms.CharField(label='手机号码',
-                                   validators=[RegexValidator(r'^(1[3|4|5|6|7|8|9])\d{9}$', '手机号码格式错误'), ])
+    # mobile_phone = forms.CharField(label='手机号码',
+    #                                validators=[RegexValidator(r'^(1[3|4|5|6|7|8|9])\d{9}$', '手机号码格式错误'), ])
     password = forms.CharField(label='密码', widget=forms.PasswordInput())
     confirm_password = forms.CharField(label='重复密码', widget=forms.PasswordInput())
-    code = forms.CharField(label='验证码', widget=forms.TextInput())
+    # code = forms.CharField(label='验证码', widget=forms.TextInput())
 
     class Meta:
         model = models.UserInfo
-        fields = ['username', 'email', 'password', 'confirm_password', 'mobile_phone', 'code']
+        fields = ['username', 'email', 'password', 'confirm_password']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

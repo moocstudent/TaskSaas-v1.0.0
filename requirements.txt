@@ -6,7 +6,8 @@ dicttoxml==1.7.4
 Django==1.11.28
 django-redis==4.4.1
 idna==2.10
-Pillow==7.1.2
+Pillow==10.0.0
+mysqlclient==2.1.1
 pytz==2020.1
 qcloud-python-sts==3.0.3
 qcloudsms-py==0.1.4

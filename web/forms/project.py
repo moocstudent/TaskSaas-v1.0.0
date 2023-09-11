@@ -35,8 +35,8 @@ class ProjectModelForm(BootStrapForm, forms.ModelForm):
 
         # 2/项目不存在的情况下，当前用户是否还有额度创建项目
         # 现在已经创建的项目数
-        count = models.Project.objects.filter(creator=self.request.web.user).count()
-        if count >= self.request.web.price_policy.project_num:
-            raise ValidationError('项目个数已达上限，请购买套餐！')
+        # count = models.Project.objects.filter(creator=self.request.web.user).count()
+        # if count >= self.request.web.price_policy.project_num:
+        #     raise ValidationError('项目个数已达上限，请购买套餐！')
 
         return name

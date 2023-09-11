@@ -41,13 +41,13 @@ class AuthMiddleWare(MiddlewareMixin):
         # 方式一：免费额度在交易记录中存储
         # 获取当前用户ID值最大（最近交易记录）
         _object = models.Transaction.objects.filter(user=user_object, status=2).order_by('-id').first()
+        if _object:
+            # 判断是否已过期
+            current_datetime = datetime.datetime.now()
+            if _object.end_datetime and _object.end_datetime < current_datetime:
+                _object = models.Transaction.objects.filter(user=user_object, status=2, price_policy__category=1).first()
 
-        # 判断是否已过期
-        current_datetime = datetime.datetime.now()
-        if _object.end_datetime and _object.end_datetime < current_datetime:
-            _object = models.Transaction.objects.filter(user=user_object, status=2, price_policy__category=1).first()
-
-        request.web.price_policy = _object.price_policy
+            request.web.price_policy = _object.price_policy
 
         # 方式二：免费额度存储到配置文件
         """

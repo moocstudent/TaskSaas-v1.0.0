@@ -24,19 +24,21 @@ def project_list(request):
         project_dict = {'star': [], 'my': [], 'join': []}
 
         my_project_list = models.Project.objects.filter(creator=request.web.user)
-        for my_item in my_project_list:
-            if my_item.star:
-                project_dict['star'].append({'value': my_item, 'type': 'my'})
-            else:
-                project_dict['my'].append(my_item)
+        if my_project_list:
+            for my_item in my_project_list:
+                if my_item.star:
+                    project_dict['star'].append({'value': my_item, 'type': 'my'})
+                else:
+                    project_dict['my'].append(my_item)
 
-        join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
-        for join_item in join_project_list:
-            if join_item.star:
-                project_dict['star'].append({'value': join_item.project, 'type': 'join'})
-            else:
-                project_dict['join'].append(join_item.project)
-
+            join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
+            for join_item in join_project_list:
+                if join_item.star:
+                    project_dict['star'].append({'value': join_item.project, 'type': 'join'})
+                else:
+                    project_dict['join'].append(join_item.project)
+        else:
+            print('project list is empty')
         form = ProjectModelForm(request)
         return render(request, 'web/project_list.html', {'form': form, 'project_dict': project_dict})
 
@@ -44,13 +46,13 @@ def project_list(request):
     if form.is_valid():
         name = form.cleaned_data['name']
         # 为项目创建一个桶&区域
-        bucket = "{}-{}-1302500499".format(request.web.user.mobile_phone, str(int(time.time())))
-        region = "ap-chengdu"
-        create_bucket(bucket, region)
-
-        # 验证通过:项目名，颜色，描述+creater+COSbucketname+COSregion
-        form.instance.region = region
-        form.instance.bucket = bucket
+        # bucket = "{}-{}-1302500499".format(request.web.user.mobile_phone, str(int(time.time())))
+        # region = "ap-chengdu"
+        # create_bucket(bucket, region)
+        #
+        # # 验证通过:项目名，颜色，描述+creater+COSbucketname+COSregion
+        # form.instance.region = region
+        # form.instance.bucket = bucket
         form.instance.creator = request.web.user
         instance = form.save()
 
