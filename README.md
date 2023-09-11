@@ -1,4 +1,4 @@
-# 多人任务管理平台
+# 开源多人任务管理平台改造升级 TASK SAAS
 
 #### 介绍
 此项目基于Python Django框架搭建的集‘概览’，‘问题’，‘统计’，‘文件’，‘文档’模块于一体的任务管理Saas平台,集成了腾讯云的SMS短信模块 & 对象存储模块，帮助解决项目管理者进行任务管理的问题。
@@ -116,10 +116,3 @@ except ImportError:
 
 
 
-#### 项目截图
-
-![项目首页](https://images.gitee.com/uploads/images/2020/0722/154633_a84935fa_1456098.png "2020-07-22 15-39-48 的屏幕截图.png")
-![项目列表](https://images.gitee.com/uploads/images/2020/0722/154657_23ac7088_1456098.png "2020-07-22 15-40-16 的屏幕截图.png")
-![问题列表](https://images.gitee.com/uploads/images/2020/0722/154722_e0afa8fb_1456098.png "2020-07-22 15-40-25 的屏幕截图.png")
-![文件上传](https://images.gitee.com/uploads/images/2020/0722/154738_2ab201bb_1456098.png "2020-07-22 15-40-33 的屏幕截图.png")
-![MarkDown文档编辑](https://images.gitee.com/uploads/images/2020/0722/154754_a7ff4616_1456098.png "2020-07-22 15-43-18 的屏幕截图.png")
