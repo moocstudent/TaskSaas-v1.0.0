@@ -19,6 +19,7 @@ def dashboard(request, project_id):
 
     join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
 
+    print('join_user',join_user)
     top_ten = models.Issues.objects.filter(project_id=project_id, assign__isnull=False).order_by('-id')[0:10]
 
     context = {
