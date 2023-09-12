@@ -393,14 +393,14 @@ def invite_join(request, code):
     if invite_object.project.creator == request.web.user:
         return render(request, 'web/invite_join.html', {'error': '创建者无需再加入项目！'})
 
-    exists = models.ProjectUser.objects.filter(project=invite_object.project, user=request.web.user).exist()
+    exists = models.ProjectUser.objects.filter(project=invite_object.project, user=request.web.user).first()
     if exists:
         return render(request, 'web/invite_join.html', {'error': '您已在项目中，无需再加入项目！'})
 
-    max_member = request.web.price_policy.project_member
-    current_member = models.ProjectUser.objects.filter(project=invite_object.project).count()
-    if current_member + 1 >= max_member:
-        return render(request, 'web/invite_join.html', {'error': '项目成员已满，请升级套餐！'})
+    # max_member = request.web.price_policy.project_member
+    # current_member = models.ProjectUser.objects.filter(project=invite_object.project).count()
+    # if current_member + 1 >= max_member:
+    #     return render(request, 'web/invite_join.html', {'error': '项目成员已满，请升级套餐！'})
 
     # 邀请码有效性判断
     current_datetime = datetime.datetime.now()
@@ -408,14 +408,14 @@ def invite_join(request, code):
     if current_datetime > limit_datetime:
         return render(request, 'web/invite_join.html', {'error': '邀请码已过期！'})
 
-    # 数量限制
-    max_count = invite_object.count
-    use_count = invite_object.use_count
-    if max_count:
-        if use_count >= max_count:
-            return render(request, 'web/invite_join.html', {'error': '邀请成员数量已用完！'})
-        use_count += 1
-        invite_object.save()
+    # # 数量限制
+    # max_count = invite_object.count
+    # use_count = invite_object.use_count
+    # if max_count:
+    #     if use_count >= max_count:
+    #         return render(request, 'web/invite_join.html', {'error': '邀请成员数量已用完！'})
+    #     use_count += 1
+    #     invite_object.save()
 
     models.ProjectUser.objects.create(user=request.web.user, project=invite_object.project)
     return render(request, 'web/invite_join.html', {'project': invite_object.project})
