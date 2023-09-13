@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+from django.conf.urls import static
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -78,9 +80,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasksaas',
-        'USER': 'root',
-        'PASSWORD': 'zhangqi1112',
-        'HOST': '127.0.0.1',
+        'USER': 'tasksaas',
+        'PASSWORD': 'FBhPhXPGifZmtcxn',
+        'HOST': '8.136.81.58',
         'PORT': 3306,
         'CHARSET': 'utf8'
     }
@@ -123,6 +125,10 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'web/static'
+STATICFILES_DIRS = [
+  os.path.join(BASE_DIR, '/web/static/')
+]
 
 # 自己的短信模板相关配置
 TENCENT_SMS_APP_ID = 00000000  # 应用ID

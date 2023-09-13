@@ -1,8 +1,10 @@
-from django.conf.urls import url, include
+from django.conf.urls import url, include, static
 
+from TaskSaasAPP import settings
 from web.views import account, home, project, manage, wiki, file, setting, issues,dashboard
 
 urlpatterns = [
+    url(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
     url(r'^register/', account.register, name='register'),
     url(r'^login/sms/', account.login_sms, name='login_sms'),
     url(r'^login/', account.login, name='login'),
