@@ -8,4 +8,3 @@ class UserInfo(models.Model):
     # mobile_phone = models.CharField(verbose_name="手机号码", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32)
 
-
