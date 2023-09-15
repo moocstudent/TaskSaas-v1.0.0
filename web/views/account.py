@@ -112,7 +112,7 @@ def login(request):
 
 def image_code(request):
     """
-    生成图片验证码
+    生成图片验证码 dr
     """
 
     image_object, code = check_code()
