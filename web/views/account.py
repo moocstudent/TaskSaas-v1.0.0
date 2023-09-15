@@ -115,15 +115,15 @@ def image_code(request):
     生成图片验证码
     """
 
-    image_object, code = check_code()
+   ### image_object, code = check_code()
 
-    request.session['image_code'] = code
-    request.session.set_expiry(60)  # 60秒过期
+   # request.session['image_code'] = code
+   # request.session.set_expiry(60)  # 60秒过期
 
-    stream = BytesIO()
-    image_object.save(stream, 'png')
+    #stream = BytesIO()
+   # image_object.save(stream, 'png')
 
-    return HttpResponse(stream.getvalue())
+    return HttpResponse(1)
 
 
 def logout(request):
