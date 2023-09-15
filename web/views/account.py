@@ -123,6 +123,7 @@ def image_code(request):
     #stream = BytesIO()
    # image_object.save(stream, 'png')
 
+
     return HttpResponse(1)
 
 
