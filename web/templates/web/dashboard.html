@@ -207,6 +207,7 @@
 {% block js %}
     <script type="text/javascript" >
     var myChart = echarts.init(document.getElementById("chart"));
+    var data = [];
 
     // 基于准备好的dom，初始化echarts实例
     myChart.showLoading();
@@ -228,7 +229,7 @@
           {
             name: '完成量',
             type: 'bar',
-            data: [5, 20, 36, 10, 10, 20,2]
+            data: [1,2,3,4,56,6]
           }
         ]
       };

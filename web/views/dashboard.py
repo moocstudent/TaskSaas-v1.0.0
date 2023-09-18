@@ -14,6 +14,7 @@ def dashboard(request, project_id):
 
     issues_data = models.Issues.objects.filter(project_id=project_id).values('status').annotate(ct=Count('id'))
 
+    print('issues_data',issues_data)
     for item in issues_data:
         status_dict[item['status']]['count'] = item['ct']
 
