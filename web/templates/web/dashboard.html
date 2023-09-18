@@ -202,13 +202,14 @@
             </div>
         </div>
     </div>
+    <div {% load dashboard  %}></div>
+    <input id="echarts_data" value="{{ echarts_data }}" hidden="hidden" />
 {% endblock %}
 
 {% block js %}
     <script type="text/javascript" >
     var myChart = echarts.init(document.getElementById("chart"));
-    var data = [];
-
+    var echartsData = JSON.parse(document.getElementById("echarts_data").value);
     // 基于准备好的dom，初始化echarts实例
     myChart.showLoading();
 
@@ -229,7 +230,7 @@
           {
             name: '完成量',
             type: 'bar',
-            data: [1,2,3,4,56,6]
+            data: echartsData
           }
         ]
       };
