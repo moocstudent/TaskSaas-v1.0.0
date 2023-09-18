@@ -76,7 +76,9 @@
                         新增问题趋势
                     </div>
                     <div class="panel-body">
-                        <div id="chart" style="width:100%;min-height:200px">假装这里有个highcharts插件</div>
+                        <div id="chart" style="width:100%;min-height:200px">
+
+                        </div>
                     </div>
                 </div>
 
@@ -203,4 +205,38 @@
 {% endblock %}
 
 {% block js %}
+    <script type="text/javascript" >
+    var myChart = echarts.init(document.getElementById("chart"));
+
+    // 基于准备好的dom，初始化echarts实例
+    myChart.showLoading();
+
+      // 指定图表的配置项和数据
+      var option = {
+       // title: {
+         // text: 'ECharts 入门示例'
+        //},
+        tooltip: {},
+        legend: {
+          data: ['完成量']
+        },
+        xAxis: {
+          data: ['新建', '处理中', '已解决', '已忽略', '待反馈', '已关闭','重新打开']
+        },
+        yAxis: {},
+        series: [
+          {
+            name: '完成量',
+            type: 'bar',
+            data: [5, 20, 36, 10, 10, 20]
+          }
+        ]
+      };
+
+      // 使用刚指定的配置项和数据显示图表。
+      myChart.setOption(option);
+      myChart.hideLoading();
+
+
+</script>
 {% endblock %}
