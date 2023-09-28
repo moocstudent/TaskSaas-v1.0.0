@@ -19,22 +19,25 @@ def dashboard(request, project_id):
     issues_filter = models.Issues.objects.filter(project_id=project_id)
     issues_types = issues_filter.values('issues_type').annotate(count=Count('issues_type')).values('issues_type')
     print(issues_types)
-    print(issues_types[1]['issues_type'])
     # keys = []
     index = 0
     for key, text in sorted(models.Issues.status_choices):
         status_dict[key] = {'text': text, 'count': 0}
         status_choices.append(key)
-        tasks_count.insert(index,issues_filter.filter(issues_type=issues_types[0]['issues_type'],
-                                                      status=key).count())
-        funcs_count.insert(index,issues_filter.filter(issues_type=issues_types[1]['issues_type'],
-                                                      status=key).count())
-        bugs_count.insert(index,issues_filter.filter(issues_type=issues_types[2]['issues_type'],
-                                                     status=key).count())
-        demand_count.insert(index,issues_filter.filter(issues_type=issues_types[3]['issues_type'],
-                                                       status=key).count())
+        if len(issues_types) > 0:
+            tasks_count.insert(index, issues_filter.filter(issues_type=issues_types[0]['issues_type'],
+                                                           status=key).count())
+        if len(issues_types) > 1:
+            funcs_count.insert(index, issues_filter.filter(issues_type=issues_types[1]['issues_type'],
+                                                           status=key).count())
+        if len(issues_types) > 2:
+            bugs_count.insert(index, issues_filter.filter(issues_type=issues_types[2]['issues_type'],
+                                                          status=key).count())
+        if len(issues_types) > 3:
+            demand_count.insert(index, issues_filter.filter(issues_type=issues_types[3]['issues_type'],
+                                                            status=key).count())
         # keys.index(index,key)
-        index+=1
+        index += 1
 
     issues_data = issues_filter.values('status').annotate(ct=Count('id'))
 
@@ -55,10 +58,14 @@ def dashboard(request, project_id):
     funcs_count.reverse()
     bugs_count.reverse()
     demand_count.reverse()
-    issues_types_dict.append(issues_types[0]['issues_type'])
-    issues_types_dict.append(issues_types[1]['issues_type'])
-    issues_types_dict.append(issues_types[2]['issues_type'])
-    issues_types_dict.append(issues_types[3]['issues_type'])
+    if len(issues_types) > 0:
+        issues_types_dict.append(issues_types[0]['issues_type'])
+    if len(issues_types) > 1:
+        issues_types_dict.append(issues_types[1]['issues_type'])
+    if len(issues_types) > 2:
+        issues_types_dict.append(issues_types[2]['issues_type'])
+    if len(issues_types) > 3:
+        issues_types_dict.append(issues_types[3]['issues_type'])
     context = {
         'status_dict': status_dict,
         'join_user': join_user,
@@ -68,8 +75,8 @@ def dashboard(request, project_id):
         'funcs_count': funcs_count,
         'bugs_count': bugs_count,
         'demand_count': demand_count,
-        'issues_types':issues_types_dict,
-        'status_choices':status_choices
+        'issues_types': issues_types_dict,
+        'status_choices': status_choices
     }
 
     return render(request, 'web/dashboard.html', context)
