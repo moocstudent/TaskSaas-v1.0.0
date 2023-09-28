@@ -26,7 +26,7 @@ SECRET_KEY = 'vt1!_$!!o4ka5gakevbar9u!fhsjmuw900lw_3)f&s3!6ke3ep'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = "*"
 
 # Application definition
 
@@ -80,15 +80,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasksaas',
-        'USER': 'tasksaas',
-        'PASSWORD': 'FBhPhXPGifZmtcxn',
-        'HOST': '8.136.81.58',
+        'USER': 'root',
+        'PASSWORD': 'zhangqi1112',
+        'HOST': 'localhost',
         'PORT': 3306,
         'CHARSET': 'utf8'
     }
 }
-#
-ALLOWED_HOSTS = ['*']
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

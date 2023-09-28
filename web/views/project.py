@@ -31,6 +31,8 @@ def project_list(request):
                 else:
                     project_dict['my'].append(my_item)
 
+            print('request.web.user:',request.web.user)
+
             join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
             for join_item in join_project_list:
                 if join_item.star:
@@ -39,6 +41,12 @@ def project_list(request):
                     project_dict['join'].append(join_item.project)
         else:
             print('project list is empty')
+            join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
+            for join_item in join_project_list:
+                if join_item.star:
+                    project_dict['star'].append({'value': join_item.project, 'type': 'join'})
+                else:
+                    project_dict['join'].append(join_item.project)
         form = ProjectModelForm(request)
         return render(request, 'web/project_list.html', {'form': form, 'project_dict': project_dict})
 
