@@ -1,6 +1,8 @@
 import json
 import datetime
 
+from django.core.cache import cache
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -117,7 +119,12 @@ def issues(request, project_id):
 
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
-
+        trigger = cache.get('mytaskTrigger')
+        if trigger == 'on':
+            print("trigger == 'on':")
+            print(request.web.user)
+            queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
+                                                 | Q(creator=request.web.user))
         page_object = Pagination(
             current_page=request.GET.get('page'),
             all_count=queryset.count(),

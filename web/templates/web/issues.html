@@ -10,6 +10,68 @@
     <link rel="stylesheet" href="{% static 'web/plugin/select2/css/select2.min.css' %}">
 
     <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 17px;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+
+
         .issues-list .number {
             width: 100px;
             text-align: right;
@@ -83,6 +145,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-search" aria-hidden="true"></i>筛选
+                          <label class="fa! switch">
+                            <input type="checkbox" id="mytaskToggle" name="trigger"
+                                   onclick="mytaskTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                      只看与我相关
                 </div>
                 <div class="panel-body filter-area">
                     {% for row in filter_list %}
@@ -388,7 +456,7 @@
         </div>
     </div>
 
-
+     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -532,5 +600,53 @@
                 })
             })
         }
+   function mytaskTrigger() {
+            console.log("mytaskTrigger")
+            let isChecked = $('input[type="checkbox"][name="trigger"]').prop('checked');
+            if (isChecked) {
+                console.log("勾选");
+                localStorage.setItem("mytaskTrigger", "on")
+            } else {
+                console.log("未勾选");
+                localStorage.setItem("mytaskTrigger", "off")
+            }
+            sendFreshTriggerVal()
+
+        }
+
+
+                  function sendFreshTriggerVal(){
+            {#let csrf = {{ csrf_token }}#}
+                $.ajax({
+                    url: "{% url 'cache' %}",
+                    type: "POST",
+                    data: {"trigger":localStorage.getItem("mytaskTrigger"),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()},
+                    dataType: "JSON",
+                    success: function (res) {
+                        console.log(res);
+                        if (res.code) {
+                            console.log("reload")
+                            location.reload();
+                        } else {
+
+                        }
+                    }
+
+                })
+        }
+
+            function storageTriggerInit() {
+            let item = localStorage.getItem("mytaskTrigger");
+            console.log("trigger", item)
+            if (item == "on") {
+                $('input[type="checkbox"][name="trigger"]').prop('checked', true);
+            } else {
+                $('input[type="checkbox"][name="trigger"]').prop('checked', false);
+            }
+        }
+
+        storageTriggerInit()
+
     </script>
 {% endblock %}

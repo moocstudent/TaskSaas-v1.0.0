@@ -1,7 +1,8 @@
+from django.core.cache import cache
 from django.shortcuts import render
 import collections
 from web import models
-from django.db.models import Count
+from django.db.models import Count, Q
 
 
 def dashboard(request, project_id):
@@ -17,6 +18,12 @@ def dashboard(request, project_id):
     bugs_count = []
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
+    trigger = cache.get('mytaskTrigger')
+    if trigger == 'on':
+        print("trigger == 'on':")
+        print(request.web.user)
+        issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)
+                             |Q(creator=request.web.user))
     issues_types = issues_filter.values('issues_type').annotate(count=Count('issues_type')).values('issues_type')
     print(issues_types)
     # keys = []

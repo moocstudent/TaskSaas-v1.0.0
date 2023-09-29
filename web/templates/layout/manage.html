@@ -70,6 +70,21 @@
 
 <script src="{% static 'web/js/jquery.min.js' %}"></script>
 <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
-{% block js %}{% endblock %}
+{% block js %}
+    <script>
+            function storageTriggerInit() {
+            let item = localStorage.getItem("mytaskTrigger");
+            console.log("trigger", item)
+            if (item == "on") {
+                $('input[type="checkbox"]').prop('checked', true);
+            } else {
+                $('input[type="checkbox"]').prop('checked', false);
+            }
+        }
+
+        storageTriggerInit()
+
+    </script>
+{% endblock %}
 </body>
 </html>

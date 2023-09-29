@@ -88,8 +88,8 @@
 {% block content %}
     <div class="container-fluid project">
         <div style="margin: 10px 0;">
-               <a class="btn btn-primary" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus-circle"
-                                                                                  aria-hidden="true"></i>新建项目</a>
+            <a class="btn btn-primary" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus-circle"
+                                                                                      aria-hidden="true"></i>新建项目</a>
 
         </div>
 
@@ -198,10 +198,16 @@
             </div>
         </div>
     </div>
+{#        <div {% load p %} hidden="hidden"></div>#}
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
     <script>
+
+
+        {#let trigger = {% url 'dashboard' project_id=item.value.id %}+'mytaskTrigger=localStorage.getItem("mytaskTrigger")';#}
+        {#console.log('trigger',trigger)#}
         $(function () {
             bindSubmit();
         })
@@ -227,5 +233,27 @@
                 })
             })
         }
+
+        function sendFreshTriggerVal(){
+            {#let csrf = {{ csrf_token }}#}
+                $.ajax({
+                    url: "{% url 'cache' %}",
+                    type: "POST",
+                    data: {"trigger":localStorage.getItem("mytaskTrigger"),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()},
+                    dataType: "JSON",
+                    success: function (res) {
+                        console.log(res);
+                        if (res.status) {
+                            location.reload();
+                        } else {
+
+                        }
+                    }
+
+                })
+        }
+        sendFreshTriggerVal()
+
     </script>
 {% endblock %}

@@ -5,6 +5,66 @@
 
 {% block css %}
     <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 17px;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
         .table-right > tbody > tr > td.label-left {
             width: 90px;
         }
@@ -74,6 +134,11 @@
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart" aria-hidden="true"></i>
                         新增问题趋势
+                        <label class="fa! switch">
+                            <input type="checkbox" id="mytaskToggle" onclick="mytaskTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                        只看与我相关
                     </div>
                     <div class="panel-body">
                         <div id="chart" style="width:100%;min-height:200px">
@@ -202,144 +267,145 @@
             </div>
         </div>
     </div>
-    <div {% load dashboard  %} hidden="hidden"></div>
-    <input id="echarts_data" value="{{ echarts_data }}" hidden="hidden" />
-    <input id="tasks_count" value="{{ tasks_count }}" hidden="hidden" />
-    <input id="funcs_count" value="{{ funcs_count }}" hidden="hidden" />
-    <input id="bugs_count" value="{{ bugs_count }}" hidden="hidden" />
-    <input id="demand_count" value="{{ demand_count }}" hidden="hidden" />
-    <input id="issues_types" value="{{ issues_types }}" hidden="hidden" />
-    <input id="status_choices" value="{{ status_choices }}" hidden="hidden" />
-    <input id="pid" value="{{ request.web.project.id }}" hidden="hidden" />
+    <div {% load dashboard %} hidden="hidden"></div>
+    <input id="echarts_data" value="{{ echarts_data }}" hidden="hidden"/>
+    <input id="tasks_count" value="{{ tasks_count }}" hidden="hidden"/>
+    <input id="funcs_count" value="{{ funcs_count }}" hidden="hidden"/>
+    <input id="bugs_count" value="{{ bugs_count }}" hidden="hidden"/>
+    <input id="demand_count" value="{{ demand_count }}" hidden="hidden"/>
+    <input id="issues_types" value="{{ issues_types }}" hidden="hidden"/>
+    <input id="status_choices" value="{{ status_choices }}" hidden="hidden"/>
+    <input id="pid" value="{{ request.web.project.id }}" hidden="hidden"/>
+     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" >
-    var myChart = echarts.init(document.getElementById("chart"));
-    var echartsData = JSON.parse(document.getElementById("echarts_data").value);
-    var tasksCount = JSON.parse(document.getElementById("tasks_count").value);
-    var funcsCount = JSON.parse(document.getElementById("funcs_count").value);
-    var bugsCount = JSON.parse(document.getElementById("bugs_count").value);
-    var demandCount = JSON.parse(document.getElementById("demand_count").value);
-    var issues_types = JSON.parse(document.getElementById("issues_types").value);
-    var status_choices = JSON.parse(document.getElementById("status_choices").value);
-    var pid = JSON.parse(document.getElementById("pid").value);
-    // 基于准备好的dom，初始化echarts实例
-    myChart.showLoading();
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById("chart"));
+        var echartsData = JSON.parse(document.getElementById("echarts_data").value);
+        var tasksCount = JSON.parse(document.getElementById("tasks_count").value);
+        var funcsCount = JSON.parse(document.getElementById("funcs_count").value);
+        var bugsCount = JSON.parse(document.getElementById("bugs_count").value);
+        var demandCount = JSON.parse(document.getElementById("demand_count").value);
+        var issues_types = JSON.parse(document.getElementById("issues_types").value);
+        var status_choices = JSON.parse(document.getElementById("status_choices").value);
+        var pid = JSON.parse(document.getElementById("pid").value);
+        // 基于准备好的dom，初始化echarts实例
+        myChart.showLoading();
 
-      // 指定图表的配置项和数据
-   {% comment %}   var option = {
-       // title: {
-         // text: 'ECharts 入门示例'
-        //},
-        tooltip: {},
-        legend: {
-          data: ['完成量']
-        },
-        xAxis: {
-          data: ['新建', '处理中', '已解决', '已忽略', '待反馈', '已关闭','重新打开']
-        },
-        yAxis: {},
-        series: [
-          {
-            name: '完成量',
-            type: 'bar',
-            data: echartsData
-          }
-        ]
-      };{% endcomment %}
+        // 指定图表的配置项和数据
+        {% comment %}   var option = {
+            // title: {
+              // text: 'ECharts 入门示例'
+             //},
+             tooltip: {},
+             legend: {
+               data: ['完成量']
+             },
+             xAxis: {
+               data: ['新建', '处理中', '已解决', '已忽略', '待反馈', '已关闭','重新打开']
+             },
+             yAxis: {},
+             series: [
+               {
+                 name: '完成量',
+                 type: 'bar',
+                 data: echartsData
+               }
+             ]
+           };{% endcomment %}
 
-    option = {
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      // Use axis to trigger tooltip
-      type: 'shadow' // 'shadow' as default; can also be 'line' or 'shadow'
-    }
-  },
-  legend: {},
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'value',
-      triggerEvent: true,
-  },
-  yAxis: {
-    type: 'category',
-    data: ['重新打开', '已关闭', '待反馈', '已忽略', '已解决', '处理中', '新建']
-      ,triggerEvent: true,
-  },
-  series: [
-    {
-      name: '任务',
-      type: 'bar',
-      stack: 'total',
-      label: {
-        show: true
-      },
-      emphasis: {
-        focus: 'series'
-      },
-      data: tasksCount
-    },
-    {
-      name: '功能',
-      type: 'bar',
-      stack: 'total',
-      label: {
-        show: true
-      },
-      emphasis: {
-        focus: 'series'
-      },
-      data: funcsCount
-    },
-    {
-      name: 'Bug',
-      type: 'bar',
-      stack: 'total',
-      label: {
-        show: true
-      },
-      emphasis: {
-        focus: 'series'
-      },
-      data: bugsCount
-    },
-    {
-      name: '需求确认',
-      type: 'bar',
-      stack: 'total',
-      label: {
-        show: true
-      },
-      emphasis: {
-        focus: 'series'
-      },
-      data: demandCount
-    },
+        option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    // Use axis to trigger tooltip
+                    type: 'shadow' // 'shadow' as default; can also be 'line' or 'shadow'
+                }
+            },
+            legend: {},
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                triggerEvent: true,
+            },
+            yAxis: {
+                type: 'category',
+                data: ['重新打开', '已关闭', '待反馈', '已忽略', '已解决', '处理中', '新建']
+                , triggerEvent: true,
+            },
+            series: [
+                {
+                    name: '任务',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: tasksCount
+                },
+                {
+                    name: '功能',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: funcsCount
+                },
+                {
+                    name: 'Bug',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: bugsCount
+                },
+                {
+                    name: '需求确认',
+                    type: 'bar',
+                    stack: 'total',
+                    label: {
+                        show: true
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: demandCount
+                },
 
-  ]
-};
-    let yMatchTypes =["新建","处理中","已解决","已忽略","待反馈","已关闭","重新打开"]
-    let xMatchTypes =["任务", "功能", "Bug","需求确认"]
+            ]
+        };
+        let yMatchTypes = ["新建", "处理中", "已解决", "已忽略", "待反馈", "已关闭", "重新打开"]
+        let xMatchTypes = ["任务", "功能", "Bug", "需求确认"]
 
-      // 使用刚指定的配置项和数据显示图表。
-      myChart.setOption(option);
-      myChart.hideLoading();
-     myChart.on("click", function(params) {
-        console.log(params);
-        if (params.name && params.seriesName) {
-          window.location.href = "/manage/"+pid+"/issues/?status="+(yMatchTypes.indexOf(params.name)+1)+
-              "&issues_type="+(issues_types[(xMatchTypes.indexOf(params.seriesName))])
-        }
-      });
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+        myChart.hideLoading();
+        myChart.on("click", function (params) {
+            console.log(params);
+            if (params.name && params.seriesName) {
+                window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +
+                    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])
+            }
+        });
 
-             // echarts点击事件获取对应的index和公司名称---跳转对应的数据核查页面ok
+        // echarts点击事件获取对应的index和公司名称---跳转对应的数据核查页面ok
         {% comment %}myChart.getZr().on('click', params => { // 柱形图点击事件
               var pointInPixel = [params.offsetX, params.offsetY]
               // 判断给定的点是否在指定的坐标系
@@ -355,5 +421,52 @@
               }
         }){% endcomment %}
 
-</script>
+        function mytaskTrigger() {
+            console.log("mytaskTrigger")
+            let isChecked = $('input[type="checkbox"]').prop('checked');
+            if (isChecked) {
+                console.log("勾选");
+                localStorage.setItem("mytaskTrigger", "on")
+            } else {
+                console.log("未勾选");
+                localStorage.setItem("mytaskTrigger", "off")
+            }
+            sendFreshTriggerVal()
+
+        }
+
+        function storageTriggerInit() {
+            let item = localStorage.getItem("mytaskTrigger");
+            console.log("trigger", item)
+            if (item == "on") {
+                $('input[type="checkbox"]').prop('checked', true);
+            } else {
+                $('input[type="checkbox"]').prop('checked', false);
+            }
+        }
+
+        storageTriggerInit()
+
+                function sendFreshTriggerVal(){
+            {#let csrf = {{ csrf_token }}#}
+                $.ajax({
+                    url: "{% url 'cache' %}",
+                    type: "POST",
+                    data: {"trigger":localStorage.getItem("mytaskTrigger"),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()},
+                    dataType: "JSON",
+                    success: function (res) {
+                        console.log(res);
+                        if (res.code) {
+                            console.log("reload")
+                            location.reload();
+                        } else {
+
+                        }
+                    }
+
+                })
+        }
+
+    </script>
 {% endblock %}

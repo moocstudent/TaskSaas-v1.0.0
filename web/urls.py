@@ -1,7 +1,7 @@
 from django.conf.urls import url, include, static
 
 from TaskSaasAPP import settings
-from web.views import account, home, project, manage, wiki, file, setting, issues,dashboard
+from web.views import account, home, project, manage, wiki, file, setting, issues, dashboard, cache
 
 urlpatterns = [
     url(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^image/code/', account.image_code, name='image_code'),
     url(r'^send/sms/', account.send_sms, name='send_sms'),
     url(r'^index/', home.index, name='index'),
-
+    url(r'^cache_set/', cache.cache_set, name='cache'),
     # 项目列表
     url(r'^project/list/', project.project_list, name='project_list'),
     url(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
