@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^send/sms/', account.send_sms, name='send_sms'),
     url(r'^index/', home.index, name='index'),
     url(r'^cache_set/', cache.cache_set, name='cache'),
+    url(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
+    url(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
     # 项目列表
     url(r'^project/list/', project.project_list, name='project_list'),
     url(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
@@ -23,6 +25,7 @@ urlpatterns = [
     url(r'^manage/(?P<project_id>\d+)/', include([
 
         url(r'^statistics/$', manage.statistics, name='statistics'),
+        url(r'^workbench/$', manage.workbench, name='workbench'),
 
         url(r'^wiki/$', wiki.wiki, name='wiki'),
         url(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),

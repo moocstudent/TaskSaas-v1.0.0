@@ -31,4 +31,17 @@ def manage_menu_list(request):
         if request.path_info.startswith(item['url']):
             item['class'] = 'active'
 
+
     return {'data_list': data_list}
+
+@register.inclusion_tag('inclusion/right_side_manage_menu_list.html')
+def right_side_manage_menu_list(request):
+
+    right_side_data_list = [
+        {'title': '工作台', 'url': reverse('workbench', kwargs={'project_id': request.web.project.id})}
+    ]
+
+    for item in right_side_data_list:
+        if request.path_info.startswith(item['url']):
+            item['class'] = 'active'
+    return {'right_side_data_list':right_side_data_list}

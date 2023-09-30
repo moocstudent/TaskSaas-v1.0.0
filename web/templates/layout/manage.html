@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/font-awesome/css/font-awesome.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/css/manage.css' %}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js" integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
+            integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         .navbar-av {
             border-radius: 0;
@@ -47,7 +49,10 @@
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">工作台</a></li>
+                {% if request.web.project %}
+                    {% right_side_manage_menu_list request %}
+                {% endif %}
+{#                <li><a href="#">工作台</a></li>#}
                 <li><a href="#">日 历</a></li>
                 <li><a href="#"><i class="fa fa-bell-o" aria-hidden="true"></i> </a></li>
                 <li><a href="#"><i class="fa fa-bookmark" aria-hidden="true"></i> </a></li>
@@ -72,7 +77,7 @@
 <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
 {% block js %}
     <script>
-            function storageTriggerInit() {
+        function storageTriggerInit() {
             let item = localStorage.getItem("mytaskTrigger");
             console.log("trigger", item)
             if (item == "on") {

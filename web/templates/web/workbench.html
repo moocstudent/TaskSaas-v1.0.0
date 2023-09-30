@@ -1,0 +1,553 @@
+{% extends 'layout/manage.html' %}
+{% load issues %}
+{% load static %}
+{% block title %}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'web/plugin/editor-md/css/editormd.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-select/css/bootstrap-select.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/select2/css/select2.min.css' %}">
+
+    <style>
+
+        {% comment %}   .switch {
+               position: relative;
+               display: inline-block;
+               width: 60px;
+               height: 34px;
+           }
+
+           .switch input {
+               opacity: 0;
+               width: 0;
+               height: 17px;
+           }
+
+           .slider {
+               position: absolute;
+               cursor: pointer;
+               top: 0;
+               left: 0;
+               right: 0;
+               bottom: 0;
+               background-color: #ccc;
+               -webkit-transition: .4s;
+               transition: .4s;
+           }
+
+           .slider:before {
+               position: absolute;
+               content: "";
+               height: 26px;
+               width: 26px;
+               left: 4px;
+               bottom: 4px;
+               background-color: white;
+               -webkit-transition: .4s;
+               transition: .4s;
+           }
+
+           input:checked + .slider {
+               background-color: #2196F3;
+           }
+
+           input:focus + .slider {
+               box-shadow: 0 0 1px #2196F3;
+           }
+
+           input:checked + .slider:before {
+               -webkit-transform: translateX(26px);
+               -ms-transform: translateX(26px);
+               transform: translateX(26px);
+           }
+
+           /* Rounded sliders */
+           .slider.round {
+               border-radius: 34px;
+           }
+
+           .slider.round:before {
+               border-radius: 50%;
+           }
+{% endcomment %}
+
+        .issues-list .number {
+            width: 100px;
+            text-align: right;
+        }
+
+        .issues-list .number a {
+            font-weight: 500;
+            padding: 0 10px;
+        }
+
+        .issues-list .issue .tags {
+            padding: 10px 0;
+        }
+
+        .issues-list .issue .tags span {
+            margin-right: 20px;
+            display: inline-block;
+            font-size: 12px;
+        }
+
+        .issues-list .issue .tags .type {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #dddddd;
+        }
+
+        .editormd {
+            margin-bottom: 0;
+        }
+
+        .pd-0 {
+            padding: 0 !important;
+        }
+
+        /* 筛选 */
+        .filter-area .item {
+            margin-bottom: 15px;
+        }
+
+        .filter-area .item .title {
+            padding: 5px 0;
+        }
+
+        .filter-area .item .check-list a {
+            text-decoration: none;
+            display: inline-block;
+            min-width: 65px;
+        }
+
+        .filter-area .item .check-list label {
+            font-weight: 200;
+            font-size: 13px;
+            margin-left: 3px;
+        }
+
+        .filter-area .item .check-list a:hover {
+            font-weight: 300;
+        }
+
+        .filter-area .item .check-list .cell {
+            margin-right: 10px;
+        }
+
+        .Radio input:disabled + label { /*禁用的指针*/
+            cursor: not-allowed
+        }
+
+        .Radio input {
+            display: none
+        }
+
+        .Radio label {
+            padding: 0 16px 0 0;
+            display: inline-block;
+            cursor: pointer;
+            position: relative
+        }
+
+        .Radio label:before {
+            box-sizing: border-box;
+            content: "";
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid #999;
+            margin: 0 8px;
+            vertical-align: middle;
+            display: inline-block;
+            transition: 0.1S;
+        }
+
+        .Radio label:hover:before {
+            border-color: #00a4ff;
+        }
+
+        .Radio input:disabled + label:before {
+            background-color: #CCC;
+            border-color: #999;
+            opacity: 0.5;
+        }
+
+        .Radio input:disabled + label {
+            opacity: 0.5;
+        }
+
+        .Radio input:checked + label:before {
+            border: 5px solid #00a4ff;
+        }
+
+        .HoverLabel label {
+            display: block;
+            border-radius: 4px;
+            padding: 4px;
+            width: 100%;
+        }
+
+        .HoverLabel label:hover {
+            background-color: #EEE;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid" style="margin-top: 20px">
+        <div class="row">
+            <div class="col-md-4" style="float: right">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-pie-chart" aria-hidden="true"></i>
+                        个人工作统计
+                        <span class="Radio">
+                        <input onclick="mydayTrigger(this.value)" id="day1" name="day" type="radio" value="day1"/><label
+                                for="day1">当天</label>
+                        <input onclick="mydayTrigger(this.value)" id="day7" name="day" type="radio" value="day7"
+                               checked/><label for="day7">近七天</label>
+                        <input onclick="mydayTrigger(this.value)" id="day30" name="day" type="radio"
+                               value="day30"/><label for="day30">本月</label>
+                        <input onclick="mydayTrigger(this.value)" id="day0" name="day" type="radio" value="day0"/><label
+                                for="day0">不限</label>
+                    </span>
+                        {#                        <label class="fa! switch">#}
+                        {#                            <input type="checkbox" id="mytaskToggle" onclick="mytaskTrigger()">#}
+                        {#                            <span class="slider round"></span>#}
+                        {#                        </label>#}
+                        {#                        只看与我相关#}
+                    </div>
+
+                    <div class="panel-body">
+                        <div id="chart" style="width:100%;min-height:400px">
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="col-sm-8">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-tasks" aria-hidden="true"></i> MyTasks
+                    </div>
+                    {#                    <div class="panel-body">#}
+                    {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
+                    {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
+                    {#                    </div>#}
+
+                    <!-- Table -->
+                    <table class="table">
+                        <tbody class="issues-list">
+                        {% for item in issues_object_list %}
+                            <tr>
+                                <td class="number">
+                                    <i class="fa fa-circle text-{{ item.priority }}"></i>
+                                    <a target="_blank"
+                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{% string_just item.id %}</a>
+                                </td>
+                                <td class="issue">
+                                    <div>
+                                        <a target="_blank"
+                                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{{ item.subject }}</a>
+                                    </div>
+                                    <div class="tags">
+                                    <span class="type" style="background-color: #56b8eb">
+                                        {{ item.issues_type }}
+                                    </span>
+                                        <span>
+                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}
+                                    </span>
+                                        {% if item.assign.username %}
+                                            <span>
+                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                                        {{ item.assign.username }}
+                                    </span>
+                                        {% endif %}
+                                        <span>
+                                        <i class="fa fa-user-o" aria-hidden="true"></i>
+                                        {{ item.creator.username }}
+                                    </span>
+                                        {% if item.end_date %}
+                                            <span>
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        {{ item.end_date }} 截止
+                                    </span>
+                                        {% endif %}
+                                        <span>
+                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                        {{ item.latest_update_datetime }} 更新
+                                    </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="...">
+                    <ul class="pagination" style="margin-top: 0px">
+                        {{ page_html|safe }}
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+    <input id="days" value="{{ days }}" hidden="hidden"/>
+    <input id="fresh_counts" value="{{ fresh_counts }}" hidden="hidden"/>
+    <input id="handle_counts" value="{{ handle_counts }}" hidden="hidden"/>
+    <input id="resolve_counts" value="{{ resolve_counts }}" hidden="hidden"/>
+    <input id="wait_counts" value="{{ wait_counts }}" hidden="hidden"/>
+    <input id="reopen_counts" value="{{ reopen_counts }}" hidden="hidden"/>
+{% endblock %}
+
+{% block js %}
+    <script>
+
+        {#调整为当天，近七天，近一月，近三个月相关数据展示#}
+        {#当天的切换为漏洞图#}
+        var myChart = echarts.init(document.getElementById("chart"));
+        var days = eval(document.getElementById("days").value);
+        var fresh_counts = eval(document.getElementById("fresh_counts").value);
+        var handle_counts = eval(document.getElementById("handle_counts").value);
+        var resolve_counts = eval(document.getElementById("resolve_counts").value);
+        var wait_counts = eval(document.getElementById("wait_counts").value);
+        var reopen_counts = eval(document.getElementById("reopen_counts").value);
+        var tasks = ['task']
+        for (d in days) {
+            tasks.push(days[d])
+        }
+        console.log('tasks', tasks)
+        myChart.showLoading();
+        // setTimeout(function () {
+        option = {
+            legend: {
+                selected: {
+                    '已解决': false
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                showContent: false
+            },
+            dataZoom: [
+                {
+                    show: true,
+                    realtime: true,
+                    start: 30,
+                    end: 70,
+                    xAxisIndex: [0, 1]
+                },
+                {
+                    type: 'inside',
+                    realtime: true,
+                    start: 30,
+                    end: 70,
+                    xAxisIndex: [0, 1]
+                }
+            ],
+            {% comment %}   toolbox: {
+                   feature: {
+                       dataZoom: {
+                           yAxisIndex: 'none'
+                       },
+                       {#restore: {},#}
+                       {#saveAsImage: {}#}
+                   }
+               },{% endcomment %}
+            dataset: {
+                source: [
+                    tasks,
+                    fresh_counts,
+                    reopen_counts,
+                    handle_counts,
+                    wait_counts,
+                    resolve_counts
+                ]
+            },
+            xAxis: {
+                type: 'category',
+                axisLabel: {
+                    show: true, // 是否显示刻度标签，默认显示
+                    interval: 'auto', // 坐标轴刻度标签的显示间隔，在类目轴中有效；默认会采用标签不重叠的策略间隔显示标签；可以设置成0强制显示所有标签；如果设置为1，表示『隔一个标签显示一个标签』，如果值为2，表示隔两个标签显示一个标签，以此类推。
+                    rotate: 0, // 刻度标签旋转的角度，在类目轴的类目标签显示不下的时候可以通过旋转防止标签之间重叠；旋转的角度从-90度到90度
+                    inside: false, // 刻度标签是否朝内，默认朝外
+                    margin: 6, // 刻度标签与轴线之间的距离
+                    {#formatter: '{value} Day', // 刻度标签的内容格式器#}
+                }
+            },
+            yAxis: {
+                gridIndex: 0,
+                axisLabel: {
+                    formatter: '{value}项',
+                    align: 'right'
+                }
+            },
+            grid: {top: '55%'},
+            {#markLine: { data: [ {type: 'average', name: '平均值'} ] },#}
+            series: [
+                {
+                    type: 'line',
+                    smooth: true,
+                    seriesLayoutBy: 'row',
+                    emphasis: {focus: 'series'}
+                },
+                {
+                    type: 'line',
+                    smooth: true,
+                    seriesLayoutBy: 'row',
+                    emphasis: {focus: 'series'}
+                },
+                {
+                    type: 'line',
+                    smooth: true,
+                    seriesLayoutBy: 'row',
+                    emphasis: {focus: 'series'}
+                },
+                {
+                    type: 'line',
+                    smooth: true,
+                    seriesLayoutBy: 'row',
+                    emphasis: {focus: 'series'}
+                },
+                {
+                    type: 'line',
+                    smooth: true,
+                    seriesLayoutBy: 'row',
+                    emphasis: {focus: 'series'},
+                    selected: false,
+                },
+                {
+                    type: 'pie',
+                    id: 'pie',
+                    radius: '30%',
+                    center: ['50%', '25%'],
+                    emphasis: {
+                        focus: 'self'
+                    },
+                    label: {
+                        formatter: '{b}: {@c} ({d}%)'
+                    },
+                    encode: {
+                        itemName: 'task',
+                        value: days[0],
+                        tooltip: ''
+                    }
+                }
+            ]
+        };
+
+        myChart.on('updateAxisPointer', function (event) {
+            console.log('event ', event)
+            let xAxisIndex = myChart.length;
+            console.log('xAxisIndex', xAxisIndex)
+            const xAxisInfo = event.axesInfo[0];
+            console.log('xAxisInfo ', xAxisInfo)
+            if (xAxisInfo) {
+                const dimension = xAxisInfo.value + 1;
+                myChart.setOption({
+                    series: {
+                        id: 'pie',
+                        label: {
+                            {#formatter: '{b}: {@[' + dimension + ']} ({d}%)'#}
+                        },
+                        encode: {
+                            value: dimension,
+                            tooltip: dimension
+                        }
+                    }
+                });
+            }
+        });
+        myChart.setOption(option);
+        myChart.hideLoading();
+        myChart.on("click", function (params) {
+            console.log(params);
+            if (params.name && params.seriesName) {
+
+                {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
+                {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
+            }
+        });
+        myChart.on('legendselectchanged', function (e) {
+            if (e.selected[e.name]) {
+                // 点击项是取消选中状态
+                console.log(e.name + ' checked')
+            } else {
+                // 点击项是选中状态
+                console.log(e.name + ' un checked')
+            }
+            // do something
+        });
+
+
+        function mydayTrigger(val) {
+            console.log("mydayTrigger", val)
+            sendFreshDayTriggerVal(val)
+        }
+
+        // });
+        function sendFreshDayTriggerVal(val) {
+            $.ajax({
+                url: "{% url 'day_cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": val,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.code) {
+                        localStorage.setItem("mydayTrigger", val)
+                        console.log("reload")
+                        location.reload();
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+        function sendFreshEchartLegendTriggerVal(val) {
+            $.ajax({
+                url: "{% url 'echart_legend_cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": val,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.code) {
+                        localStorage.setItem("legendTrigger", val)
+                        console.log("reload")
+                        location.reload();
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+
+        function storageTriggerInit() {
+            let day = localStorage.getItem("mydayTrigger");
+            document.getElementById(day).setAttribute('checked', false);
+        }
+
+
+        storageTriggerInit()
+
+    </script>
+{% endblock %}

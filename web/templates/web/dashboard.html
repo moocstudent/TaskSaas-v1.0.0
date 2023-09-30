@@ -177,7 +177,7 @@
                                 <div class="clearfix" style="margin-bottom: 30px;">
                                     <div class="col-sm-4">
 {#                                       id {{ request.web.project.creator.id }}#}
-                                        <div class="avatar" onclick="showMemberWithProjInfos()">{{ request.web.project.creator.username.0|upper }}</div>
+                                        <a href="" onclick="showMemberWithProjInfos()"><div class="avatar">{{ request.web.project.creator.username.0|upper }}</div></a>
                                         <div class="text">{{ request.web.project.creator.username }}</div>
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@
                                     {% for item in join_user %}
                                         <div class="col-sm-4">
 {#                                        id {{ item.0 }}#}
-                                            <div class="avatar" onclick="showMemberWithProjInfos()">{{ item.1.0 |upper }}</div>
+                                            <a href="" onclick="showMemberWithProjInfos()"><div class="avatar">{{ item.1.0 |upper }}</div></a>
                                             <div class="text">{{ item.1 }}</div>
                                         </div>
                                     {% endfor %}
@@ -505,7 +505,6 @@
         storageTriggerInit()
 
         function sendFreshTriggerVal() {
-            {#let csrf = {{ csrf_token }}#}
             $.ajax({
                 url: "{% url 'cache' %}",
                 type: "POST",

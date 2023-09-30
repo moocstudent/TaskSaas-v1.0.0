@@ -20,7 +20,7 @@ def dashboard(request, project_id):
     bugs_count = []
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
-    trigger = cache.get('mytaskTrigger')
+    trigger = cache.get('mytaskTrigger','off')
     if trigger == 'on':
         print("trigger == 'on':")
         print(request.web.user)
@@ -28,6 +28,8 @@ def dashboard(request, project_id):
                              |Q(creator=request.web.user))
     issues_types = issues_filter.values('issues_type').annotate(count=Count('issues_type')).values('issues_type')
     print(issues_types)
+    print('myis size', len(issues_filter))
+
     # keys = []
     index = 0
     for key, text in sorted(models.Issues.status_choices):
@@ -63,9 +65,21 @@ def dashboard(request, project_id):
     print('join_user', join_user)
     print('echarts_data', echarts_data)
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
-    top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
-    top_ten_reply = models.IssuesReply.objects.filter(issues__project_id=project_id).exclude(content__startswith='指派更新').order_by('-create_datetime')
 
+    top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
+    if trigger == 'on':
+        print("trigger == 'on':")
+        print(request.web.user)
+        top_ten=top_ten.filter(Q(assign=request.web.user)|Q(attention=request.web.user)
+                             |Q(creator=request.web.user))
+    print('tt size', len(top_ten))
+    top_ten_reply = models.IssuesReply.objects.filter(issues__project_id=project_id).exclude(content__startswith='指派更新').order_by('-create_datetime')
+    if trigger == 'on':
+        print("trigger == 'on':")
+        print(request.web.user)
+        top_ten_reply=top_ten_reply.filter(Q(issues__assign=request.web.user)|Q(issues__attention=request.web.user)
+                             |Q(issues__creator=request.web.user))
+    print('tr size', len(top_ten_reply))
     top_ten_dict = collections.OrderedDict()
     for t in top_ten:
         is_assign = 0
