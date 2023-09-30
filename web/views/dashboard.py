@@ -1,8 +1,10 @@
+import operator
+
 from django.core.cache import cache
 from django.shortcuts import render
 import collections
 from web import models
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 
 
 def dashboard(request, project_id):
@@ -60,7 +62,33 @@ def dashboard(request, project_id):
 
     print('join_user', join_user)
     print('echarts_data', echarts_data)
-    top_ten = models.Issues.objects.filter(project_id=project_id, assign__isnull=False).order_by('-id')[0:10]
+    # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
+    top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
+    top_ten_reply = models.IssuesReply.objects.filter(issues__project_id=project_id).exclude(content__startswith='指派更新').order_by('-create_datetime')
+
+    top_ten_dict = collections.OrderedDict()
+    for t in top_ten:
+        is_assign = 0
+        assign = None
+        if t.assign_id:
+            is_assign=1
+            assign = t.assign.username
+        top_ten_dict[t.latest_update_datetime] = {'is_assign': is_assign, 'is_fresh': 1,'is_reply':0,
+                                                  'creator':t.creator.username,'assign':assign,
+                                                  'desc':t.subject,'reply_type':0,
+                                                  'title': t.subject,
+                                                  'id':t.id}
+    for tr in top_ten_reply:
+        top_ten_dict[tr.create_datetime] = {'is_assign': 0, 'is_fresh': 0,'is_reply':1,
+                                                  'creator':tr.creator.username,'assign':tr.reply_id,
+                                                  'desc': tr.content,'reply_type':tr.reply_type,
+                                                  'title':tr.issues.subject,
+                                                  'id':tr.issues_id}
+
+    top_ten_re_sorted = dict(sorted(top_ten_dict.items(), key=operator.itemgetter(0), reverse=True))
+
+
+
     tasks_count.reverse()
     funcs_count.reverse()
     bugs_count.reverse()
@@ -76,7 +104,7 @@ def dashboard(request, project_id):
     context = {
         'status_dict': status_dict,
         'join_user': join_user,
-        'top_ten': top_ten,
+        'top_ten': top_ten_re_sorted,
         'echarts_data': echarts_data,
         'tasks_count': tasks_count,
         'funcs_count': funcs_count,
