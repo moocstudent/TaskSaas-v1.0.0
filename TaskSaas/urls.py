@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from TaskSaas import views
 
 urlpatterns = [
-    url(r'^send/sms/', views.send_sms),
-    url(r'^register/', views.register),
+    re_path(r'^send/sms/', views.send_sms),
+    re_path(r'^register/', views.register),
 ]

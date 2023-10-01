@@ -1,59 +1,62 @@
-from django.conf.urls import url, include, static
+from django.conf.urls import static
+from django.urls import re_path, include
 
 from TaskSaasAPP import settings
 from web.views import account, home, project, manage, wiki, file, setting, issues, dashboard, cache
 
 urlpatterns = [
-    url(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
-    url(r'^register/', account.register, name='register'),
-    url(r'^login/sms/', account.login_sms, name='login_sms'),
-    url(r'^login/', account.login, name='login'),
-    url(r'^logout/', account.logout, name='logout'),
-    url(r'^image/code/', account.image_code, name='image_code'),
-    url(r'^send/sms/', account.send_sms, name='send_sms'),
-    url(r'^index/', home.index, name='index'),
-    url(r'^cache_set/', cache.cache_set, name='cache'),
-    url(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
-    url(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
+    re_path(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
+    re_path(r'^register/', account.register, name='register'),
+    re_path(r'^login/sms/', account.login_sms, name='login_sms'),
+    re_path(r'^login/', account.login, name='login'),
+    re_path(r'^logout/', account.logout, name='logout'),
+    re_path(r'^image/code/', account.image_code, name='image_code'),
+    re_path(r'^send/sms/', account.send_sms, name='send_sms'),
+    re_path(r'^index/', home.index, name='index'),
+    re_path(r'^cache_set/', cache.cache_set, name='cache'),
+    re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
+    re_path(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
     # 项目列表
-    url(r'^project/list/', project.project_list, name='project_list'),
-    url(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
-    url(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar, name='project_unstar'),
+    re_path(r'^project/list/', project.project_list, name='project_list'),
+    re_path(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
+    re_path(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar, name='project_unstar'),
 
+    re_path(r'^workbench_json/$', manage.workbench_json, name='workbench_json'),
     # 项目管理
     # 路由分发
-    url(r'^manage/(?P<project_id>\d+)/', include([
+    re_path(r'^manage/(?P<project_id>\d+)/', include([
 
-        url(r'^statistics/$', manage.statistics, name='statistics'),
-        url(r'^workbench/$', manage.workbench, name='workbench'),
+        re_path(r'^statistics/$', manage.statistics, name='statistics'),
+        re_path(r'^workbench/$', manage.workbench, name='workbench'),
 
-        url(r'^wiki/$', wiki.wiki, name='wiki'),
-        url(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),
-        url(r'^wiki/delete/(?P<wiki_id>\d+)/$', wiki.wiki_delete, name='wiki_delete'),
-        url(r'^wiki/edit/(?P<wiki_id>\d+)/$', wiki.wiki_edit, name='wiki_edit'),
-        url(r'^wiki/upload/', wiki.wiki_upload, name='wiki_upload'),
-        url(r'^wiki/catalog/', wiki.wiki_catalog, name='wiki_catalog'),
 
-        url(r'^file/$', file.file, name='file'),
-        url(r'^file/delete/$', file.file_delete, name='file_delete'),
-        url(r'^cos/credential/$', file.cos_credential, name='cos_credential'),
-        url(r'^file/post/$', file.file_post, name='file_post'),
-        url(r'^file/download/(?P<file_id>\d+)/$', file.file_download, name='file_download'),
+        re_path(r'^wiki/$', wiki.wiki, name='wiki'),
+        re_path(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),
+        re_path(r'^wiki/delete/(?P<wiki_id>\d+)/$', wiki.wiki_delete, name='wiki_delete'),
+        re_path(r'^wiki/edit/(?P<wiki_id>\d+)/$', wiki.wiki_edit, name='wiki_edit'),
+        re_path(r'^wiki/upload/', wiki.wiki_upload, name='wiki_upload'),
+        re_path(r'^wiki/catalog/', wiki.wiki_catalog, name='wiki_catalog'),
 
-        url(r'^setting/$', setting.setting, name='setting'),
-        url(r'^setting/delete/$', setting.setting_delete, name='setting_delete'),
+        re_path(r'^file/$', file.file, name='file'),
+        re_path(r'^file/delete/$', file.file_delete, name='file_delete'),
+        re_path(r'^cos/credential/$', file.cos_credential, name='cos_credential'),
+        re_path(r'^file/post/$', file.file_post, name='file_post'),
+        re_path(r'^file/download/(?P<file_id>\d+)/$', file.file_download, name='file_download'),
 
-        url(r'^issues/$', issues.issues, name='issues'),
-        url(r'^issues/detail/(?P<issues_id>\d+)/$', issues.issues_detail, name='issues_detail'),
-        url(r'^issues/record/(?P<issues_id>\d+)/$', issues.issues_record, name='issues_record'),
-        url(r'^issues/change/(?P<issues_id>\d+)/$', issues.issues_change, name='issues_change'),
-        url(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
+        re_path(r'^setting/$', setting.setting, name='setting'),
+        re_path(r'^setting/delete/$', setting.setting_delete, name='setting_delete'),
 
-        url(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
+        re_path(r'^issues/$', issues.issues, name='issues'),
+        re_path(r'^issues/detail/(?P<issues_id>\d+)/$', issues.issues_detail, name='issues_detail'),
+        re_path(r'^issues/record/(?P<issues_id>\d+)/$', issues.issues_record, name='issues_record'),
+        re_path(r'^issues/change/(?P<issues_id>\d+)/$', issues.issues_change, name='issues_change'),
+        re_path(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
 
-    ], None, None)),
+        re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
+
+    ], None)),
 
     # 邀请页面
-    url(r'^invite/join/(?P<code>\w+)/$', issues.invite_join, name='invite_join'),
+    re_path(r'^invite/join/(?P<code>\w+)/$', issues.invite_join, name='invite_join'),
 
 ]

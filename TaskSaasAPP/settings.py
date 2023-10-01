@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import django
+from django.utils.encoding import smart_str
+django.utils.encoding.smart_text = smart_str
 
 from django.conf.urls import static
 
@@ -26,7 +29,7 @@ SECRET_KEY = 'vt1!_$!!o4ka5gakevbar9u!fhsjmuw900lw_3)f&s3!6ke3ep'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = "*"
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -39,7 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'TaskSaas.apps.TasksaasConfig',
     'web.apps.WebConfig',
+    'rest_framework',
 ]
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -53,7 +65,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'TaskSaasAPP.urls'
-
 
 TEMPLATES = [
     {
@@ -87,7 +98,6 @@ DATABASES = {
         'CHARSET': 'utf8'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -126,7 +136,7 @@ USE_TZ = False
 STATIC_URL = '/static/'
 STATIC_ROOT = 'web/static'
 STATICFILES_DIRS = [
-  os.path.join(BASE_DIR, '/web/static/')
+    os.path.join(BASE_DIR, 'web/static/')
 ]
 
 # 自己的短信模板相关配置
@@ -173,7 +183,6 @@ try:
     from .local_settings import *
 except ImportError:
     pass
-
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration

@@ -119,7 +119,7 @@ def issues(request, project_id):
 
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
-        trigger = cache.get('mytaskTrigger')
+        trigger = cache.get(str(request.web.user.id)+'mytaskTrigger')
         if trigger == 'on':
             print("trigger == 'on':")
             print(request.web.user)

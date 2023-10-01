@@ -20,7 +20,7 @@ def dashboard(request, project_id):
     bugs_count = []
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
-    trigger = cache.get('mytaskTrigger','off')
+    trigger = cache.get(str(request.web.user.id)+'mytaskTrigger','off')
     if trigger == 'on':
         print("trigger == 'on':")
         print(request.web.user)

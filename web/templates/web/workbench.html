@@ -231,7 +231,7 @@
             </div>
 
 
-            <div class="col-sm-8">
+            <div class="col-sm-8" id="tasklist">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-tasks" aria-hidden="true"></i> MyTasks
@@ -306,6 +306,7 @@
     <input id="resolve_counts" value="{{ resolve_counts }}" hidden="hidden"/>
     <input id="wait_counts" value="{{ wait_counts }}" hidden="hidden"/>
     <input id="reopen_counts" value="{{ reopen_counts }}" hidden="hidden"/>
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -320,6 +321,7 @@
         var resolve_counts = eval(document.getElementById("resolve_counts").value);
         var wait_counts = eval(document.getElementById("wait_counts").value);
         var reopen_counts = eval(document.getElementById("reopen_counts").value);
+        var project_id = eval(document.getElementById("project_id").value);
         var tasks = ['task']
         for (d in days) {
             tasks.push(days[d])
@@ -328,6 +330,15 @@
         myChart.showLoading();
         // setTimeout(function () {
         option = {
+            title: {
+                left:8,
+                top: 100,
+                text: '默认展示当天饼图',
+                textStyle: {
+                    fontSize: 7
+                }
+
+            },
             legend: {
                 selected: {
                     '已解决': false
@@ -335,7 +346,8 @@
             },
             tooltip: {
                 trigger: 'axis',
-                showContent: false
+                showContent: false,
+
             },
             dataZoom: [
                 {
@@ -476,16 +488,69 @@
                 {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
             }
         });
+
+
         myChart.on('legendselectchanged', function (e) {
             if (e.selected[e.name]) {
-                // 点击项是取消选中状态
-                console.log(e.name + ' checked')
-            } else {
                 // 点击项是选中状态
+                console.log(e.name + ' checked')
+                sendFreshEchartLegendTriggerVal(e.selected)
+            } else {
+                // 点击项是取消状态
                 console.log(e.name + ' un checked')
+                sendFreshEchartLegendTriggerVal(e.selected)
             }
             // do something
         });
+        {% comment %}
+                function judmentLegendsToCache(legends) {
+                    console.log(legends);
+                    let trigger = localStorage.getItem("legendTrigger");
+                    console.log('bf tg:', trigger);
+                    if (!trigger || trigger === undefined) {
+                        trigger = ''
+                    }
+                    if (trigger.indexOf('undefined') > -1) {
+                        console.log('udfd rplc')
+                        trigger = trigger.replace(new RegExp("undefined", "g"))
+                    }
+                    if (legends['新建']) {
+                        if (trigger.indexOf('1') === -1) {
+                            localStorage.setItem("legendTrigger", trigger + "1")
+                        }
+                    } else {
+                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("1", "g")))
+                    }
+                    if (legends['重新打开']) {
+                        if (trigger.indexOf('7') === -1) {
+                            localStorage.setItem("legendTrigger", trigger + "7")
+                        }
+                    } else {
+                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("7", "g")))
+                    }
+                    if (legends['处理中']) {
+                        if (trigger.indexOf('2') === -1) {
+                            localStorage.setItem("legendTrigger", trigger + "2")
+                        }
+                    } else {
+                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("2", "g")))
+                    }
+                    if (legends['待反馈']) {
+                        if (trigger.indexOf('5') === -1) {
+                            localStorage.setItem("legendTrigger", trigger + "5")
+                        }
+                    } else {
+                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("5", "g")))
+                    }
+                    if (legends['已解决']) {
+                        if (trigger.indexOf('4') === -1) {
+                            localStorage.setItem("legendTrigger", trigger + "4")
+                        }
+                    } else {
+                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("4", "g")))
+                    }
+                    console.log('end set ', localStorage.getItem("legendTrigger"))
+                }{% endcomment %}
 
 
         function mydayTrigger(val) {
@@ -518,20 +583,40 @@
         }
 
         function sendFreshEchartLegendTriggerVal(val) {
+            let reqVal = ''
+            if (val.新建) {
+                reqVal += 1
+            }
+            if (val.处理中) {
+                reqVal += 2
+            }
+            if (val.已解决) {
+                reqVal += 3
+            }
+            if (val.待反馈) {
+                reqVal += 5
+            }
+            if (val.重新打开) {
+                reqVal += 7
+            }
+            console.log(reqVal)
             $.ajax({
                 url: "{% url 'echart_legend_cache' %}",
                 type: "POST",
                 data: {
-                    "trigger": val,
+                    "trigger": reqVal,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
                 success: function (res) {
-                    console.log(res);
+                    console.log('sendFreshEchartLegendTriggerVal res', res);
                     if (res.code) {
-                        localStorage.setItem("legendTrigger", val)
+                        localStorage.setItem("legendTrigger", reqVal)
                         console.log("reload")
+                        {#legendTriggerRefresh()#}
+                        {#reloadWorkBenchJson()#}
                         location.reload();
+                        {#$("#tasklist").load(issues_object_list=[])#}
                     } else {
 
                     }
@@ -541,9 +626,82 @@
         }
 
 
+        function reloadWorkBenchJson() {
+            $.ajax({
+                url: "{% url 'workbench_json' %}",
+                type: "POST",
+                data: {
+                    "project_id": project_id,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log('res:', res);
+                    {#alert(res)#}
+                    if (res.code) {
+                        {#localStorage.setItem("mydayTrigger", val)#}
+                        console.log("reload")
+                        {#location.reload();#}
+                        {#$("#tasklist").html(res)#}
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+        function legendTriggerRefresh() {
+            let legend = localStorage.getItem("legendTrigger");
+            console.log('legendTriggerRefresh le>>', legend);
+            let legendArr = ['新建', '处理中', '已解决', '待反馈', '重新打开']
+            if (legend) {
+                let splitLegend = legend.split("");
+
+                for (var i = 0; i < 5; i++) {
+                    myChart.setOption({
+                        legend: {selected: {[legendArr[i]]: false}},
+                    })
+                }
+                for (s in splitLegend) {
+                    if (splitLegend[s] == '1') {
+                        myChart.setOption({
+                            legend: {selected: {['新建']: true}}
+                        })
+                    } else if (splitLegend[s] == '2') {
+                        myChart.setOption({
+                            legend: {selected: {['处理中']: true}}
+                        })
+                    } else if (splitLegend[s] == '3') {
+                        myChart.setOption({
+                            legend: {selected: {['已解决']: true}}
+                        })
+                    } else if (splitLegend[s] == '5') {
+                        myChart.setOption({
+                            legend: {selected: {['待反馈']: true}}
+                        })
+                    } else if (splitLegend[s] == '7') {
+                        myChart.setOption({
+                            legend: {selected: {['重新打开']: true}}
+                        })
+                    }
+                }
+
+            } else {
+                for (var i = 0; i < 5; i++) {
+                    myChart.setOption({
+                        legend: {selected: {[legendArr[i]]: false}},
+                    })
+                }
+            }
+        }
+
         function storageTriggerInit() {
             let day = localStorage.getItem("mydayTrigger");
-            document.getElementById(day).setAttribute('checked', false);
+            if (day) {
+                document.getElementById(day).setAttribute('checked', false);
+            }
+            legendTriggerRefresh()
         }
 
 

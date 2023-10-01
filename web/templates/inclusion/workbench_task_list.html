@@ -1,0 +1,66 @@
+<div class="col-sm-8" id="tasklist">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-tasks" aria-hidden="true"></i> MyTasks
+        </div>
+        {#                    <div class="panel-body">#}
+        {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
+        {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
+        {#                    </div>#}
+
+        <!-- Table -->
+        <table class="table">
+            <tbody class="issues-list">
+            {% for item in issues_object_list %}
+                <tr>
+                    <td class="number">
+                        <i class="fa fa-circle text-{{ item.priority }}"></i>
+                        <a target="_blank"
+                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{% string_just item.id %}</a>
+                    </td>
+                    <td class="issue">
+                        <div>
+                            <a target="_blank"
+                               href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{{ item.subject }}</a>
+                        </div>
+                        <div class="tags">
+                                    <span class="type" style="background-color: #56b8eb">
+                                        {{ item.issues_type }}
+                                    </span>
+                            <span>
+                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}
+                                    </span>
+                            {% if item.assign.username %}
+                                <span>
+                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                                        {{ item.assign.username }}
+                                    </span>
+                            {% endif %}
+                            <span>
+                                        <i class="fa fa-user-o" aria-hidden="true"></i>
+                                        {{ item.creator.username }}
+                                    </span>
+                            {% if item.end_date %}
+                                <span>
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        {{ item.end_date }} 截止
+                                    </span>
+                            {% endif %}
+                            <span>
+                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                        {{ item.latest_update_datetime }} 更新
+                                    </span>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <nav aria-label="...">
+        <ul class="pagination" style="margin-top: 0px">
+            {{ page_html|safe }}
+        </ul>
+    </nav>
+
+</div>

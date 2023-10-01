@@ -33,8 +33,10 @@ def get_every_day(day_trigger,day0,format):
         end_date = datetime.datetime(begin_date.year,begin_date.month,1)
         begin_date = datetime.datetime(begin_date.year,begin_date.month,month_days)
     elif day_trigger == 'day0':
-        begin_date
+        # begin_date
         end_date = day0
+    else:
+        return []
     print(end_date)
     every_days_date = [begin_date - datetime.timedelta(days=x) for x in range((begin_date - end_date).days + 1)]
     if format:
