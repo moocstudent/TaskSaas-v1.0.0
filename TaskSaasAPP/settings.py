@@ -47,8 +47,7 @@ INSTALLED_APPS = [
     'rest_framework', # django restframework
 ]
 
-# 设置ASGI应用
-ASGI_APPLICATION = 'myproject.asgi.application'
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -100,6 +99,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TaskSaasAPP.wsgi.application'
 
+# 设置ASGI应用
+ASGI_APPLICATION = 'TaskChat.routing.application'
+
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 DATABASES = {
@@ -149,7 +151,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'web/static'
+# STATIC_ROOT = 'web/static'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'web/static/')
 ]

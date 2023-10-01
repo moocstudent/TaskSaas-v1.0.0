@@ -1,12 +1,12 @@
 from django.conf.urls import static
-from django.urls import re_path, include
+from django.urls import re_path, include, path
 
+from TaskChat import chat_views, consumers
 from TaskSaasAPP import settings
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard
 
-
 urlpatterns = [
-    re_path(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
+    re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': 'web/static'}, name='static'),
     re_path(r'^register/', account.register, name='register'),
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
     re_path(r'^login/', account.login, name='login'),
@@ -20,14 +20,14 @@ urlpatterns = [
     # 项目列表
     re_path(r'^project/list/', project.project_list, name='project_list'),
     re_path(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
-    re_path(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar, name='project_unstar'),
+    re_path(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar,
+            name='project_unstar'),
 
     re_path(r'^workbench_json/$', manage.workbench_json, name='workbench_json'),
     # 项目管理
     # 路由分发
 
     re_path(r'^manage/(?P<project_id>\d+)/', include([
-
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),
         re_path(r'^workbench/$', manage.workbench, name='workbench'),
@@ -56,6 +56,12 @@ urlpatterns = [
 
         re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
 
+    ], None)),
+
+    re_path(r'^chat/', include([
+        path('', chat_views.chat, name='chat-url'),
+        # path('<str:room_name>/', chat_views.room, name='room'),
+        path('ws/', consumers.xChatConsumer.as_asgi()),
     ], None)),
 
     # 邀请页面
