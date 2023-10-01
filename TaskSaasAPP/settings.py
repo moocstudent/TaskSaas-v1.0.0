@@ -40,10 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',  # channels应用
+    'TaskChat',
     'TaskSaas.apps.TasksaasConfig',
     'web.apps.WebConfig',
-    'rest_framework',
+    'rest_framework', # django restframework
 ]
+
+# 设置ASGI应用
+ASGI_APPLICATION = 'myproject.asgi.application'
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -63,6 +68,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'web.middleware.auth.AuthMiddleWare',
 ]
+
+CHANNEL_LAYERS = {
+     "default": {
+         "BACKEND": "channels_redis.core.RedisChannelLayer",
+         "CONFIG": {
+             "hosts": [("127.0.0.1", 6379)],
+              #或"hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')],
+         },
+     },
+ }
 
 ROOT_URLCONF = 'TaskSaasAPP.urls'
 

@@ -2,7 +2,8 @@ from django.conf.urls import static
 from django.urls import re_path, include
 
 from TaskSaasAPP import settings
-from web.views import account, home, project, manage, wiki, file, setting, issues, dashboard, cache
+from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard
+
 
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', static.serve,{'document_root': settings.STATIC_ROOT}, name='static'),
@@ -24,11 +25,12 @@ urlpatterns = [
     re_path(r'^workbench_json/$', manage.workbench_json, name='workbench_json'),
     # 项目管理
     # 路由分发
+
     re_path(r'^manage/(?P<project_id>\d+)/', include([
+
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),
         re_path(r'^workbench/$', manage.workbench, name='workbench'),
-
 
         re_path(r'^wiki/$', wiki.wiki, name='wiki'),
         re_path(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),

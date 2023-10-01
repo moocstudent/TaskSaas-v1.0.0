@@ -16,8 +16,12 @@ Including another URLconf
 from django.urls import re_path, include
 from django.contrib import admin
 
+# app_name = 'TaskSaas'
+
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
+    # path('chat/', include('chat.urls')),
     re_path(r'^TaskSaas/', include(('TaskSaas.urls', 'TaskSaas'), namespace='TaskSaas')),
+    # re_path(r'^TaskChat/', include(('TaskChat.urls', 'TaskChat'), namespace='TaskChat')),
     re_path(r'^', include('web.urls')),
 ]

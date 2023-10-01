@@ -18,7 +18,7 @@ def statistics(request, project_id):
 def workbench(request, project_id):
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger')
+    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger','1257')
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=request.web.user)
                                                                              | Q(attention=request.web.user)
                                                                              | Q(creator=request.web.user))
