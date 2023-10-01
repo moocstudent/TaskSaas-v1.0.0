@@ -26,6 +26,7 @@ urlpatterns = [
     re_path(r'^workbench_json/$', manage.workbench_json, name='workbench_json'),
     # 项目管理
     # 路由分发
+    re_path(r'^sys_setting/$', setting.sys_setting, name='sys_setting'),
 
     re_path(r'^manage/(?P<project_id>\d+)/', include([
 

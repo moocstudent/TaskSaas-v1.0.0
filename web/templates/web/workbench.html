@@ -297,20 +297,50 @@
                 </nav>
 
             </div>
+
+
+            <div class="col-md-8" style="float: left">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (开发中)
+                    </div>
+                    <div>
+                        <textarea disabled class="col-md-10"
+                                  style="resize:none;height: 300px;background-color: floralwhite"></textarea>
+                        <div class="col-md-2" style="float: right">
+                            online members:
+                            <ul>
+                                <li>小明</li>
+                                <li>小红</li>
+                                <li>小双</li>
+                                <li>晓丹</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4" style="float: right;padding-top: 0%">
+                        <input id="chat-message-input" type="text" placeholder="聊天信息发送"/><br/>
+                        <input id="chat-message-submit" onclick="msgSubmit()" type="button" value="Send"/>
+                    </div>
+                </div>
+            </div>
         </div>
+        <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+        <input id="days" value="{{ days }}" hidden="hidden"/>
+        <input id="fresh_counts" value="{{ fresh_counts }}" hidden="hidden"/>
+        <input id="handle_counts" value="{{ handle_counts }}" hidden="hidden"/>
+        <input id="resolve_counts" value="{{ resolve_counts }}" hidden="hidden"/>
+        <input id="wait_counts" value="{{ wait_counts }}" hidden="hidden"/>
+        <input id="reopen_counts" value="{{ reopen_counts }}" hidden="hidden"/>
+        <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
     </div>
-    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
-    <input id="days" value="{{ days }}" hidden="hidden"/>
-    <input id="fresh_counts" value="{{ fresh_counts }}" hidden="hidden"/>
-    <input id="handle_counts" value="{{ handle_counts }}" hidden="hidden"/>
-    <input id="resolve_counts" value="{{ resolve_counts }}" hidden="hidden"/>
-    <input id="wait_counts" value="{{ wait_counts }}" hidden="hidden"/>
-    <input id="reopen_counts" value="{{ reopen_counts }}" hidden="hidden"/>
-    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
     <script>
+        function msgSubmit() {
+            alert('【功能暂不可用】正在紧锣密鼓开发中')
+        }
+
 
         {#调整为当天，近七天，近一月，近三个月相关数据展示#}
         {#当天的切换为漏洞图#}
@@ -331,7 +361,7 @@
         // setTimeout(function () {
         option = {
             title: {
-                left:8,
+                left: 8,
                 top: 100,
                 text: '默认展示当天饼图',
                 textStyle: {
