@@ -146,7 +146,7 @@ def manage_menu_list(request):
 def right_side_manage_menu_list(request):
 
     right_side_data_list = [
-        {'title': '工作台', 'url': reverse('workbench', kwargs={'project_id': request.web.project.id})}
+        {'id':'workbench','title': '(新)*工作台', 'url': reverse('workbench', kwargs={'project_id': request.web.project.id})}
     ]
 
     for item in right_side_data_list:
