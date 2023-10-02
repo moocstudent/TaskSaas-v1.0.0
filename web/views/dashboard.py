@@ -91,13 +91,13 @@ def dashboard(request, project_id):
                                                   'creator':t.creator.username,'assign':assign,
                                                   'desc':t.subject,'reply_type':0,
                                                   'title': t.subject,
-                                                  'id':t.id}
+                                                  'issue_id':t.issue_id,'id':t.id}
     for tr in top_ten_reply:
         top_ten_dict[tr.create_datetime] = {'is_assign': 0, 'is_fresh': 0,'is_reply':1,
                                                   'creator':tr.creator.username,'assign':tr.reply_id,
                                                   'desc': tr.content,'reply_type':tr.reply_type,
                                                   'title':tr.issues.subject,
-                                                  'id':tr.issues_id}
+                                                  'issue_id':t.issue_id,'id':tr.issues_id}
 
     top_ten_re_sorted = dict(sorted(top_ten_dict.items(), key=operator.itemgetter(0), reverse=True))
 

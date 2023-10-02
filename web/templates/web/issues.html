@@ -188,12 +188,12 @@
                             <td class="number">
                                 <i class="fa fa-circle text-{{ item.priority }}"></i>
                                 <a target="_blank"
-                                   href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{% string_just item.id %}</a>
+                                   href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                             </td>
                             <td class="issue">
                                 <div>
                                     <a target="_blank"
-                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.id %}">{{ item.subject }}</a>
+                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>
                                 </div>
                                 <div class="tags">
                                     <span class="type" style="background-color: #56b8eb">

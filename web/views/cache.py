@@ -23,3 +23,13 @@ def echart_legend_cache_set(request):
     cache.set(str(request.web.user.id)+'myechartlegendTrigger', trigger, timeout=None)
     print(cache.get(str(request.web.user.id)+'myechartlegendTrigger'))
     return JsonResponse({'code':1})
+
+
+#因为是打开新页面，所以这个可没有
+# def issues_status_cache_set(request):
+#     print('id>>>',request.web.user.id)
+#     trigger = request.POST.get("trigger")
+#     print(trigger)
+#     cache.set(str(request.web.user.id)+'myissuesStatusTrigger', trigger, timeout=None)
+#     print(cache.get(str(request.web.user.id)+'myissuesStatusTrigger'))
+#     return JsonResponse({'code':1})

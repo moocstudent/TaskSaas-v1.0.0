@@ -1,18 +1,18 @@
-import json
 import datetime
+import json
 
 from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
+
+from utils.encrypt import uid
+from utils.pagination import Pagination
 from web import models
 from web.forms.issues import IssuesModelForm, IssuesReplyModelForm, IssuesInviteModelForm
-from utils.encrypt import uid
-from django.utils.safestring import mark_safe
-from utils.pagination import Pagination
-import collections
 
 
 class CheckFilter(object):
@@ -98,7 +98,7 @@ class SelectFilter(object):
 
         yield mark_safe("</select>")
 
-
+# todo 改为对应的restframework form
 def issues(request, project_id):
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
@@ -119,12 +119,12 @@ def issues(request, project_id):
 
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
-        trigger = cache.get(str(request.web.user.id)+'mytaskTrigger')
+        trigger = cache.get(str(request.web.user.id) + 'mytaskTrigger')
         if trigger == 'on':
             print("trigger == 'on':")
             print(request.web.user)
             queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
-                                                 | Q(creator=request.web.user))
+                                       | Q(creator=request.web.user))
         page_object = Pagination(
             current_page=request.GET.get('page'),
             all_count=queryset.count(),
@@ -158,19 +158,30 @@ def issues(request, project_id):
         return render(request, 'web/issues.html', context)
 
     form = IssuesModelForm(request, data=request.POST)
+    this_proj_max_issue_id = models.Issues.objects.filter(project_id=request.web.project.id).aggregate(
+        this_proj_max_issue_id=Max('issue_id'))
+    if this_proj_max_issue_id:
+        this_proj_max_issue_id = this_proj_max_issue_id['this_proj_max_issue_id']
+    else:
+        this_proj_max_issue_id = 0
     if form.is_valid():
         form.instance.project = request.web.project
         form.instance.creator = request.web.user
+        form.instance.issue_id = this_proj_max_issue_id + 1
+        print('form>>',form.instance.desc)
+        if form.instance.desc is None or len(form.instance.desc)==0:
+            form.instance.desc=form.instance.subject
         # 保存
         form.save()
         return JsonResponse({'status': True, })
+    print('form is invalid',form.errors)
     return JsonResponse({'status': False, 'error': form.errors})
 
 
 def issues_detail(request, project_id, issues_id):
     """编辑问题"""
 
-    issues_object = models.Issues.objects.filter(id=issues_id, project_id=project_id).first()
+    issues_object = models.Issues.objects.filter(issue_id=issues_id, project_id=project_id).first()
 
     form = IssuesModelForm(request, instance=issues_object)
 
@@ -226,8 +237,9 @@ def issues_record(request, project_id, issues_id):
 
 @csrf_exempt
 def issues_change(request, project_id, issues_id):
+    print('issues_id',issues_id)
     """表单更新数据"""
-    issues_object = models.Issues.objects.filter(id=issues_id, project_id=project_id).first()
+    issues_object = models.Issues.objects.filter(issue_id=issues_id, project_id=project_id).first()
 
     post_dict = json.loads(request.body.decode('utf-8'))
     # 数据库字段更新
@@ -355,7 +367,7 @@ def issues_change(request, project_id, issues_id):
             change_record = "{}更新为{}".format(field_object.verbose_name, ",".join(username_list))
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
-    return JsonResponse({'status': False, 'error': '好自为之！'})
+    return JsonResponse({'status': False, 'error': 'Error！'})
 
 
 def invite_url(request, project_id):

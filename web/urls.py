@@ -14,9 +14,11 @@ urlpatterns = [
     re_path(r'^image/code/', account.image_code, name='image_code'),
     re_path(r'^send/sms/', account.send_sms, name='send_sms'),
     re_path(r'^index/', home.index, name='index'),
+    path('', home.index, name=''),
     re_path(r'^cache_set/', cache.cache_set, name='cache'),
     re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
     re_path(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
+    # re_path(r'^issues_status_cache_set/', cache.issues_status_cache_set, name='issues_status_cache'),
     # 项目列表
     re_path(r'^project/list/', project.project_list, name='project_list'),
     re_path(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
@@ -62,7 +64,7 @@ urlpatterns = [
     re_path(r'^chat/', include([
         path('', chat_views.chat, name='chat-url'),
         # path('<str:room_name>/', chat_views.room, name='room'),
-        path('ws/<str:user_id>', consumers.ChatConsumer.as_asgi()),
+        path('ws/', consumers.ChatConsumer.as_asgi()),
     ], None)),
 
     # 邀请页面

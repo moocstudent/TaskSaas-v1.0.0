@@ -148,13 +148,14 @@ class FileRepository(models.Model):
 
 class Issues(models.Model):
     id = models.BigAutoField(primary_key=True)
+    issue_id = models.BigIntegerField(default=0,null=True,blank=True)
     """问题"""
     project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
     issues_type = models.ForeignKey(verbose_name='问题类型', to='IssuesType',null=True,on_delete=models.SET_NULL)
     module = models.ForeignKey(verbose_name='模块', to='Module', null=True, blank=True,on_delete=models.SET_NULL)
 
     subject = models.CharField(verbose_name='主题', max_length=80)
-    desc = models.TextField(verbose_name='问题描述')
+    desc = models.TextField(verbose_name='问题描述',null=True,blank=True)
     priority_choices = {
         ("danger", "高"),
         ("warning", "中"),
