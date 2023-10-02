@@ -5,7 +5,7 @@ from django.urls import path
 from TaskChat.consumers import xChatConsumer, ChatConsumer
 
 websocket_urlpatterns = [
-    path('chat/ws/', ChatConsumer.as_asgi()),
+    path('chat/ws/<str:user_id>/<str:username>', ChatConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({

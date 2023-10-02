@@ -1,5 +1,6 @@
 import json
 
+from channels.auth import login
 from django.core.cache import cache
 from django.db.models import Q, Count, Max, Min
 from django.http import HttpResponse, JsonResponse
@@ -93,6 +94,8 @@ def workbench(request, project_id):
         'warning': warning_count,
         'success': success_count,
     }
+
+    # c = login(request, request.web.user)
     context = {
         'issues_object_list': issues_object_list,
         'page_html': page_object.page_html(),

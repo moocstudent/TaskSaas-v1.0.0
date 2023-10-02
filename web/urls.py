@@ -62,7 +62,7 @@ urlpatterns = [
     re_path(r'^chat/', include([
         path('', chat_views.chat, name='chat-url'),
         # path('<str:room_name>/', chat_views.room, name='room'),
-        path('ws/', consumers.xChatConsumer.as_asgi()),
+        path('ws/<str:user_id>', consumers.ChatConsumer.as_asgi()),
     ], None)),
 
     # 邀请页面

@@ -305,7 +305,7 @@
                         <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (开发中)
                     </div>
                     <div>
-                        <textarea disabled class="col-md-10"
+                        <textarea id="chat-log" disabled class="col-md-10"
                                   style="resize:none;height: 300px;background-color: floralwhite"></textarea>
                         <div class="col-md-2" style="float: right">
                             online members:
@@ -332,6 +332,8 @@
         <input id="wait_counts" value="{{ wait_counts }}" hidden="hidden"/>
         <input id="reopen_counts" value="{{ reopen_counts }}" hidden="hidden"/>
         <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
+        <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
+        <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
     </div>
 {% endblock %}
 
@@ -352,6 +354,9 @@
         var wait_counts = eval(document.getElementById("wait_counts").value);
         var reopen_counts = eval(document.getElementById("reopen_counts").value);
         var project_id = eval(document.getElementById("project_id").value);
+        var user_id = eval(document.getElementById("user_id").value);
+        var username = document.getElementById("username").value;
+
         var tasks = ['task']
         for (d in days) {
             tasks.push(days[d])
@@ -737,5 +742,152 @@
 
         storageTriggerInit()
 
+        {#ws聊天室相关 below：#}
+        {#$('#page_header').text('聊天室');#}
+        {#$('#page_header_descript').text('chat room');#}
+
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function (e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+
+        function isOpen(ws) {
+            return ws.readyState === ws.OPEN
+        }
+
+
+        var interval_timer = null;//计时器
+        var timer_count = 0;
+        var wsUrl = 'ws://' + window.location.host + '/chat/ws/' + user_id + '/' + username
+        var ws;
+
+        createOrConnectWebSocket();	// 创建websocket
+        /**
+         * 创建websocket或掉线重连
+         */
+        function createOrConnectWebSocket() {
+            if (!ws) {
+                ws = new WebSocket(wsUrl);
+                websocketInit();
+            } else {
+                if (!isOnlineCurrUser()) {
+                    ws = null;
+                    createOrConnectWebSocket();
+                }
+            }
+            // 开启定时器
+            init_start_timer();
+        }
+
+        /**
+         * websocket 的初始化
+         */
+        function websocketInit() {
+            ws.onmessage = function (e) {
+                var data = JSON.parse(e.data);
+                var message = data['message'];
+                document.querySelector('#chat-log').value += (message + '\n');
+
+
+                {#var message = eval('(' + e.data + ')');#}
+                {#switch (message.type) {#}
+                {#case#}
+                {#'init'#}
+                {#:#}
+                {#changeNoReadLogs();#}
+                {#var bind = '{"type":"bind","from_id":"' + from_id + '","to_id":"' + to_id + '"}';#}
+                {#ws.send(bind);#}
+                {#message_load();#}
+                {#    break;#}
+
+                {% comment %}}{% endcomment %}
+            };
+            ws.onclose = function (e) {
+                console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean);
+            };
+        }
+
+        /**
+         * 设置一个 30秒的轮询监听方法，避免页面关闭
+         */
+        function init_start_timer() {
+            //重置计数器
+            timer_count = 0;
+            if (interval_timer != null) {
+                clearInterval(interval_timer);
+                interval_timer = null;
+            }
+            interval_timer = setInterval(function () {
+                myTimer()
+            }, 10000);
+        }
+
+        /**
+         *定时器具体实现方法
+         */
+        function myTimer() {
+            //TODO 如果超过半小时没有交互，则关闭计时器
+            if (timer_count >= 300000) {
+                clearInterval(interval_timer);
+            } else {
+                timer_count += 30;
+                createOrConnectWebSocket()
+                {#var online = '{"type":"timer","user_id":" + ' + user_id + '}';#}
+                while (!isOnlineCurrUser()) {
+                    {#createOrConnectWebSocket()#}
+                    console.log('my timer reconnect ws')
+                }
+                {#ws.send(online);#}
+                console.log('timer_count', timer_count);
+            }
+        }
+
+        /**
+         * 判断当前用户是否 还在线
+         */
+        function isOnlineCurrUser() {
+            if (ws) {
+                if (ws.readyState == WebSocket.OPEN) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        document.querySelector('#chat-message-submit').onclick = function (e) {
+            var messageInputDom = document.querySelector('#chat-message-input');
+            var message = messageInputDom.value;
+            if (!message) {
+                console.log('message can not be empty')
+                return
+            }
+            let stringifyMsg = JSON.stringify({
+                'message': message
+            });
+            if (isOnlineCurrUser()) {
+                ws.send(stringifyMsg);
+                messageInputDom.value = '';
+            } else {
+                console.log('reconnect ws...')
+                createOrConnectWebSocket()
+                while (!isOnlineCurrUser()) {
+                    {#createOrConnectWebSocket()#}
+                }
+                ws.send(stringifyMsg);
+                messageInputDom.value = '';
+            }
+
+        };
+
+
     </script>
+
+
 {% endblock %}
