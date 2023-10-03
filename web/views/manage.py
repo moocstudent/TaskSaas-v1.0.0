@@ -18,6 +18,7 @@ def statistics(request, project_id):
 
 # todo commit具体信息 当点击页面commit message时弹出详情
 def git_commit(request,git_project_id,commit_hash):
+    # 'http://39.99.215.169:8099/api/v4/projects/4/repository/commits/56b02ef687f66e4e375effbd95c3b2d5776dc595'
     git_host = "http://39.99.215.169:8099"
     # project = models.Project.objects.filter(id=project_id).first()
     print(request.web.project)
