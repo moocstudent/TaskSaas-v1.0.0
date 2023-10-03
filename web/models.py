@@ -242,7 +242,7 @@ class IssuesReply(models.Model):
     )
     reply_type = models.IntegerField(verbose_name='类型', choices=reply_type_choices)
 
-    issues = models.ForeignKey(verbose_name='问题', to='Issues',null=True,on_delete=models.SET_NULL)
+    issues = models.ForeignKey(verbose_name='问题',db_column='issues_pk', to="Issues",null=True,on_delete=models.SET_NULL)
     content = models.TextField(verbose_name='描述')
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True, related_name='create_reply',on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)

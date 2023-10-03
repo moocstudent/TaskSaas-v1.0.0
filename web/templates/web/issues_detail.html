@@ -312,8 +312,8 @@
 
     <script>
         var WIKI_UPLOAD_URL = "{% url 'wiki_upload' project_id=request.web.project.id %}";
-        var ISSUES_RECORD_API = "{% url 'issues_record' project_id=request.web.project.id issues_id=issues_object.issue_id %}";
-        var ISSUES_CHANGE_API = "{% url 'issues_change' project_id=request.web.project.id issues_id=issues_object.issue_id %}";
+        var ISSUES_RECORD_API = "{% url 'issues_record' project_id=request.web.project.id issues_pk=issues_object.id %}";
+        var ISSUES_CHANGE_API = "{% url 'issues_change' project_id=request.web.project.id issues_pk=issues_object.id %}";
         var EDITOR;
 
 

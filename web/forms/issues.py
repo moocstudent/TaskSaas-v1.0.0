@@ -53,7 +53,7 @@ class IssuesModelForm(BootStrapForm, forms.ModelForm):
 class IssuesReplyModelForm(forms.ModelForm):
     class Meta:
         model = models.IssuesReply
-        fields = ['content', 'reply', ]
+        fields = ['content', 'reply']
 
 
 class IssuesInviteModelForm(BootStrapForm, forms.ModelForm):

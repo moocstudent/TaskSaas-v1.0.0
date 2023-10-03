@@ -162,6 +162,8 @@ def issues(request, project_id):
         this_proj_max_issue_id=Max('issue_id'))
     if this_proj_max_issue_id:
         this_proj_max_issue_id = this_proj_max_issue_id['this_proj_max_issue_id']
+        if this_proj_max_issue_id is None:
+            this_proj_max_issue_id = 0
     else:
         this_proj_max_issue_id = 0
     if form.is_valid():
@@ -193,12 +195,12 @@ def issues_detail(request, project_id, issues_id):
 
 
 @csrf_exempt
-def issues_record(request, project_id, issues_id):
+def issues_record(request, project_id, issues_pk):
     """初始化操作记录"""
-
+    print(request.web.project)
     if request.method == 'GET':
-        reply_list = models.IssuesReply.objects.filter(issues_id=issues_id, issues__project=request.web.project)
-
+        reply_list = models.IssuesReply.objects.filter(issues=issues_pk, issues__project=request.web.project)
+        print(reply_list)
         # 将queryset转换为json格式
         data_list = []
         for row in reply_list:
@@ -217,7 +219,8 @@ def issues_record(request, project_id, issues_id):
     form = IssuesReplyModelForm(data=request.POST)
 
     if form.is_valid():
-        form.instance.issues_id = issues_id
+        # 这里不要动就好，这里id=pk就是没问题的，虽然在数据库字段是issues_pk，但instance的不是
+        form.instance.issues_id = issues_pk
         form.instance.reply_type = 2
         form.instance.creator = request.web.user
 
@@ -236,11 +239,10 @@ def issues_record(request, project_id, issues_id):
 
 
 @csrf_exempt
-def issues_change(request, project_id, issues_id):
-    print('issues_id',issues_id)
+def issues_change(request, project_id, issues_pk):
     """表单更新数据"""
-    issues_object = models.Issues.objects.filter(issue_id=issues_id, project_id=project_id).first()
-
+    issues_object = models.Issues.objects.filter(id=issues_pk, project_id=project_id).first()
+    # print('issues_object',issues_object)
     post_dict = json.loads(request.body.decode('utf-8'))
     # 数据库字段更新
     name = post_dict.get('name')
@@ -310,6 +312,7 @@ def issues_change(request, project_id, issues_id):
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
 
             else:
+                print('用户输入的值是自己的值value:',value)
                 # 用户输入的值是自己的值
                 instance = field_object.rel.model.objects.filter(id=value, project_id=project_id).first()
                 if not instance:
