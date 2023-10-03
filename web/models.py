@@ -16,6 +16,16 @@ class UserInfo(models.Model):
     def __str__(self):
         return self.username
 
+# git信息，不同项目关联的不同的git信息
+class GitInfoRelation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    project = models.ForeignKey(verbose_name="项目id",default=0, null=True, blank=True,to="Project",on_delete=models.SET_NULL)
+    git_project_id = models.BigIntegerField(verbose_name="Git项目id",default=0, null=True, blank=True)
+    git_access_token = models.CharField(verbose_name="Git访问Token",default='',null=False,blank=False,max_length=60)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True,on_delete=models.SET_NULL)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
+
 
 class PricePolicy(models.Model):
     id = models.BigAutoField(primary_key=True)

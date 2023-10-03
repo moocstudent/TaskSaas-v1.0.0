@@ -1,5 +1,6 @@
 import json
 
+import requests
 from channels.auth import login
 from django.core.cache import cache
 from django.db.models import Q, Count, Max, Min
@@ -16,16 +17,83 @@ def statistics(request, project_id):
     return render(request, 'web/statistics.html')
 
 
+def git(request, project_id):
+    project = models.Project.objects.filter(id=project_id).first()
+    relation_git_infos = models.GitInfoRelation.objects.filter(project_id=project_id).order_by('create_datetime')
+    relation_git_ids = []
+    if relation_git_infos:
+        for v in relation_git_infos:
+            relation_git_ids.append(v.git_project_id)
+
+    git_host = "http://39.99.215.169:8099"
+    task_project_name = project.name
+    project_infos = []
+    if relation_git_ids:
+        for git_info in relation_git_infos:
+            try:
+                git_project_id = str(git_info.git_project_id)
+                project_private_token = git_info.git_access_token
+                members_url = git_host + "/api/v4/projects/" + git_project_id + "/members?private_token=" + project_private_token
+                project_info_url = git_host + "/api/v4/projects/" + git_project_id + "?private_token=" + project_private_token
+                project_events_url = git_host + "/api/v4/projects/" + git_project_id + "/events?private_token=" + project_private_token
+                project_branches_url = git_host + "/api/v4/projects/" + git_project_id + "/repository/branches?private_token=" + project_private_token
+                members_response = json.loads(requests.get(members_url).text)
+                project_info_response = json.loads(requests.get(project_info_url).text)
+                project_events_response = json.loads(requests.get(project_events_url).text)
+                project_branches_response = json.loads(requests.get(project_branches_url).text)
+                commit_base_url = project_info_response['web_url']
+                for br in project_branches_response:
+                    br['graph_url'] = br['web_url'].replace('tree','network')
+                    # if commit_base_url is None:
+                    #     print(br['web_url'])
+                        # commit_base_url = br['web_url'].replace('tree','commit/')
+                        # print('commit_base_url',commit_base_url)
+
+                # print('project_events_response',project_events_response)
+                for br in project_events_response:
+                    # print(br)
+                    push_data = br.get('push_data')
+                    if push_data is not None:
+                        commit_from = push_data.get('commit_from')
+                        commit_to = push_data.get('commit_to')
+                        if commit_from is not None:
+                            br['commit_from_url'] = commit_base_url+'/-/commit/'+commit_from
+                            # print("br['commit_from_url']", br['commit_from_url'])
+                        if commit_to is not None:
+                            br['commit_to_url'] = commit_base_url + '/-/commit/' + commit_to
+                            # print("br['commit_to_url']", br['commit_to_url'])
+
+                members = list(
+                    filter(lambda i: not ('bot_' in i['username'] and 'project_' in i['username']), members_response))
+                one_project_info = {
+                    'git_project_id': git_project_id,
+                    'members': members,
+                    'member_size': len(members),
+                    'project_info': project_info_response,
+                    'project_events': project_events_response,
+                    'project_branches': project_branches_response
+                }
+                project_infos.append(one_project_info)
+            except Exception as e:
+                print('get git_project error',git_project_id)
+                continue
+    context = {
+        'task_project_name': task_project_name,
+        'git_project_infos': project_infos,
+    }
+    return render(request, 'web/git.html', context=context)
+
+
 def workbench(request, project_id):
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger','1257')
+    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger', '1257')
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=request.web.user)
                                                                              | Q(attention=request.web.user)
                                                                              | Q(creator=request.web.user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get(str(request.web.user.id)+'mydayTrigger', 'day0')
+    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger', 'day0')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 
@@ -75,9 +143,9 @@ def workbench(request, project_id):
 
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
-    if int(pagesize)!=pagesize:
-        pagesize = int(pagesize)+1
-    if current_page and int(current_page)>pagesize:
+    if int(pagesize) != pagesize:
+        pagesize = int(pagesize) + 1
+    if current_page and int(current_page) > pagesize:
         current_page = 1
     page_object = Pagination(
         current_page=current_page,
@@ -109,6 +177,7 @@ def workbench(request, project_id):
     }
     return render(request, 'web/workbench.html', context)
 
+
 def workbench_json(request):
     print('workbench_json')
     project_id = request.POST.get('project_id')
@@ -120,7 +189,7 @@ def workbench_json(request):
                                                                              | Q(creator=request.web.user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get(str(request.web.user.id)+'mydayTrigger', 'day0')
+    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger', 'day0')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 
@@ -170,9 +239,9 @@ def workbench_json(request):
 
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
-    if int(pagesize)!=pagesize:
-        pagesize = int(pagesize)+1
-    if current_page and int(current_page)>pagesize:
+    if int(pagesize) != pagesize:
+        pagesize = int(pagesize) + 1
+    if current_page and int(current_page) > pagesize:
         current_page = 1
     page_object = Pagination(
         current_page=current_page,

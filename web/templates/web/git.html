@@ -1,0 +1,318 @@
+{% extends 'layout/manage.html' %}
+{% block title %}{% endblock %}
+
+{% block css %}
+    <style>
+        .liClass-wave::marker {
+            content: "👋";
+        }
+
+        .liClass-push::marker {
+            content: "PUSH";
+            color: #00c4ff;
+        }
+
+        .liClass-branch::marker {
+            content: "👌";
+        }
+
+        .liClass-smile::marker {
+            content: "😄";
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 17px;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .foldable .content {
+            display: none;
+        }
+
+        .foldable.show .content {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid" style="margin-top: 20px">
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-barcode" aria-hidden="true"></i>
+                        项目 {{ task_project_name }} 相关Git信息
+                        <label class="fa! switch">
+                            <input type="checkbox" id="mytaskToggle" onclick="myProjectTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                        过滤我参与的Git
+                    </div>
+
+                    <table class="table">
+                        <tbody class="issues-list">
+                        {% for git_project in git_project_infos %}
+                            <tr class="col-md-12 foldable" id="projTr{{ git_project.git_project_id }}">
+                                <td class="number">
+                                    {#                                <i class="fa fa-circle text-{{ item.priority }}"></i>#}
+
+
+                                    {#                                <a target="_blank"#}
+                                    {#                                   href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>#}
+                                    {#                                {{ git_project.project_info }}#}
+                                    <button class="foldBtn" id="{{ git_project.git_project_id }}">折叠/展开</button>
+                                    Git项目ID:<label>{{ git_project.git_project_id }}</label>
+                                    名称:<label>{{ git_project.project_info.name }}</label>
+                                    HttpGit路径:<label>{{ git_project.project_info.http_url_to_repo }}</label>
+                                    创建人:<label>{{ git_project.project_info.owner.username }}</label>
+                                    创建于:<label>{{ git_project.project_info.created_at }}</label>
+                                    最新更新于:<label>{{ git_project.project_info.updated_at }}</label>
+                                    {#                                    访问等级:<label>{{ git_project.project_info.repository_access_level }}</label>#}
+                                    参与人数:<label>{{ git_project.member_size }}</label>
+                                    {% for m in git_project.members %}
+                                        <img src="{{ m.avatar_url }}" style="height: 30px;width: 30px"/>
+                                    {% endfor %}
+                                    <br/>
+                                    {% if git_project.project_info.description %}
+                                        介绍:{{ git_project.project_info.description }}
+                                    {% endif %}
+                                    {% if git_project.project_info.tag_list %}
+                                        Tags:{{ git_project.project_info.tag_list }}
+                                    {% endif %}
+                                </td>
+                                <td class="issue content">
+                                    <div>
+                                    </div>
+                                    <div class="tags">
+                                        <div class="col-md-8" style="float: left">
+                                    <span class="type" {% comment %}style="background-color: #56b8eb"{% endcomment %}>
+                                    代码提交信息近20条:
+                                    <ul>
+                                        {% for evt in git_project.project_events %}
+                                            <li class="liClass-wave"><label
+                                                    style="font-size: 16px">
+{#                                                <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
+                                                <i class="fa fa-user-o" aria-hidden="true"></i>
+                                                {{ evt.author_username }}</label>-
+                                                 <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                                {{ evt.created_at }}-
+                                                 <i class="fa fa-refresh" aria-hidden="true"></i>
+                                                {{ evt.push_data.action }}-
+                                                 <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                                                {{ evt.action_name }}
+                                                👌{{ evt.push_data.ref }}
+                                                 <br>
+                                                commit_from:
+                                                {% if  evt.push_data.commit_from %}
+                                                    <a href="{{ evt.commit_from_url }}"
+                                                       target="_blank">{{ evt.push_data.commit_from }}</a>
+                                                {% endif %}
+                                                {% if  evt.push_data.commit_to %}
+                                                    to
+                                                    <a href="{{ evt.commit_to_url }}">{{ evt.push_data.commit_to }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            {% if evt.push_data.commit_title %}
+                                                <pre>commit message: {{ evt.push_data.commit_title }}</pre>
+                                            {% endif %}
+
+                                        {% endfor %}
+                                    </ul>
+                                    </span>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            该项目现有分支:
+                                            <ul>
+                                                {% for branch in git_project.project_branches %}
+                                                    <a href="{{ branch.graph_url }}" target="_blank">
+                                                        <li class="liClass-branch">
+                                                            {#                                                    {{ branch }}#}
+                                                            <label>{{ branch.name }}</label> <br>
+                                                            最近更新于:{{ branch.commit.created_at }}<br>
+                                                            更新人:{{ branch.commit.committer_name }} <br>
+                                                            {#                                                        正常推送开启:{{ branch.can_push }}#}
+                                                            {% if branch.protected %}🔐受保护分支{% endif %}
+                                                        </li>
+                                                    </a>
+                                                {% endfor %}
+                                            </ul>
+                                            该项目现有参与人员:
+                                            <ul>
+                                                {% for member in git_project.members %}
+                                                    <li class="liClass-smile">
+                                                        {#                                                        {{ member }}#}
+                                                        <a href="{{ member.web_url }}" target="_blank">
+                                                            <img src="{{ member.avatar_url }}"
+                                                                 style="height: 30px;width: 30px"/>
+                                                            <label>{{ member.name }}</label> ({{ member.username }})</a>
+                                                        -
+                                                        <br>
+                                                        <i class="fa fa-universal-access"
+                                                           aria-hidden="true"></i>访问权重:{{ member.access_level }} -
+                                                        <i class="fa fa-calendar-check-o"
+                                                           aria-hidden="true"></i>创建于:{{ member.created_at }}<br>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+
+{#                                        <span>#}
+{#                                        <i class="fa fa-refresh" aria-hidden="true"></i>#}
+{#                                            {{ item.get_status_display }}#}
+{#                                    </span>#}
+                                        {#                                    {% if item.assign.username %}#}
+{#                                        <span>#}
+{#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
+{#                                        {{ item.assign.username }}#}
+{#                                    </span>#}
+                                        {#                                    {% endif %}#}
+{#                                        <span>#}
+{#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
+{#                                        {{ item.creator.username }}#}
+{#                                    </span>#}
+                                        {#                                    {% if item.end_date %}#}
+{#                                        <span>#}
+{#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
+{#                                        {{ item.end_date }} 截止#}
+{#                                    </span>#}
+                                        {#                                    {% endif %}#}
+{#                                        <span>#}
+{#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
+{#                                        {{ item.latest_update_datetime }} 更新#}
+{#                                    </span>#}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {#                    <div class="panel-heading">#}
+                    {#                        <i class="fa fa-user" aria-hidden="true"></i>#}
+                    {#                        项目Git成员#}
+                    {#                    </div>#}
+                    {#                    <div class="panel-body user-item">#}
+                    {#                        <div class="col-sm-12 title">创建者</div>#}
+                    {#                        <div class="clearfix" style="margin-bottom: 30px;">#}
+                    {#                            <div class="col-sm-4">#}
+                    {#                                       id {{ request.web.project.creator.id }}#}
+                    {#                                <a href="" onclick="showMemberWithProjInfos()">#}
+                    {#                                    <div class="avatar">{{ request.web.project.creator.username.0|upper }}</div>#}
+                    {#                                </a>#}
+                    {#                                <div class="text">{{ request.web.project.creator.username }}</div>#}
+                    {#                            </div>#}
+                    {#                        </div>#}
+                    {#                        <div class="col-sm-12 title">参与者</div>#}
+                    {#                        <div>#}
+                    {#                            {% for item in join_user %}#}
+                    {#                                <div class="col-sm-4">#}
+                    {#                                        id {{ item.0 }}#}
+                    {#                                    <a href="" onclick="showMemberWithProjInfos()">#}
+                    {#                                        <div class="avatar">{{ item.1.0 |upper }}</div>#}
+                    {#                                    </a>#}
+                    {#                                    <div class="text">{{ item.1 }}</div>#}
+                    {#                                </div>#}
+                    {#                            {% endfor %}#}
+                    {#                        </div>#}
+                    {##}
+                    {#                    </div>#}
+                    {#                </div>#}
+                </div>
+            </div>
+        </div>
+    </div>
+    {#    <input id="project_infos" value="{{ project_infos }}" hidden="hidden"/>#}
+{% endblock %}
+
+{% block js %}
+    <script>function myProjectTrigger() {
+        console.log('暂未实现')
+    }
+
+
+    {#var project_infos = JSON.parse(document.getElementById("project_infos").value);#}
+    {#var project_info = JSON.parse(document.getElementById("project_info").value);#}
+    {#var project_events = JSON.parse(document.getElementById("project_events").value);#}
+    {#var project_branches = JSON.parse(document.getElementById("project_branches").value);#}
+    {#members = members.filter((member) => {#}
+    {#    return member.username.indexOf('project_') === -1 && member.username.indexOf('_bot_') === -1#}
+    {% comment %}}){% endcomment %}
+    {#console.log(members)#}
+    {#console.log(project_infos)#}
+    {#console.log(project_events)#}
+    {#console.log(project_branches)#}
+
+    function showMemberWithProjInfos() {
+        alert("暂无")
+    }
+
+    const foldBtn = document.querySelector('.foldBtn');
+    $(document).on("click", ".foldBtn", function () {
+        console.log('click foldBtn', this.id)
+        const foldable = document.querySelector('#projTr' + this.id);
+        foldable.classList.toggle('show');
+    })
+    {% comment %}foldBtn.addEventListener('click', function () {
+
+    });{% endcomment %}
+    </script>
+{% endblock %}

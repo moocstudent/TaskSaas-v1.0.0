@@ -33,6 +33,7 @@ urlpatterns = [
     re_path(r'^manage/(?P<project_id>\d+)/', include([
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),
+        re_path(r'^git/$', manage.git, name='git'),
         re_path(r'^workbench/$', manage.workbench, name='workbench'),
 
         re_path(r'^wiki/$', wiki.wiki, name='wiki'),
