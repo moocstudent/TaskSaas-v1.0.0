@@ -16,6 +16,14 @@ from web import models
 def statistics(request, project_id):
     return render(request, 'web/statistics.html')
 
+# todo commit具体信息 当点击页面commit message时弹出详情
+def git_commit(request,git_project_id,commit_hash):
+    git_host = "http://39.99.215.169:8099"
+    # project = models.Project.objects.filter(id=project_id).first()
+    print(request.web.project)
+    relation_git_infos = models.GitInfoRelation.objects.filter(project_id=request.web.project).order_by('create_datetime')
+
+    return HttpResponse()
 
 def git(request, project_id):
     project = models.Project.objects.filter(id=project_id).first()
@@ -40,28 +48,22 @@ def git(request, project_id):
                 members_response = json.loads(requests.get(members_url).text)
                 project_info_response = json.loads(requests.get(project_info_url).text)
                 project_events_response = json.loads(requests.get(project_events_url).text)
+                print('project_info_response',project_info_response)
+                print('project_events_response',project_events_response)
                 project_branches_response = json.loads(requests.get(project_branches_url).text)
                 commit_base_url = project_info_response['web_url']
                 for br in project_branches_response:
                     br['graph_url'] = br['web_url'].replace('tree','network')
-                    # if commit_base_url is None:
-                    #     print(br['web_url'])
-                        # commit_base_url = br['web_url'].replace('tree','commit/')
-                        # print('commit_base_url',commit_base_url)
 
-                # print('project_events_response',project_events_response)
                 for br in project_events_response:
-                    # print(br)
                     push_data = br.get('push_data')
                     if push_data is not None:
                         commit_from = push_data.get('commit_from')
                         commit_to = push_data.get('commit_to')
                         if commit_from is not None:
                             br['commit_from_url'] = commit_base_url+'/-/commit/'+commit_from
-                            # print("br['commit_from_url']", br['commit_from_url'])
                         if commit_to is not None:
                             br['commit_to_url'] = commit_base_url + '/-/commit/' + commit_to
-                            # print("br['commit_to_url']", br['commit_to_url'])
 
                 members = list(
                     filter(lambda i: not ('bot_' in i['username'] and 'project_' in i['username']), members_response))
