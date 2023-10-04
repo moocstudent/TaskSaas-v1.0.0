@@ -1,6 +1,8 @@
+from django.contrib.auth import base_user
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from utils import encrypt
 from utils.tencent.cos import delete_bucket
 from web import models
 
@@ -21,10 +23,12 @@ def setting_delete(request, project_id):
     password = request.POST.get('password')
     if not project_name or project_name != request.web.project.name:
         return render(request, 'web/setting_delete.html', {'error': "项目名称错误"})
-
-    # 加密？
-    if not password or password != request.user.password:
+    if password is None:
         return render(request, 'web/setting_delete.html', {'error': "密码错误"})
+    else:
+        check_password_flag = base_user.check_password(password, request.user.password)
+        if not check_password_flag:
+            return render(request, 'web/setting_delete.html', {'error': "密码错误"})
 
     # 删除项目(只有项目创建者才能删除）
     if request.web.user != request.web.project.creator:
@@ -32,9 +36,15 @@ def setting_delete(request, project_id):
 
     # 删除桶里面所有文件
     # 删除桶
-    delete_bucket(request.web.project.bucket,request.web.project.region)
-
-    # 删除项目
-    models.Project.objects.filter(id=request.web.project.id).delete()
+    try:
+        delete_bucket(request.web.project.bucket,request.web.project.region)
+    except:
+        print('delete bucket error ',project_id)
+        pass
+    if str(project_id) == str(request.web.project.id):
+         # 删除项目
+        models.Project.objects.filter(id=request.web.project.id).delete()
+    else:
+        return render(request, 'web/setting_delete.html', {'error': "项目错误"})
 
     return redirect("project_list")

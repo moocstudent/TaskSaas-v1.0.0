@@ -34,16 +34,23 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    我的资料
+                    删除项目 (现删除后不可找回)
                 </div>
                 <div class="panel-body">
 
                     <form class="form-horizontal" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">项目名</label>
+                            <label class="col-sm-4 control-label">项目名</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" placeholder="请输入项目名称" name="project_name">
+                                <input type="text" class="form-control" placeholder="请输入项目名称"
+                                       name="project_name">
+                                <span class="error-msg">{{ error }}</span>
+                            </div>
+                            <label class="col-sm-4 control-label">登录密码</label>
+                            <div class="col-sm-5">
+                                <input type="password" class="form-control" placeholder="请输入登录密码"
+                                       name="password">
                                 <span class="error-msg">{{ error }}</span>
                             </div>
                         </div>
