@@ -12,6 +12,9 @@ def get_month():
 def get_today():
     return datetime.datetime.now().strftime('%Y-%m-%d')
 
+def get_today_until_second():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
 def get_year():
     return datetime.datetime.now().strftime('%Y')
 
