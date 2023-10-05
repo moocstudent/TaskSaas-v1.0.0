@@ -2,6 +2,7 @@ from django.conf.urls import static
 from django.urls import re_path, include, path
 
 from TaskChat import chat_views, consumers
+from TaskSaas.api import oauth_callback_api, user_api
 from TaskSaasAPP import settings
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard
 
@@ -14,6 +15,9 @@ urlpatterns = [
     re_path(r'^image/code/', account.image_code, name='image_code'),
     re_path(r'^send/sms/', account.send_sms, name='send_sms'),
     re_path(r'^index/', home.index, name='index'),
+    re_path(r'^callback/gitlab/$', oauth_callback_api.callback, name='callback'),
+    # re_path(r'^callback/gitlab/token/', oauth_callback_api.callback_token, name='callback_token'),
+    re_path(r'^gitlab/myprofile/$', oauth_callback_api.callback_userpassword, name='git_myprofile'),
     path('', home.index, name=''),
     re_path(r'^cache_set/', cache.cache_set, name='cache'),
     re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
@@ -29,6 +33,9 @@ urlpatterns = [
     # 项目管理
     # 路由分发
     re_path(r'^sys_setting/$', setting.sys_setting, name='sys_setting'),
+
+    re_path(r'^profile/$', user_api.profile, name='profile'),
+    re_path(r'^profile_git/$', user_api.profile_git, name='profile_git'),
 
     re_path(r'^manage/(?P<project_id>\d+)/', include([
 

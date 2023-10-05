@@ -11,11 +11,10 @@
         <div class="col-sm-3">
             <div class="panel panel-default">
                 <div class="panel-heading" style="background-color: transparent;font-weight: bold">
-                    个人中心
+                    项目设置
                 </div>
                 <div class="list-group" style="border-radius: 0">
                     <div>
-                        <a href="#" class="list-group-item">我的资料</a>
                         <a href="#" class="list-group-item">修改密码</a>
                         <a href="{% url 'setting_delete' project_id=request.web.project.id %}" class="list-group-item">删除项目</a>
                     </div>
@@ -25,13 +24,13 @@
 
         <div class="col-sm-9">
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    我的资料
-                </div>
-                <div class="panel-body">
-                    <h4 style="text-align: center;">系统设置</h4>
-                </div>
+{#                <div class="panel-heading">#}
+{#                    <i class="fa fa-address-card-o" aria-hidden="true"></i>#}
+{#                    我的资料#}
+{#                </div>#}
+{#                <div class="panel-body">#}
+{#                    <h4 style="text-align: center;">系统设置</h4>#}
+{#                </div>#}
             </div>
         </div>
 

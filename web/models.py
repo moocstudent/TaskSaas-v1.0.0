@@ -7,10 +7,15 @@ class UserInfo(models.Model):
     """
     用户信息
     """
-    username = models.CharField(verbose_name="用户名", max_length=32, db_index=True)  # db_index=True 索引
-    email = models.EmailField(verbose_name="邮箱", max_length=32)
+    username = models.CharField(verbose_name="用户名", max_length=100, db_index=True)  # db_index=True 索引
+    nick_name = models.CharField(verbose_name="昵称",default='', max_length=100, db_index=True)  # db_index=True 索引
+    git_username = models.CharField(verbose_name="Git用户名", max_length=100,default='', db_index=True)  # db_index=True 索引
+    email = models.EmailField(verbose_name="邮箱", max_length=100)
+    git_avatar = models.CharField(verbose_name="Git头像",default='', max_length=300)
     mobile_phone = models.CharField(verbose_name="手机号码", max_length=32)
-    password = models.CharField(verbose_name="密码", max_length=32)
+    password = models.CharField(verbose_name="密码", max_length=100)
+    git_password = models.CharField(verbose_name="Git密码",default='', max_length=100)
+
 
     # price_policy = models.ForeignKey(verbose_name='价格策略', to='PricePolicy', null=True, blank=True)
     def __str__(self):
