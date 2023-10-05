@@ -1,3 +1,4 @@
+import json
 import operator
 
 from django.core.cache import cache
@@ -22,13 +23,26 @@ def dashboard(request, project_id):
     issues_filter = models.Issues.objects.filter(project_id=project_id)
     trigger = cache.get(str(request.web.user.id)+'mytaskTrigger','off')
     if trigger == 'on':
-        print("trigger == 'on':")
-        print(request.web.user)
-        issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)
-                             |Q(creator=request.web.user))
-    issues_types = issues_filter.values('issues_type').annotate(count=Count('issues_type')).values('issues_type')
-    print(issues_types)
+        issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user))
+    main_legend_trigger = cache.get(str(request.web.user.id) + 'mainLegendTrigger','')
+    types = []
+    type_ids = ''
+    all_type_ids = ''
+    if main_legend_trigger is not None:
+        print('mainLegendTrigger',main_legend_trigger)
+        types = (list(main_legend_trigger.split(',')))
+        issues_filter=issues_filter.filter(issues_type__title__in=types)
+
+    issues_types = models.IssuesType.objects.filter(project_id=project_id)
+    for i in issues_types.values('id'):
+        all_type_ids += str(i['id'])+','
+    all_type_ids =  all_type_ids[0:-1]
+    print('issues_types',issues_types)
     print('myis size', len(issues_filter))
+    for i in list(issues_types.filter(title__in=types).values('id')):
+        type_ids+=str(i['id'])+','
+    type_ids=type_ids[0:-1]
+    # print('issues_types dict',dict(issues_types))
 
     # keys = []
     index = 0
@@ -36,16 +50,16 @@ def dashboard(request, project_id):
         status_dict[key] = {'text': text, 'count': 0}
         status_choices.append(key)
         if len(issues_types) > 0:
-            tasks_count.insert(index, issues_filter.filter(issues_type=issues_types[0]['issues_type'],
+            tasks_count.insert(index, issues_filter.filter(issues_type=issues_types[0],
                                                            status=key).count())
         if len(issues_types) > 1:
-            funcs_count.insert(index, issues_filter.filter(issues_type=issues_types[1]['issues_type'],
+            funcs_count.insert(index, issues_filter.filter(issues_type=issues_types[1],
                                                            status=key).count())
         if len(issues_types) > 2:
-            bugs_count.insert(index, issues_filter.filter(issues_type=issues_types[2]['issues_type'],
+            bugs_count.insert(index, issues_filter.filter(issues_type=issues_types[2],
                                                           status=key).count())
         if len(issues_types) > 3:
-            demand_count.insert(index, issues_filter.filter(issues_type=issues_types[3]['issues_type'],
+            demand_count.insert(index, issues_filter.filter(issues_type=issues_types[3],
                                                             status=key).count())
         # keys.index(index,key)
         index += 1
@@ -108,13 +122,14 @@ def dashboard(request, project_id):
     bugs_count.reverse()
     demand_count.reverse()
     if len(issues_types) > 0:
-        issues_types_dict.append(issues_types[0]['issues_type'])
+        issues_types_dict.append(issues_types[0].title)
     if len(issues_types) > 1:
-        issues_types_dict.append(issues_types[1]['issues_type'])
+        issues_types_dict.append(issues_types[1].title)
     if len(issues_types) > 2:
-        issues_types_dict.append(issues_types[2]['issues_type'])
+        issues_types_dict.append(issues_types[2].title)
     if len(issues_types) > 3:
-        issues_types_dict.append(issues_types[3]['issues_type'])
+        issues_types_dict.append(issues_types[3].title)
+
     context = {
         'status_dict': status_dict,
         'join_user': join_user,
@@ -125,7 +140,9 @@ def dashboard(request, project_id):
         'bugs_count': bugs_count,
         'demand_count': demand_count,
         'issues_types': issues_types_dict,
-        'status_choices': status_choices
+        'status_choices': status_choices,
+        'type_ids':type_ids,
+        'all_type_ids':all_type_ids
     }
 
     return render(request, 'web/dashboard.html', context)

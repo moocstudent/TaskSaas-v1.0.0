@@ -22,26 +22,46 @@ class CheckFilter(object):
         self.name = name
         self.data_list = sorted(data_list)
         self.request = request
-
+    # fixme
     def __iter__(self):
-
+        print('len>>>>',len(self.data_list))
         for item in self.data_list:
             key = str(item[0])
+            print('key>>',key)
             text = item[1]
             ck = ""
             # 如果用户请求的url中status和当前key相等
             # url:xxx?status=1
-            value_list = self.request.GET.getlist(self.name)  # {'status',[1,3]}
-            if key in value_list:
-                ck = "checked"
-                value_list.remove(key)  # 1,2,3:{'status',[2]}
+            value = None
+            value_list = self.request.GET.getlist(self.name)
+            print('request value_list', value_list)
+            request_object = self.request.GET.get(self.name)
+            if self.name == 'issues_type' and request_object:
+                issues_type_ids = request_object.split(',')
+                if issues_type_ids:
+                    print('request value_str', issues_type_ids)
+                    if len(value_list) > len(issues_type_ids):
+                        value = value_list
+                    else:
+                        value = issues_type_ids
             else:
-                value_list.append(key)  # 1,2,3:{'status',[2]}
+                value = value_list
 
-            # 在当前url的参数上，新增参数
+            print('self.request.GET.get(self.name) >>>',value)
             query_dict = self.request.GET.copy()  # {'status',[1]}
+        # if value:
+            if key in value:
+                ck = "checked"
+                print('key in value',ck)
+                value.remove(key)  # 1,2,3:{'status',[2]}
+            else:
+                print('key not in value', ck)
+                value.append(key)  # 1,2,3:{'status',[2]}
+            query_dict.setlist(self.name, value)  # {'status',[]}
+        # 在当前url的参数上，新增参数
+
             query_dict._mutable = True  # 允许修改
-            query_dict.setlist(self.name, value_list)  # {'status',[]}
+
 
             if 'page' in query_dict:
                 query_dict.pop('page')
@@ -106,6 +126,20 @@ def issues(request, project_id):
         # ?status=1&status=2&issues_type=1
         condition = {}
         for name in allow_filter_name:
+            print('name>>>>>>',name)
+            value_list = request.GET.getlist(name)
+            print('request value_list',value_list)
+            request_object = request.GET.get(name)
+            if name == 'issues_type' and request_object:
+                issues_type_ids = request_object.split(',')
+                if issues_type_ids:
+                    print('request value_str',issues_type_ids)
+                    if len(value_list)>len(issues_type_ids):
+                        print('BIG')
+                        condition['{}__in'.format(name)] = value_list
+                    else:
+                        condition['{}__in'.format(name)] = issues_type_ids
+                    continue
             value_list = request.GET.getlist(name)
             if not value_list:
                 continue

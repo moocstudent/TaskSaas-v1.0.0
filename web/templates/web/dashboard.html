@@ -157,7 +157,7 @@
                             <div class="panel-body">
                                 {% for key,item in status_dict.items %}
                                     <div class="col-sm-4 status-count">
-                                        <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}">
+                                        <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
                                             <div class="count">{{ item.count }}</div>
                                             <div>{{ item.text }}</div>
                                         </a>
@@ -176,8 +176,10 @@
                                 <div class="col-sm-12 title">创建者</div>
                                 <div class="clearfix" style="margin-bottom: 30px;">
                                     <div class="col-sm-4">
-{#                                       id {{ request.web.project.creator.id }}#}
-                                        <a href="" onclick="showMemberWithProjInfos()"><div class="avatar">{{ request.web.project.creator.username.0|upper }}</div></a>
+                                        {#                                       id {{ request.web.project.creator.id }}#}
+                                        <a href="" onclick="showMemberWithProjInfos()">
+                                            <div class="avatar">{{ request.web.project.creator.username.0|upper }}</div>
+                                        </a>
                                         <div class="text">{{ request.web.project.creator.username }}</div>
                                     </div>
                                 </div>
@@ -185,8 +187,10 @@
                                 <div>
                                     {% for item in join_user %}
                                         <div class="col-sm-4">
-{#                                        id {{ item.0 }}#}
-                                            <a href="" onclick="showMemberWithProjInfos()"><div class="avatar">{{ item.1.0 |upper }}</div></a>
+                                            {#                                        id {{ item.0 }}#}
+                                            <a href="" onclick="showMemberWithProjInfos()">
+                                                <div class="avatar">{{ item.1.0 |upper }}</div>
+                                            </a>
                                             <div class="text">{{ item.1 }}</div>
                                         </div>
                                     {% endfor %}
@@ -244,7 +248,7 @@
                         <table class="table">
                             <tbody>
                             {% for key,item in top_ten.items %}
-{#                                                                {{ key }}#}
+                                {#                                                                {{ key }}#}
                                 {#                                {{ item }}#}
                                 <tr>
                                     <td style="width: 46px;">
@@ -258,7 +262,7 @@
                                                     更新了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                             <label>【{{ item.title }}】</label>
+                                                    <label>【{{ item.title }}】</label>
                                                 </label>
                                                 <label style="width: 300px;">
                                                     更新于:{{ key }}
@@ -270,7 +274,7 @@
                                             <label>更新了指派
                                                 <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                 {#                                            给 {{ item.assign.username }}#}
-                                                    <label>【{{ item.title }}】</label>
+                                                <label>【{{ item.title }}】</label>
                                             </label>
                                             <label>指派
                                                 给 {{ item.assign }}
@@ -281,12 +285,12 @@
                                         {% endif %}
                                         {% if item.is_reply %}
                                             <div>{{ item.creator }}</div>
-                                            {% if item.reply_type == 1%}
+                                            {% if item.reply_type == 1 %}
                                                 <label>更新了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                        <label>【{{ item.title }}】</label>
-                                                        <label>{{ item.desc }}</label>
+                                                    <label>【{{ item.title }}】</label>
+                                                    <label>{{ item.desc }}</label>
                                                 </label>
                                                 {#                                            <div>指派#}
                                                 {#                                                给 {{ item.assign }}#}
@@ -298,7 +302,7 @@
                                                 <label>回复了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                        <label>【{{ item.title }}】</label>
+                                                    <label>【{{ item.title }}】</label>
                                                     <label>{{ item.desc }}</label>
                                                 </label>
                                                 {#                                            <div>指派#}
@@ -334,6 +338,8 @@
     <input id="issues_types" value="{{ issues_types }}" hidden="hidden"/>
     <input id="status_choices" value="{{ status_choices }}" hidden="hidden"/>
     <input id="pid" value="{{ request.web.project.id }}" hidden="hidden"/>
+    <input id="type_ids" value="{{ type_ids }}" hidden="hidden"/>
+    <input id="all_type_ids" value="{{ all_type_ids }}" hidden="hidden"/>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
@@ -341,12 +347,41 @@
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById("chart"));
         var echartsData = JSON.parse(document.getElementById("echarts_data").value);
+        console.log('echartsData', echartsData);
+        const yDataNames = ['重新打开', '已关闭', '待反馈', '已忽略', '已解决', '处理中', '新建']
         var tasksCount = JSON.parse(document.getElementById("tasks_count").value);
+        console.log('tasksCount', tasksCount);
+        if (tasksCount.length == 0) {
+            console.log('rray(yDataNames.lengt')
+            tasksCount = Array(yDataNames.length).fill(0);
+        }
         var funcsCount = JSON.parse(document.getElementById("funcs_count").value);
+        if (funcsCount.length == 0) {
+            funcsCount = Array(yDataNames.length).fill(0);
+        }
+        console.log('funcsCount', funcsCount)
         var bugsCount = JSON.parse(document.getElementById("bugs_count").value);
+        if (bugsCount.length == 0) {
+            bugsCount = Array(yDataNames.length).fill(0);
+        }
         var demandCount = JSON.parse(document.getElementById("demand_count").value);
-        var issues_types = JSON.parse(document.getElementById("issues_types").value);
+        if (demandCount.length == 0) {
+            demandCount = Array(yDataNames.length).fill(0);
+        }
+        var issues_types = eval(document.getElementById("issues_types"));
         var status_choices = JSON.parse(document.getElementById("status_choices").value);
+        var type_ids = document.getElementById("type_ids").value;
+        var all_type_ids = document.getElementById("all_type_ids").value;
+        if (type_ids) {
+            {#if (type_ids.indexOf(",")>-1){#}
+            type_ids = type_ids.split(',')
+            {% comment %}  }{% endcomment %}
+        }
+        if (all_type_ids) {
+            {#if (type_ids.indexOf(",")>-1){#}
+            all_type_ids = all_type_ids.split(',')
+            {% comment %}  }{% endcomment %}
+        }
         var pid = JSON.parse(document.getElementById("pid").value);
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
@@ -394,8 +429,8 @@
             },
             yAxis: {
                 type: 'category',
-                data: ['重新打开', '已关闭', '待反馈', '已忽略', '已解决', '处理中', '新建']
-                , triggerEvent: true,
+                data: yDataNames,
+                triggerEvent: true,
             },
             series: [
                 {
@@ -455,29 +490,145 @@
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
         myChart.hideLoading();
-        myChart.on("click", function (params) {
-            console.log(params);
-            if (params.name && params.seriesName) {
-                window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +
-                    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])
-            }
-        });
+        myChart.on("click", function (e) {
+            console.log(e.name)
+            console.log(e.seriesName == 'Bug')
+            {#alert('chart on click>>', params);#}
+            {#console.log((yMatchTypes.indexOf(e.name) + 1))#}
+            {#console.log((all_type_ids[(xMatchTypes.indexOf(e.seriesName))]))#}
+              if (e.name && e.seriesName) {
+                  {#alert('issues_types', (xMatchTypes.indexOf(e.seriesName)))#}
+                  window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(e.name) + 1) +
+                      "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])
+              }
+        })
 
         // echarts点击事件获取对应的index和公司名称---跳转对应的数据核查页面ok
-        {% comment %}myChart.getZr().on('click', params => { // 柱形图点击事件
-              var pointInPixel = [params.offsetX, params.offsetY]
-              // 判断给定的点是否在指定的坐标系
-              if (myChart.containPixel('grid', pointInPixel)) {
-                const xIndex = myChart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
-                const option = myChart.getOption()
-                const xAxis = option.xAxis
-                {#const name = xAxis[0].data[xIndex]#}
-                console.log(xIndex)
-                {#console.log(name)#}
-                // console.log('--------打印index和公司名称-----------------')
+        {# myChart.getZr().on('click', params => { // 柱形图点击事件#}
+        {#let pointInPixel = [params.offsetX, params.offsetY];#}
+        {# if (myChart.containPixel('grid', pointInPixel)) {#}
+        {#     let pointInGrid = myChart.convertFromPixel({#}
+        {#         seriesIndex: 0#}
+        {#     }, pointInPixel);#}
+        {#     let xIndex = pointInGrid[0]; //索引#}
+        {#     console.log('xIndex',xIndex);#}
+        {#     let handleIndex = Number(xIndex);#}
+        {#     let seriesObj = myChart.getOption(); //图表object对象#}
+        {#     var op = myChart.getOption();#}
+        {#     //获得图表中点击的列#}
+        {#     var month = op.series[0].data[handleIndex];  //获取点击的列名#}
+        {#     console.log(seriesObj);#}
+        {##}
+        {#console.log(name)#}
+        {#         // console.log('--------打印index和公司名称-----------------')#}
+        {##}
+        {#       }#}
+        {# })#}
 
-              }
-        }){% endcomment %}
+        function legendTriggerRefresh() {
+            let legend = localStorage.getItem("mainLegendTrigger");
+            console.log('mainLegendTrigger le>>', legend);
+            let legendArr = ['任务', '功能', 'Bug', '需求确认']
+            if (legend) {
+                let splitLegend = legend.split(",");
+                for (var i = 0; i < 4; i++) {
+                    myChart.setOption({
+                        legend: {selected: {[legendArr[i]]: false}},
+                    })
+                }
+                for (s in splitLegend) {
+                    if (splitLegend[s] == '任务') {
+                        myChart.setOption({
+                            legend: {selected: {['任务']: true}}
+                        })
+                    } else if (splitLegend[s] == '功能') {
+                        myChart.setOption({
+                            legend: {selected: {['功能']: true}}
+                        })
+                    } else if (splitLegend[s] == 'Bug') {
+                        myChart.setOption({
+                            legend: {selected: {['Bug']: true}}
+                        })
+                    } else if (splitLegend[s] == '需求确认') {
+                        myChart.setOption({
+                            legend: {selected: {['需求确认']: true}}
+                        })
+                    }
+                }
+
+            } else {
+                for (var i = 0; i < 5; i++) {
+                    myChart.setOption({
+                        legend: {selected: {[legendArr[i]]: false}},
+                    })
+                }
+            }
+        }
+
+        myChart.on('legendselectchanged', function (e) {
+            if (e.selected[e.name]) {
+                // 点击项是选中状态
+                console.log(e.name + ' checked')
+                sendFreshMainEchartLegendTriggerVal(e.selected)
+            } else {
+                // 点击项是取消状态
+                console.log(e.name + ' un checked')
+                sendFreshMainEchartLegendTriggerVal(e.selected)
+            }
+            // do something
+        });
+
+
+        function sendFreshMainEchartLegendTriggerVal(val) {
+            let reqVal = ''
+            if (val.任务) {
+                if (reqVal.length > 0) {
+                    reqVal += ','
+                }
+                reqVal += '任务'
+            }
+            if (val.功能) {
+                if (reqVal.length > 0) {
+                    reqVal += ','
+                }
+                reqVal += '功能'
+            }
+            if (val.Bug) {
+                if (reqVal.length > 0) {
+                    reqVal += ','
+                }
+                reqVal += 'Bug'
+            }
+            if (val.需求确认) {
+                if (reqVal.length > 0) {
+                    reqVal += ','
+                }
+                reqVal += '需求确认'
+            }
+            console.log(reqVal)
+            $.ajax({
+                url: "{% url 'main_echart_legend_cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": reqVal,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.code) {
+                        localStorage.setItem("mainLegendTrigger", reqVal)
+                        console.log("reload")
+                        {#legendTriggerRefresh()#}
+                        {#reloadWorkBenchJson()#}
+                        location.reload();
+                        {#$("#tasklist").load(issues_object_list=[])#}
+                    } else {
+
+                    }
+                }
+
+            })
+        }
 
         function mytaskTrigger() {
             console.log("mytaskTrigger")
@@ -501,6 +652,7 @@
             } else {
                 $('input[type="checkbox"]').prop('checked', false);
             }
+            legendTriggerRefresh()
         }
 
         storageTriggerInit()
@@ -527,7 +679,7 @@
             })
         }
 
-        function showMemberWithProjInfos(){
+        function showMemberWithProjInfos() {
             alert("暂无")
         }
 

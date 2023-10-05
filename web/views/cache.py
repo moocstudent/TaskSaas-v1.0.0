@@ -10,12 +10,25 @@ def cache_set(request):
     print(cache.get(str(request.web.user.id)+'mytaskTrigger'))
     return JsonResponse({'code':1})
 
+def attention_cache_set(request):
+    trigger = request.POST.get("trigger")
+    cache.set(str(request.web.user.id)+'myAttentionTrigger', trigger, timeout=None)
+    print(cache.get(str(request.web.user.id)+'myAttentionTrigger'))
+    return JsonResponse({'code':1})
+
 def day_cache_set(request):
     trigger = request.POST.get("trigger")
     cache.set(str(request.web.user.id)+'mydayTrigger', trigger, timeout=None)
     print(cache.get(str(request.web.user.id)+'mydayTrigger'))
     return JsonResponse({'code':1})
 
+def main_echart_legend_cache_set(request):
+    print('id>>>',request.web.user.id)
+    trigger = request.POST.get("trigger")
+    print(trigger)
+    cache.set(str(request.web.user.id)+'mainLegendTrigger', trigger, timeout=None)
+    print(cache.get(str(request.web.user.id)+'mainLegendTrigger'))
+    return JsonResponse({'code':1})
 def echart_legend_cache_set(request):
     print('id>>>',request.web.user.id)
     trigger = request.POST.get("trigger")

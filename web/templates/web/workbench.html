@@ -10,6 +10,65 @@
     <link rel="stylesheet" href="{% static 'web/plugin/select2/css/select2.min.css' %}">
 
     <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 17px;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
 
         {% comment %}   .switch {
                position: relative;
@@ -234,7 +293,12 @@
             <div class="col-sm-8" id="tasklist">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-tasks" aria-hidden="true"></i> MyTasks
+                        <i class="fa fa-tasks" aria-hidden="true"></i> 当前我的任务
+                        <label class="fa! switch">
+                            <input type="checkbox" id="myAttentionToggle" onclick="myAttentionTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                        包含我关注的
                     </div>
                     {#                    <div class="panel-body">#}
                     {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
@@ -345,6 +409,48 @@
 
 {% block js %}
     <script>
+
+        function myAttentionTrigger() {
+            console.log("myAttentionTrigger")
+            let isChecked = $('input[type="checkbox"]').prop('checked');
+            if (isChecked) {
+                console.log("勾选");
+                localStorage.setItem("myAttentionTrigger", "on")
+            } else {
+                console.log("未勾选");
+                localStorage.setItem("myAttentionTrigger", "off")
+            }
+            sendFreshTriggerVal()
+        }
+
+        {% comment %}   function storageTriggerInit() {
+
+           }{% endcomment %}
+
+
+        function sendFreshTriggerVal() {
+            $.ajax({
+                url: "{% url 'attention_cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": localStorage.getItem("myAttentionTrigger"),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.code) {
+                        console.log("reload")
+                        location.reload();
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+
         function msgSubmit() {
             alert('【功能暂不可用】正在紧锣密鼓开发中')
         }
@@ -743,6 +849,14 @@
                 document.getElementById(day).setAttribute('checked', false);
             }
             legendTriggerRefresh()
+
+            let item = localStorage.getItem("myAttentionTrigger");
+            console.log("myAttentionTrigger", item)
+            if (item == "on") {
+                $('input[type="checkbox"]').prop('checked', true);
+            } else {
+                $('input[type="checkbox"]').prop('checked', false);
+            }
         }
 
 
