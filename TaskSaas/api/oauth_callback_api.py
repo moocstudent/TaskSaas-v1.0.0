@@ -43,3 +43,7 @@ def callback_userpassword(request):
     user_git_info_res = json.loads(requests.get("http://39.99.215.169:8099/api/v4/user?access_token="+oauth_token_res['access_token']).text)
     print(user_git_info_res)
     return HttpResponse(str(user_git_info_res))
+
+def webhook_callback(request):
+    print(request)
+    return HttpResponse(1)

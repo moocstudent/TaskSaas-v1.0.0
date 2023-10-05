@@ -18,6 +18,7 @@ urlpatterns = [
     re_path(r'^callback/gitlab/$', oauth_callback_api.callback, name='callback'),
     # re_path(r'^callback/gitlab/token/', oauth_callback_api.callback_token, name='callback_token'),
     re_path(r'^gitlab/myprofile/$', oauth_callback_api.callback_userpassword, name='git_myprofile'),
+    re_path(r'^webhook/gitlab/$', oauth_callback_api.webhook_callback, name='webhook_callback'),
     path('', home.index, name=''),
     re_path(r'^cache_set/', cache.cache_set, name='cache'),
     re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
