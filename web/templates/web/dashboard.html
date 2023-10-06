@@ -605,7 +605,7 @@
                 return
             }
             $.ajax({
-                url: "{% url 'main_echart_legend_cache' %}",
+                url: "{% url 'main_echart_legend_cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": reqVal,
@@ -632,7 +632,7 @@
         function sendInitDashboardEchartLegendTriggerVal() {
             const initialDashBoardLegend = '任务,功能,Bug,需求确认'
             $.ajax({
-                url: "{% url 'main_echart_legend_cache' %}",
+                url: "{% url 'main_echart_legend_cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": initialDashBoardLegend,
@@ -688,8 +688,9 @@
         storageTriggerInit()
 
         function sendFreshTriggerVal() {
+            {#const  pid = {{ request.web.project.id }})#}
             $.ajax({
-                url: "{% url 'cache' %}",
+                url: "{% url 'cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": localStorage.getItem(mytaskTriggerKey),

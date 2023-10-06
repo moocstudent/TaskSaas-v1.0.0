@@ -9,6 +9,7 @@ from django.db.models import Count, Q, F
 
 
 def dashboard(request, project_id):
+    print('dashboard pid ',request.web.project.id)
     # print(request.web.project.id)
     """概览"""
     # 项目状态
@@ -114,8 +115,6 @@ def dashboard(request, project_id):
                                                   'issue_id':t.issue_id,'id':tr.issues_id}
 
     top_ten_re_sorted = dict(sorted(top_ten_dict.items(), key=operator.itemgetter(0), reverse=True))
-
-
 
     tasks_count.reverse()
     funcs_count.reverse()

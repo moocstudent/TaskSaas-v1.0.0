@@ -666,7 +666,7 @@
         function sendFreshTriggerVal() {
             {#let csrf = {{ csrf_token }}#}
             $.ajax({
-                url: "{% url 'cache' %}",
+                url: "{% url 'cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": localStorage.getItem(mytaskTriggerKey),

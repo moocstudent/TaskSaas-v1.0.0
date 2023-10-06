@@ -528,7 +528,7 @@
 
         function sendFreshTriggerVal() {
             $.ajax({
-                url: "{% url 'attention_cache' %}",
+                url: "{% url 'attention_cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": localStorage.getItem(myAttentionTriggerKey),
@@ -819,7 +819,7 @@
         // });
         function sendFreshDayTriggerVal(val) {
             $.ajax({
-                url: "{% url 'day_cache' %}",
+                url: "{% url 'day_cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": val,
@@ -864,7 +864,7 @@
             }
             console.log(reqVal)
             $.ajax({
-                url: "{% url 'echart_legend_cache' %}",
+                url: "{% url 'echart_legend_cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "trigger": reqVal,

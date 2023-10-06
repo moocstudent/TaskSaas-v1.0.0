@@ -81,9 +81,16 @@
 <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
 {% block js %}
     <script>
+        const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('mytaskTriggerKey', mytaskTriggerKey)
+
         function storageTriggerInit() {
-            let item = localStorage.getItem("mytaskTrigger");
+            let item = localStorage.getItem(mytaskTriggerKey);
             console.log("trigger", item)
+            if (!item) {
+                item = 'off'
+                localStorage.setItem(mytaskTriggerKey,item);
+            }
             if (item == "on") {
                 $('input[type="checkbox"]').prop('checked', true);
             } else {

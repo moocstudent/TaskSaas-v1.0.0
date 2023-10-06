@@ -4,32 +4,28 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 
-def cache_set(request):
+def cache_set(request,project_id):
     trigger = request.POST.get("trigger")
-    project_id = request.POST.get('project_id')
     cache.set('mytaskTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
     return JsonResponse({'code':1})
 
-def attention_cache_set(request):
+def attention_cache_set(request,project_id):
     trigger = request.POST.get("trigger")
-    project_id = request.POST.get('project_id')
     cache.set('myAttentionTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
     return JsonResponse({'code':1})
 
-def day_cache_set(request):
-    project_id = request.POST.get('project_id')
+def day_cache_set(request,project_id):
     trigger = request.POST.get("trigger")
+    print('day_cache_set pid ',project_id)
     cache.set('mydayTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
     return JsonResponse({'code':1})
 
-def main_echart_legend_cache_set(request):
+def main_echart_legend_cache_set(request,project_id):
     trigger = request.POST.get("trigger")
-    project_id = request.POST.get('project_id')
     cache.set('mainLegendTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
     return JsonResponse({'code':1})
-def echart_legend_cache_set(request):
+def echart_legend_cache_set(request,project_id):
     trigger = request.POST.get("trigger")
-    project_id = request.POST.get('project_id')
     cache.set('myechartlegendTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
     return JsonResponse({'code':1})
 

@@ -120,6 +120,7 @@ class SelectFilter(object):
 
 # todo 改为对应的restframework form
 def issues(request, project_id):
+    print('issues pid ',request.web.project.id)
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
         # 筛选条件(根据用户通过GET传过来的参数实现)

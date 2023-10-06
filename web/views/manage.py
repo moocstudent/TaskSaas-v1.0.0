@@ -88,6 +88,7 @@ def git(request, project_id):
 
 
 def workbench(request, project_id):
+    print('workbench pid ',request.web.project.id)
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
     legendTriggrer = cache.get('myechartlegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'1257')

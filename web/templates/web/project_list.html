@@ -233,27 +233,7 @@
                 })
             })
         }
-        {#deprecated#}
-        function sendFreshTriggerVal(){
-            {#let csrf = {{ csrf_token }}#}
-                $.ajax({
-                    url: "{% url 'cache' %}",
-                    type: "POST",
-                    data: {"trigger":localStorage.getItem("mytaskTrigger"),
-                    "csrfmiddlewaretoken": $("#csrf_token").val()},
-                    dataType: "JSON",
-                    success: function (res) {
-                        console.log(res);
-                        if (res.status) {
-                            location.reload();
-                        } else {
 
-                        }
-                    }
-
-                })
-        }
-        {#sendFreshTriggerVal()#}
 
     </script>
 {% endblock %}

@@ -20,11 +20,7 @@ urlpatterns = [
     re_path(r'^gitlab/myprofile/$', oauth_callback_api.callback_userpassword, name='git_myprofile'),
     re_path(r'^webhook/gitlab/$', oauth_callback_api.webhook_callback, name='webhook_callback'),
     path('', home.index, name=''),
-    re_path(r'^cache_set/', cache.cache_set, name='cache'),
-    re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
-    re_path(r'^main_echart_legend_cache_set/', cache.main_echart_legend_cache_set, name='main_echart_legend_cache'),
-    re_path(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
-    re_path(r'^attention_cache_set/', cache.attention_cache_set, name='attention_cache'),
+
     # re_path(r'^issues_status_cache_set/', cache.issues_status_cache_set, name='issues_status_cache'),
     # 项目列表
     re_path(r'^project/list/', project.project_list, name='project_list'),
@@ -42,6 +38,11 @@ urlpatterns = [
 
 
     re_path(r'^manage/(?P<project_id>\d+)/', include([
+        re_path(r'^cache_set/', cache.cache_set, name='cache'),
+        re_path(r'^day_cache_set/', cache.day_cache_set, name='day_cache'),
+        re_path(r'^main_echart_legend_cache_set/', cache.main_echart_legend_cache_set, name='main_echart_legend_cache'),
+        re_path(r'^echart_legend_cache_set/', cache.echart_legend_cache_set, name='echart_legend_cache'),
+        re_path(r'^attention_cache_set/', cache.attention_cache_set, name='attention_cache'),
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),
         re_path(r'^git/$', manage.git, name='git'),
