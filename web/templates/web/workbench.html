@@ -798,7 +798,6 @@
             let legendArr = ['新建', '处理中', '已解决', '待反馈', '重新打开']
             if (legend) {
                 let splitLegend = legend.split("");
-
                 for (var i = 0; i < 5; i++) {
                     myChart.setOption({
                         legend: {selected: {[legendArr[i]]: false}},
@@ -829,11 +828,12 @@
                 }
 
             } else {
-                for (var i = 0; i < 5; i++) {
+                console.log('legendTriggerKey',legend)
+           {% comment %}     for (var i = 0; i < 5; i++) {
                     myChart.setOption({
                         legend: {selected: {[legendArr[i]]: false}},
                     })
-                }
+                }{% endcomment %}
             }
         }
 
