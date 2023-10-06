@@ -91,7 +91,7 @@
             font-size: 12px;
         }
 
-        .issues-list .issue .tags .type {
+    .issues-list .issue .tags .type {
             color: white;
             padding: 1px 5px;
             border-radius: 5px;
@@ -103,6 +103,34 @@
             padding: 1px 5px;
             border-radius: 5px;
             background-color: #007bff;
+        }
+
+        .issues-list .issue .tags .type_warning {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #ffc107;
+        }
+
+        .issues-list .issue .tags .type_success {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #28a745;
+        }
+
+        .issues-list .issue .tags .type_danger {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #dc3545;
+        }
+
+        .issues-list .issue .tags .type_info {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #17a2b8;
         }
 
 
@@ -203,7 +231,17 @@
                                        href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>
                                 </div>
                                 <div class="tags">
-                                    <span class="type" style="background-color: #56b8eb">
+                                    <span class="{% if item.status == 1 %}
+                                            type_primary
+                                            {% elif item.status == 2 %}
+                                            type_warning
+                                            {% elif item.status == 3 %}
+                                            type_info
+                                            {% elif item.status == 5 %}
+                                            type_danger
+                                            {% elif item.status == 7 %}
+                                            type_success
+                                   {% else %}type{% endif %}">
                                         {{ item.issues_type }}
                                     </span>
                                     <span>

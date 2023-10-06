@@ -159,8 +159,8 @@
                                                 {{ evt.action_name }}
                                                 👌{{ evt.push_data.ref }}
                                                  <br>
-                                                commit_from:
                                                 {% if  evt.push_data.commit_from %}
+                                                    commit_from:
                                                     <a href="{{ evt.commit_from_url }}"
                                                        target="_blank">{{ evt.push_data.commit_from }}</a>
                                                 {% endif %}
@@ -215,30 +215,30 @@
                                             </ul>
                                         </div>
 
-{#                                        <span>#}
-{#                                        <i class="fa fa-refresh" aria-hidden="true"></i>#}
-{#                                            {{ item.get_status_display }}#}
-{#                                    </span>#}
+                                        {#                                        <span>#}
+                                        {#                                        <i class="fa fa-refresh" aria-hidden="true"></i>#}
+                                        {#                                            {{ item.get_status_display }}#}
+                                        {#                                    </span>#}
                                         {#                                    {% if item.assign.username %}#}
-{#                                        <span>#}
-{#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
-{#                                        {{ item.assign.username }}#}
-{#                                    </span>#}
+                                        {#                                        <span>#}
+                                        {#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
+                                        {#                                        {{ item.assign.username }}#}
+                                        {#                                    </span>#}
                                         {#                                    {% endif %}#}
-{#                                        <span>#}
-{#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
-{#                                        {{ item.creator.username }}#}
-{#                                    </span>#}
+                                        {#                                        <span>#}
+                                        {#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
+                                        {#                                        {{ item.creator.username }}#}
+                                        {#                                    </span>#}
                                         {#                                    {% if item.end_date %}#}
-{#                                        <span>#}
-{#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
-{#                                        {{ item.end_date }} 截止#}
-{#                                    </span>#}
+                                        {#                                        <span>#}
+                                        {#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
+                                        {#                                        {{ item.end_date }} 截止#}
+                                        {#                                    </span>#}
                                         {#                                    {% endif %}#}
-{#                                        <span>#}
-{#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
-{#                                        {{ item.latest_update_datetime }} 更新#}
-{#                                    </span>#}
+                                        {#                                        <span>#}
+                                        {#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
+                                        {#                                        {{ item.latest_update_datetime }} 更新#}
+                                        {#                                    </span>#}
                                     </div>
                                 </td>
                             </tr>
