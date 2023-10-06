@@ -1,4 +1,5 @@
 {% extends 'layout/manage.html' %}
+{% load project %}
 {% load issues %}
 {% load static %}
 {% block title %}{% endblock %}
@@ -258,7 +259,7 @@
 
     <div class="container-fluid" style="margin-top: 20px">
         <div class="row">
-            <div class="col-md-4" style="float: right">
+            <div class="col-md-5" style="float: right">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-pie-chart" aria-hidden="true"></i>
@@ -290,80 +291,83 @@
             </div>
 
 
-            <div class="col-sm-8" id="tasklist">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-tasks" aria-hidden="true"></i> 当前我的任务
-                        <label class="fa! switch">
-                            <input type="checkbox" id="myAttentionToggle" onclick="myAttentionTrigger()">
-                            <span class="slider round"></span>
-                        </label>
-                        包含我关注的
-                    </div>
-                    {#                    <div class="panel-body">#}
-                    {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
-                    {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
-                    {#                    </div>#}
+            {#            <div class="col-sm-8" id="tasklist">#}
+            {#                <div class="panel panel-default">#}
+            {#                    <div class="panel-heading">#}
+            {#                        <i class="fa fa-tasks" aria-hidden="true"></i> 当前我的任务#}
+            {#                        <label class="fa! switch">#}
+            {#                            <input type="checkbox" id="myAttentionToggle" onclick="myAttentionTrigger()">#}
+            {#                            <span class="slider round"></span>#}
+            {#                        </label>#}
+            {#                        包含我关注的#}
+            {#                    </div>#}
+            {#                    <div class="panel-body">#}
+            {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
+            {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
+            {#                    </div>#}
+            {##}
+            {#                    <!-- Table -->#}
+            {#                    <table class="table">#}
+            {#                        <tbody class="issues-list">#}
+            {#                        {% for item in issues_object_list %}#}
+            {#                            <tr>#}
+            {#                                <td class="number">#}
+            {#                                    <i class="fa fa-circle text-{{ item.priority }}"></i>#}
+            {#                                    <a target="_blank"#}
+            {#                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>#}
+            {#                                </td>#}
+            {#                                <td class="issue">#}
+            {#                                    <div>#}
+            {#                                        <a target="_blank"#}
+            {#                                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>#}
+            {#                                    </div>#}
+            {#                                    <div class="tags">#}
+            {#                                    <span class="type" style="background-color: #56b8eb">#}
+            {#                                        {{ item.issues_type }}#}
+            {#                                    </span>#}
+            {#                                        <span>#}
+            {#                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}#}
+            {#                                    </span>#}
+            {#                                        {% if item.assign.username %}#}
+            {#                                            <span>#}
+            {#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
+            {#                                        {{ item.assign.username }}#}
+            {#                                    </span>#}
+            {#                                        {% endif %}#}
+            {#                                        <span>#}
+            {#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
+            {#                                        {{ item.creator.username }}#}
+            {#                                    </span>#}
+            {#                                        {% if item.end_date %}#}
+            {#                                            <span>#}
+            {#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
+            {#                                        {{ item.end_date }} 截止#}
+            {#                                    </span>#}
+            {#                                        {% endif %}#}
+            {#                                        <span>#}
+            {#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
+            {#                                        {{ item.latest_update_datetime }} 更新#}
+            {#                                    </span>#}
+            {#                                    </div>#}
+            {#                                </td>#}
+            {#                            </tr>#}
+            {#                        {% endfor %}#}
+            {#                        </tbody>#}
+            {#                    </table>#}
+            {#                </div>#}
+            {#                <nav aria-label="...">#}
+            {#                    <ul class="pagination" style="margin-top: 0px">#}
+            {#                        {{ page_html|safe }}#}
+            {#                    </ul>#}
+            {#                </nav>#}
+            {##}
+            {#            </div>#}
 
-                    <!-- Table -->
-                    <table class="table">
-                        <tbody class="issues-list">
-                        {% for item in issues_object_list %}
-                            <tr>
-                                <td class="number">
-                                    <i class="fa fa-circle text-{{ item.priority }}"></i>
-                                    <a target="_blank"
-                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                </td>
-                                <td class="issue">
-                                    <div>
-                                        <a target="_blank"
-                                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>
-                                    </div>
-                                    <div class="tags">
-                                    <span class="type" style="background-color: #56b8eb">
-                                        {{ item.issues_type }}
-                                    </span>
-                                        <span>
-                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}
-                                    </span>
-                                        {% if item.assign.username %}
-                                            <span>
-                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>
-                                        {{ item.assign.username }}
-                                    </span>
-                                        {% endif %}
-                                        <span>
-                                        <i class="fa fa-user-o" aria-hidden="true"></i>
-                                        {{ item.creator.username }}
-                                    </span>
-                                        {% if item.end_date %}
-                                            <span>
-                                        <i class="fa fa-calendar" aria-hidden="true"></i>
-                                        {{ item.end_date }} 截止
-                                    </span>
-                                        {% endif %}
-                                        <span>
-                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
-                                        {{ item.latest_update_datetime }} 更新
-                                    </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <nav aria-label="...">
-                    <ul class="pagination" style="margin-top: 0px">
-                        {{ page_html|safe }}
-                    </ul>
-                </nav>
+            {% if request.web.project %}
+                {% workbench_task_list request %}
+            {% endif %}
 
-            </div>
-
-
-            <div class="col-md-8" style="float: left">
+            <div class="col-md-7" style="float: left">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (开发中)
@@ -408,7 +412,42 @@
 {% endblock %}
 
 {% block js %}
+
+    <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js'%}"></script>
     <script>
+    Date.prototype.pattern=function(fmt) {
+    var o = {
+    "M+" : this.getMonth()+1, //月份
+    "d+" : this.getDate(), //日
+    "h+" : this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时
+    "H+" : this.getHours(), //小时
+    "m+" : this.getMinutes(), //分
+    "s+" : this.getSeconds(), //秒
+    "q+" : Math.floor((this.getMonth()+3)/3), //季度
+    "S" : this.getMilliseconds() //毫秒
+    };
+    var week = {
+    "0" : "周日",
+    "1" : "周一",
+    "2" : "周二",
+    "3" : "周三",
+    "4" : "周四",
+    "5" : "周五",
+    "6" : "周日"
+    };
+    if(/(y+)/.test(fmt)){
+        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    }
+    if(/(E+)/.test(fmt)){
+        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "星期" : "") : "")+week[this.getDay()+""]);
+    }
+    for(var k in o){
+        if(new RegExp("("+ k +")").test(fmt)){
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+        }
+    }
+    return fmt;
+}
 
         function myAttentionTrigger() {
             console.log("myAttentionTrigger")
@@ -512,15 +551,53 @@
                     xAxisIndex: [0, 1]
                 }
             ],
-            {% comment %}   toolbox: {
-                   feature: {
-                       dataZoom: {
-                           yAxisIndex: 'none'
-                       },
-                       {#restore: {},#}
-                       {#saveAsImage: {}#}
-                   }
-               },{% endcomment %}
+            toolbox: {
+                orient: 'vertical', //水平显示(vertical为垂直显示)
+                {#x: '', //距离X轴多远#}
+                feature: {
+                    dataView: {
+                        show: true, readOnly: false,
+                        lang : ['{{ request.web.user.username }} '+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+' '+ '工作量视图', '关闭', '导出excel'],
+                         contentToOption: function (opts) {
+                        $("#worktasksTable").table2excel({           // 下载jquery.table2excel.js，引入，$("#tempChart")是Echarts容器
+                            exclude: ".noExl", //过滤位置的 css 类名， 有class = “noExl” 的行不被导出
+                            filename: '{{ request.web.user.username }}_'+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+'_工作量视图'+new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") +".xls", // 文件名称
+                            name: '{{ request.web.user.username }}_'+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+'_工作量视图'+new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") ,
+                            exclude_img: true,
+                            exclude_links: true,
+                            exclude_inputs: true
+                        });
+                    },
+                        optionToContent: function (opt) {
+                            console.log('opt', opt);
+                            var tdHeads = '<td  style="padding:0 10px">{{ request.web.user.username }}</td>';
+                            var axisData = opt.dataset[0].source;
+                            for (var i = 1; i < axisData[0].length; i++) {
+                                tdHeads += '<td style="padding: 0 10px">' + axisData[0][i] + '</td>';
+                            }
+                            var table = '<table id="worktasksTable" border="1" style="margin-left:20px;border-collapse:collapse;font-size:14px;text-align:center;"><tbody><tr>' + tdHeads + '</tr>';
+                            var tdBodys = '';
+                            for (var i = 1, l = axisData.length; i < l; i++) {
+                                for (var j = 0; j < axisData[i].length; j++) {
+                                    tdBodys += '<td>' + axisData[i][j] + '</td>';
+                                }
+                                {#table += '<tr><td style="padding: 0 10px">' + axisData[i] + '</td>' + tdBodys + '</tr>';#}
+                                table += '<tr>' + tdBodys + '</tr>';
+                                tdBodys = '';
+                            }
+                            table += '</tbody></table>';
+                            return table;
+                        },
+
+                    },
+
+
+
+                    magicType: {show: true, type: ['line', 'bar']},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
             dataset: {
                 source: [
                     tasks,
@@ -630,6 +707,32 @@
         myChart.on("click", function (params) {
             console.log(params);
             if (params.name && params.seriesName) {
+                console.log('click ')
+                console.log('params.name ', params.name)
+                console.log('params.seriesName ', params.seriesName)
+
+
+                {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
+                {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
+            }
+        });
+        myChart.on("mousemove", function (params) {
+            console.log(params);
+            if (params.name && params.seriesName) {
+                console.log('mousemove ')
+                console.log('params.name ', params.name)
+                console.log('params.seriesName ', params.seriesName)
+
+                {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
+                {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
+            }
+        });
+        myChart.on("mouseout", function (params) {
+            console.log(params);
+            if (params.name && params.seriesName) {
+                console.log('mouseout')
+                console.log('params.name ', params.name)
+                console.log('params.seriesName ', params.seriesName)
 
                 {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
                 {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
@@ -1035,6 +1138,16 @@
         }
 
         chatHisInit()
+
+        function getDayPlainTag(dayTrigger){
+            switch (dayTrigger){
+                case 'day1':return "当天";
+                case 'day7':return "近七天";
+                case 'day30':return "本月";
+                case 'day0':return "不限时间";
+                default:return ''
+            }
+        }
 
     </script>
 

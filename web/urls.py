@@ -40,6 +40,7 @@ urlpatterns = [
     re_path(r'^profile/$', user_api.profile, name='profile'),
     re_path(r'^profile_git/$', user_api.profile_git, name='profile_git'),
 
+
     re_path(r'^manage/(?P<project_id>\d+)/', include([
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),

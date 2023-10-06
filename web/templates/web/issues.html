@@ -71,7 +71,6 @@
         }
 
 
-
         .issues-list .number {
             width: 100px;
             text-align: right;
@@ -98,6 +97,14 @@
             border-radius: 5px;
             background-color: #dddddd;
         }
+
+        .issues-list .issue .tags .type_primary {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #007bff;
+        }
+
 
         .editormd {
             margin-bottom: 0;
@@ -145,12 +152,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-search" aria-hidden="true"></i>筛选
-                          <label class="fa! switch">
-                            <input type="checkbox" id="mytaskToggle" name="trigger"
-                                   onclick="mytaskTrigger()">
-                            <span class="slider round"></span>
-                        </label>
-                      只看与我相关
+                    <label class="fa! switch">
+                        <input type="checkbox" id="mytaskToggle" name="trigger"
+                               onclick="mytaskTrigger()">
+                        <span class="slider round"></span>
+                    </label>
+                    只看与我相关
                 </div>
                 <div class="panel-body filter-area">
                     {% for row in filter_list %}
@@ -456,7 +463,7 @@
         </div>
     </div>
 
-     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -600,7 +607,8 @@
                 })
             })
         }
-   function mytaskTrigger() {
+
+        function mytaskTrigger() {
             console.log("mytaskTrigger")
             let isChecked = $('input[type="checkbox"][name="trigger"]').prop('checked');
             if (isChecked) {
@@ -615,28 +623,30 @@
         }
 
 
-                  function sendFreshTriggerVal(){
+        function sendFreshTriggerVal() {
             {#let csrf = {{ csrf_token }}#}
-                $.ajax({
-                    url: "{% url 'cache' %}",
-                    type: "POST",
-                    data: {"trigger":localStorage.getItem("mytaskTrigger"),
-                    "csrfmiddlewaretoken": $("#csrf_token").val()},
-                    dataType: "JSON",
-                    success: function (res) {
-                        console.log(res);
-                        if (res.code) {
-                            console.log("reload")
-                            location.reload();
-                        } else {
+            $.ajax({
+                url: "{% url 'cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": localStorage.getItem("mytaskTrigger"),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.code) {
+                        console.log("reload")
+                        location.reload();
+                    } else {
 
-                        }
                     }
+                }
 
-                })
+            })
         }
 
-            function storageTriggerInit() {
+        function storageTriggerInit() {
             let item = localStorage.getItem("mytaskTrigger");
             console.log("trigger", item)
             if (item == "on") {

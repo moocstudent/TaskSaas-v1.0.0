@@ -117,8 +117,11 @@ def workbench(request, project_id):
                     continue
             min_date = v
     days = []
-    if min_date:
+    print('min_date',min_date)
+    if min_date and day_trigger!='day1':
         days = get_every_day(day_trigger, min_date, '%Y-%m-%d')
+    elif day_trigger=='day1':
+        days = get_every_day(day_trigger, date_util.get_today(), '%Y-%m-%d')
     print('days', days)
 
     fresh_counts = ['新建']
@@ -293,4 +296,5 @@ def filter_by_day(my_issues_set, day_trigger):
             (Q(latest_update_datetime__year=date_util.get_year()) & Q(
                 latest_update_datetime__month=date_util.get_month())))
     else:
+        print('day0 no filtered')
         return my_issues_set

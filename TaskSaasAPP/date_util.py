@@ -3,7 +3,7 @@ import datetime
 
 
 def get_last_week_since_today():
-    seven_day = datetime.timedelta(days=7)
+    seven_day = datetime.timedelta(days=6)
     return (datetime.datetime.now()-seven_day).strftime('%Y-%m-%d')
 
 def get_month():
@@ -29,7 +29,7 @@ def get_every_day(day_trigger,day0,format):
     if day_trigger == 'day1':
         end_date = begin_date
     elif day_trigger == 'day7':
-        end_date = begin_date-datetime.timedelta(days=7)
+        end_date = begin_date-datetime.timedelta(days=6)
     elif day_trigger == 'day30':
         month_days = calendar.monthrange(begin_date.year, begin_date.month)[1]
         print(month_days)
