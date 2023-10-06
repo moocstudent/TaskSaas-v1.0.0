@@ -90,24 +90,15 @@ def git(request, project_id):
 def workbench(request, project_id):
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger')
-    if legendTriggrer is None:
-        legendTriggrer='1257'
-        cache.set(str(request.web.user.id) + 'myechartlegendTrigger','1257')
-    attention_trigger = cache.get(str(request.web.user.id)+'myAttentionTrigger')
-    if attention_trigger is None:
-        cache.set(str(request.web.user.id) + 'myAttentionTrigger','off')
-        attention_trigger = 'off'
+    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger','1257')
+    attention_trigger = cache.get(str(request.web.user.id)+'myAttentionTrigger','off')
     people_involve_q = Q(assign=request.web.user)| Q(creator=request.web.user)
     if attention_trigger == 'on':
         people_involve_q = people_involve_q | Q(attention=request.web.user)
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (people_involve_q)
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger')
-    if day_trigger is None:
-        day_trigger = 'day7'
-        cache.set(str(request.web.user.id) + 'mydayTrigger','day7')
+    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger','day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 
@@ -195,22 +186,19 @@ def workbench(request, project_id):
     return render(request, 'web/workbench.html', context)
 
 
+# deprecated
 def workbench_json(request):
     print('workbench_json')
     project_id = request.POST.get('project_id')
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger')
+    legendTriggrer = cache.get(str(request.web.user.id) + 'myechartlegendTrigger','1257')
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=request.web.user)
                                                                              | Q(attention=request.web.user)
                                                                              | Q(creator=request.web.user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger')
-    if day_trigger is None:
-        # day trigger default day7 the web is the same
-        cache.set(str(request.web.user.id) + 'mydayTrigger','day7')
-        day_trigger = 'day7'
+    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger','day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 

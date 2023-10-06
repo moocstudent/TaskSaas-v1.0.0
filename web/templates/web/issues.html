@@ -688,11 +688,16 @@
 
         function storageTriggerInit() {
             let item = localStorage.getItem(mytaskTriggerKey);
-            console.log("trigger", item)
-            if (item == "on") {
-                $('input[type="checkbox"][name="trigger"]').prop('checked', true);
+            if (!item) {
+                item = 'off'
+                localStorage.setItem(mytaskTriggerKey,item);
             } else {
-                $('input[type="checkbox"][name="trigger"]').prop('checked', false);
+                console.log("trigger", item)
+                if (item == "on") {
+                    $('input[type="checkbox"][name="trigger"]').prop('checked', true);
+                } else {
+                    $('input[type="checkbox"][name="trigger"]').prop('checked', false);
+                }
             }
         }
 

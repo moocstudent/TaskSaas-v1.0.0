@@ -796,44 +796,49 @@
             let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
             let legendArr = ['新建', '处理中', '已解决', '待反馈', '重新打开']
-            if (legend) {
-                let splitLegend = legend.split("");
-                for (var i = 0; i < 5; i++) {
-                    myChart.setOption({
-                        legend: {selected: {[legendArr[i]]: false}},
-                    })
-                }
-                for (s in splitLegend) {
-                    if (splitLegend[s] == '1') {
+            if (!legend) {
+                legend = '12357'
+                localStorage.setItem(legendTriggerKey, legend);
+            } else {
+                if (legend) {
+                    let splitLegend = legend.split("");
+                    for (var i = 0; i < 5; i++) {
                         myChart.setOption({
-                            legend: {selected: {['新建']: true}}
-                        })
-                    } else if (splitLegend[s] == '2') {
-                        myChart.setOption({
-                            legend: {selected: {['处理中']: true}}
-                        })
-                    } else if (splitLegend[s] == '3') {
-                        myChart.setOption({
-                            legend: {selected: {['已解决']: true}}
-                        })
-                    } else if (splitLegend[s] == '5') {
-                        myChart.setOption({
-                            legend: {selected: {['待反馈']: true}}
-                        })
-                    } else if (splitLegend[s] == '7') {
-                        myChart.setOption({
-                            legend: {selected: {['重新打开']: true}}
+                            legend: {selected: {[legendArr[i]]: false}},
                         })
                     }
-                }
+                    for (s in splitLegend) {
+                        if (splitLegend[s] == '1') {
+                            myChart.setOption({
+                                legend: {selected: {['新建']: true}}
+                            })
+                        } else if (splitLegend[s] == '2') {
+                            myChart.setOption({
+                                legend: {selected: {['处理中']: true}}
+                            })
+                        } else if (splitLegend[s] == '3') {
+                            myChart.setOption({
+                                legend: {selected: {['已解决']: true}}
+                            })
+                        } else if (splitLegend[s] == '5') {
+                            myChart.setOption({
+                                legend: {selected: {['待反馈']: true}}
+                            })
+                        } else if (splitLegend[s] == '7') {
+                            myChart.setOption({
+                                legend: {selected: {['重新打开']: true}}
+                            })
+                        }
+                    }
 
-            } else {
-                console.log('legendTriggerKey',legend)
-           {% comment %}     for (var i = 0; i < 5; i++) {
-                    myChart.setOption({
-                        legend: {selected: {[legendArr[i]]: false}},
-                    })
-                }{% endcomment %}
+                } else {
+                    console.log('legendTriggerKey', legend)
+                    {% comment %}     for (var i = 0; i < 5; i++) {
+                             myChart.setOption({
+                                 legend: {selected: {[legendArr[i]]: false}},
+                             })
+                         }{% endcomment %}
+                }
             }
         }
 
@@ -841,15 +846,23 @@
             let day = localStorage.getItem(mydayTriggerKey);
             if (day) {
                 document.getElementById(day).setAttribute('checked', false);
+            } else {
+                day = 'day7'
+                localStorage.setItem(mydayTriggerKey, day);
             }
             legendTriggerRefresh()
 
             let item = localStorage.getItem(myAttentionTriggerKey);
-            console.log("myAttentionTrigger", item)
-            if (item == "on") {
-                $('input[type="checkbox"]').prop('checked', true);
+            if (!item) {
+                item = 'off'
+                localStorage.setItem(myAttentionTriggerKey, item);
             } else {
-                $('input[type="checkbox"]').prop('checked', false);
+                console.log("myAttentionTrigger", item)
+                if (item == "on") {
+                    $('input[type="checkbox"]').prop('checked', true);
+                } else {
+                    $('input[type="checkbox"]').prop('checked', false);
+                }
             }
         }
 
