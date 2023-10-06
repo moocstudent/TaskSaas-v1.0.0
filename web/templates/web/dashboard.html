@@ -383,6 +383,14 @@
             {% comment %}  }{% endcomment %}
         }
         var pid = JSON.parse(document.getElementById("pid").value);
+
+        const dashboardLegendTriggerKey = "mainLegendTrigger"+'{{ request.web.user.id }}'+'_'+'{{ request.web.project.id }}'
+        console.log('dashboardLegendTriggerKey',dashboardLegendTriggerKey)
+
+        const mytaskTriggerKey = "mytaskTrigger"+'{{ request.web.user.id }}'+'_'+'{{ request.web.project.id }}'
+        console.log('mytaskTriggerKey',mytaskTriggerKey)
+
+
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
 
@@ -496,11 +504,11 @@
             {#alert('chart on click>>', params);#}
             {#console.log((yMatchTypes.indexOf(e.name) + 1))#}
             {#console.log((all_type_ids[(xMatchTypes.indexOf(e.seriesName))]))#}
-              if (e.name && e.seriesName) {
-                  {#alert('issues_types', (xMatchTypes.indexOf(e.seriesName)))#}
-                  window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(e.name) + 1) +
-                      "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])
-              }
+            if (e.name && e.seriesName) {
+                {#alert('issues_types', (xMatchTypes.indexOf(e.seriesName)))#}
+                window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(e.name) + 1) +
+                    "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])
+            }
         })
 
         // echarts点击事件获取对应的index和公司名称---跳转对应的数据核查页面ok
@@ -557,11 +565,12 @@
                 }
 
             } else {
-                for (var i = 0; i < 5; i++) {
+                console.log('mainLegendTrigger', legend)
+                {% comment %}for (var i = 0; i < 5; i++) {
                     myChart.setOption({
                         legend: {selected: {[legendArr[i]]: false}},
                     })
-                }
+                }{% endcomment %}
             }
         }
 
@@ -606,6 +615,11 @@
                 reqVal += '需求确认'
             }
             console.log(reqVal)
+            if (!reqVal) {
+                alert('至少保留一项😄')
+                location.reload();
+                return
+            }
             $.ajax({
                 url: "{% url 'main_echart_legend_cache' %}",
                 type: "POST",
@@ -616,7 +630,7 @@
                 dataType: "JSON",
                 success: function (res) {
                     if (res.code) {
-                        localStorage.setItem("mainLegendTrigger", reqVal)
+                        localStorage.setItem(dashboardLegendTriggerKey, reqVal)
                         console.log("reload")
                         {#legendTriggerRefresh()#}
                         {#reloadWorkBenchJson()#}
@@ -635,18 +649,18 @@
             let isChecked = $('input[type="checkbox"]').prop('checked');
             if (isChecked) {
                 console.log("勾选");
-                localStorage.setItem("mytaskTrigger", "on")
+                localStorage.setItem(mytaskTriggerKey, "on")
             } else {
                 console.log("未勾选");
-                localStorage.setItem("mytaskTrigger", "off")
+                localStorage.setItem(mytaskTriggerKey, "off")
             }
             sendFreshTriggerVal()
 
         }
 
         function storageTriggerInit() {
-            let item = localStorage.getItem("mytaskTrigger");
-            console.log("trigger", item)
+            let item = localStorage.getItem(mytaskTriggerKey);
+            console.log("mytaskTrigger", item)
             if (item == "on") {
                 $('input[type="checkbox"]').prop('checked', true);
             } else {
@@ -662,7 +676,7 @@
                 url: "{% url 'cache' %}",
                 type: "POST",
                 data: {
-                    "trigger": localStorage.getItem("mytaskTrigger"),
+                    "trigger": localStorage.getItem(mytaskTriggerKey),
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",

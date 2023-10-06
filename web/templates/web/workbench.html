@@ -291,78 +291,6 @@
             </div>
 
 
-            {#            <div class="col-sm-8" id="tasklist">#}
-            {#                <div class="panel panel-default">#}
-            {#                    <div class="panel-heading">#}
-            {#                        <i class="fa fa-tasks" aria-hidden="true"></i> 当前我的任务#}
-            {#                        <label class="fa! switch">#}
-            {#                            <input type="checkbox" id="myAttentionToggle" onclick="myAttentionTrigger()">#}
-            {#                            <span class="slider round"></span>#}
-            {#                        </label>#}
-            {#                        包含我关注的#}
-            {#                    </div>#}
-            {#                    <div class="panel-body">#}
-            {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
-            {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
-            {#                    </div>#}
-            {##}
-            {#                    <!-- Table -->#}
-            {#                    <table class="table">#}
-            {#                        <tbody class="issues-list">#}
-            {#                        {% for item in issues_object_list %}#}
-            {#                            <tr>#}
-            {#                                <td class="number">#}
-            {#                                    <i class="fa fa-circle text-{{ item.priority }}"></i>#}
-            {#                                    <a target="_blank"#}
-            {#                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>#}
-            {#                                </td>#}
-            {#                                <td class="issue">#}
-            {#                                    <div>#}
-            {#                                        <a target="_blank"#}
-            {#                                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>#}
-            {#                                    </div>#}
-            {#                                    <div class="tags">#}
-            {#                                    <span class="type" style="background-color: #56b8eb">#}
-            {#                                        {{ item.issues_type }}#}
-            {#                                    </span>#}
-            {#                                        <span>#}
-            {#                                        <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}#}
-            {#                                    </span>#}
-            {#                                        {% if item.assign.username %}#}
-            {#                                            <span>#}
-            {#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
-            {#                                        {{ item.assign.username }}#}
-            {#                                    </span>#}
-            {#                                        {% endif %}#}
-            {#                                        <span>#}
-            {#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
-            {#                                        {{ item.creator.username }}#}
-            {#                                    </span>#}
-            {#                                        {% if item.end_date %}#}
-            {#                                            <span>#}
-            {#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
-            {#                                        {{ item.end_date }} 截止#}
-            {#                                    </span>#}
-            {#                                        {% endif %}#}
-            {#                                        <span>#}
-            {#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
-            {#                                        {{ item.latest_update_datetime }} 更新#}
-            {#                                    </span>#}
-            {#                                    </div>#}
-            {#                                </td>#}
-            {#                            </tr>#}
-            {#                        {% endfor %}#}
-            {#                        </tbody>#}
-            {#                    </table>#}
-            {#                </div>#}
-            {#                <nav aria-label="...">#}
-            {#                    <ul class="pagination" style="margin-top: 0px">#}
-            {#                        {{ page_html|safe }}#}
-            {#                    </ul>#}
-            {#                </nav>#}
-            {##}
-            {#            </div>#}
-
             {% if request.web.project %}
                 {% workbench_task_list request %}
             {% endif %}
@@ -449,15 +377,21 @@
             return fmt;
         }
 
+        const myAttentionTriggerKey = "myAttentionTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('myAttentionTriggerKey', myAttentionTriggerKey)
+
+        const mydayTriggerKey = "mydayTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('mydayTriggerKey', mydayTriggerKey)
+
         function myAttentionTrigger() {
             console.log("myAttentionTrigger")
             let isChecked = $('input[type="checkbox"]').prop('checked');
             if (isChecked) {
                 console.log("勾选");
-                localStorage.setItem("myAttentionTrigger", "on")
+                localStorage.setItem(myAttentionTriggerKey, "on")
             } else {
                 console.log("未勾选");
-                localStorage.setItem("myAttentionTrigger", "off")
+                localStorage.setItem(myAttentionTriggerKey, "off")
             }
             sendFreshTriggerVal()
         }
@@ -472,7 +406,7 @@
                 url: "{% url 'attention_cache' %}",
                 type: "POST",
                 data: {
-                    "trigger": localStorage.getItem("myAttentionTrigger"),
+                    "trigger": localStorage.getItem(myAttentionTriggerKey),
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -557,12 +491,12 @@
                 feature: {
                     dataView: {
                         show: true, readOnly: false,
-                        lang: ['{{ request.web.user.username }} ' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + ' ' + '工作量视图', '关闭', '导出excel'],
+                        lang: ['{{ request.web.user.username }} ' + getDayPlainTag(localStorage.getItem(mydayTriggerKey)) + ' ' + '工作量视图', '关闭', '导出excel'],
                         contentToOption: function (opts) {
                             $("#worktasksTable").table2excel({           // 下载jquery.table2excel.js，引入，$("#tempChart")是Echarts容器
                                 exclude: ".noExl", //过滤位置的 css 类名， 有class = “noExl” 的行不被导出
-                                filename: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") + ".xls", // 文件名称
-                                name: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss"),
+                                filename: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem(mydayTriggerKey)) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") + ".xls", // 文件名称
+                                name: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem(mydayTriggerKey)) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss"),
                                 exclude_img: true,
                                 exclude_links: true,
                                 exclude_inputs: true
@@ -749,57 +683,7 @@
                 console.log(e.name + ' un checked')
                 sendFreshEchartLegendTriggerVal(e.selected)
             }
-            // do something
         });
-        {% comment %}
-                function judmentLegendsToCache(legends) {
-                    console.log(legends);
-                    let trigger = localStorage.getItem("legendTrigger");
-                    console.log('bf tg:', trigger);
-                    if (!trigger || trigger === undefined) {
-                        trigger = ''
-                    }
-                    if (trigger.indexOf('undefined') > -1) {
-                        console.log('udfd rplc')
-                        trigger = trigger.replace(new RegExp("undefined", "g"))
-                    }
-                    if (legends['新建']) {
-                        if (trigger.indexOf('1') === -1) {
-                            localStorage.setItem("legendTrigger", trigger + "1")
-                        }
-                    } else {
-                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("1", "g")))
-                    }
-                    if (legends['重新打开']) {
-                        if (trigger.indexOf('7') === -1) {
-                            localStorage.setItem("legendTrigger", trigger + "7")
-                        }
-                    } else {
-                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("7", "g")))
-                    }
-                    if (legends['处理中']) {
-                        if (trigger.indexOf('2') === -1) {
-                            localStorage.setItem("legendTrigger", trigger + "2")
-                        }
-                    } else {
-                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("2", "g")))
-                    }
-                    if (legends['待反馈']) {
-                        if (trigger.indexOf('5') === -1) {
-                            localStorage.setItem("legendTrigger", trigger + "5")
-                        }
-                    } else {
-                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("5", "g")))
-                    }
-                    if (legends['已解决']) {
-                        if (trigger.indexOf('4') === -1) {
-                            localStorage.setItem("legendTrigger", trigger + "4")
-                        }
-                    } else {
-                        localStorage.setItem("legendTrigger", trigger.replace(new RegExp("4", "g")))
-                    }
-                    console.log('end set ', localStorage.getItem("legendTrigger"))
-                }{% endcomment %}
 
 
         function mydayTrigger(val) {
@@ -820,7 +704,7 @@
                 success: function (res) {
                     console.log(res);
                     if (res.code) {
-                        localStorage.setItem("mydayTrigger", val)
+                        localStorage.setItem(mydayTriggerKey, val)
                         console.log("reload")
                         location.reload();
                     } else {
@@ -888,7 +772,7 @@
                     console.log('res:', res);
                     {#alert(res)#}
                     if (res.code) {
-                        {#localStorage.setItem("mydayTrigger", val)#}
+                        {#localStorage.setItem(mydayTriggerKey, val)#}
                         console.log("reload")
                         {#location.reload();#}
                         {#$("#tasklist").html(res)#}
@@ -946,13 +830,13 @@
         }
 
         function storageTriggerInit() {
-            let day = localStorage.getItem("mydayTrigger");
+            let day = localStorage.getItem(mydayTriggerKey);
             if (day) {
                 document.getElementById(day).setAttribute('checked', false);
             }
             legendTriggerRefresh()
 
-            let item = localStorage.getItem("myAttentionTrigger");
+            let item = localStorage.getItem(myAttentionTriggerKey);
             console.log("myAttentionTrigger", item)
             if (item == "on") {
                 $('input[type="checkbox"]').prop('checked', true);
