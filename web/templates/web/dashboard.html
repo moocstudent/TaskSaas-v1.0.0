@@ -517,44 +517,44 @@
             console.log('mainLegendTrigger le>>', legend);
             let legendArr = ['任务', '功能', 'Bug', '需求确认']
             if (!legend) {
-                {#intilize the dashboard#}
-                sendInitDashboardEchartLegendTriggerVal()
                 legend = '任务,功能,Bug,需求确认'
-            }
-            if (legend) {
-                let splitLegend = legend.split(",");
-                for (var i = 0; i < 4; i++) {
-                    myChart.setOption({
-                        legend: {selected: {[legendArr[i]]: false}},
-                    })
-                }
-                for (s in splitLegend) {
-                    if (splitLegend[s] == '任务') {
+                localStorage.setItem(dashboardLegendTriggerKey, legend);
+            } else {
+                if (legend) {
+                    let splitLegend = legend.split(",");
+                    for (var i = 0; i < 4; i++) {
                         myChart.setOption({
-                            legend: {selected: {['任务']: true}}
-                        })
-                    } else if (splitLegend[s] == '功能') {
-                        myChart.setOption({
-                            legend: {selected: {['功能']: true}}
-                        })
-                    } else if (splitLegend[s] == 'Bug') {
-                        myChart.setOption({
-                            legend: {selected: {['Bug']: true}}
-                        })
-                    } else if (splitLegend[s] == '需求确认') {
-                        myChart.setOption({
-                            legend: {selected: {['需求确认']: true}}
+                            legend: {selected: {[legendArr[i]]: false}},
                         })
                     }
-                }
+                    for (s in splitLegend) {
+                        if (splitLegend[s] == '任务') {
+                            myChart.setOption({
+                                legend: {selected: {['任务']: true}}
+                            })
+                        } else if (splitLegend[s] == '功能') {
+                            myChart.setOption({
+                                legend: {selected: {['功能']: true}}
+                            })
+                        } else if (splitLegend[s] == 'Bug') {
+                            myChart.setOption({
+                                legend: {selected: {['Bug']: true}}
+                            })
+                        } else if (splitLegend[s] == '需求确认') {
+                            myChart.setOption({
+                                legend: {selected: {['需求确认']: true}}
+                            })
+                        }
+                    }
 
-            } else {
-                console.log('mainLegendTrigger', legend)
-                {% comment %}for (var i = 0; i < 5; i++) {
-                    myChart.setOption({
-                        legend: {selected: {[legendArr[i]]: false}},
-                    })
-                }{% endcomment %}
+                } else {
+                    console.log('mainLegendTrigger', legend)
+                    {% comment %}for (var i = 0; i < 5; i++) {
+                        myChart.setOption({
+                            legend: {selected: {[legendArr[i]]: false}},
+                        })
+                    }{% endcomment %}
+                }
             }
         }
 
@@ -628,13 +628,14 @@
             })
         }
 
+        //deprecated
         function sendInitDashboardEchartLegendTriggerVal() {
             const initialDashBoardLegend = '任务,功能,Bug,需求确认'
             $.ajax({
                 url: "{% url 'main_echart_legend_cache' %}",
                 type: "POST",
                 data: {
-                    "trigger":initialDashBoardLegend ,
+                    "trigger": initialDashBoardLegend,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -670,11 +671,16 @@
 
         function storageTriggerInit() {
             let item = localStorage.getItem(mytaskTriggerKey);
-            console.log("mytaskTrigger", item)
-            if (item == "on") {
-                $('input[type="checkbox"]').prop('checked', true);
+            if (!item) {
+                item = 'off'
+                localStorage.setItem(mytaskTriggerKey, item);
             } else {
-                $('input[type="checkbox"]').prop('checked', false);
+                console.log("mytaskTrigger", item)
+                if (item == "on") {
+                    $('input[type="checkbox"]').prop('checked', true);
+                } else {
+                    $('input[type="checkbox"]').prop('checked', false);
+                }
             }
             legendTriggerRefresh()
         }

@@ -22,14 +22,19 @@ def dashboard(request, project_id):
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
     trigger = cache.get(str(request.web.user.id)+'mytaskTrigger','off')
+    if trigger is None:
+        trigger = 'off'
+        cache.set(str(request.web.user.id) + 'mytaskTrigger', trigger)
     if trigger == 'on':
         issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user))
-    main_legend_trigger = cache.get(str(request.web.user.id) + 'mainLegendTrigger','')
+    main_legend_trigger = cache.get(str(request.web.user.id) + 'mainLegendTrigger')
+    if main_legend_trigger is None:
+        main_legend_trigger = '任务,功能,Bug,需求确认'
+        cache.set(str(request.web.user.id) + 'mainLegendTrigger',main_legend_trigger)
     types = []
     type_ids = ''
     all_type_ids = ''
     if main_legend_trigger is not None:
-        print('mainLegendTrigger',main_legend_trigger)
         types = (list(main_legend_trigger.split(',')))
         issues_filter=issues_filter.filter(issues_type__title__in=types)
 
