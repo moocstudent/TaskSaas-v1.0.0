@@ -268,7 +268,7 @@
                         <input onclick="mydayTrigger(this.value)" id="day1" name="day" type="radio" value="day1"/><label
                                 for="day1">当天</label>
                         <input onclick="mydayTrigger(this.value)" id="day7" name="day" type="radio" value="day7"
-                               checked/><label for="day7">近七天</label>
+                        /><label for="day7">近七天</label>
                         <input onclick="mydayTrigger(this.value)" id="day30" name="day" type="radio"
                                value="day30"/><label for="day30">本月</label>
                         <input onclick="mydayTrigger(this.value)" id="day0" name="day" type="radio" value="day0"/><label
@@ -291,9 +291,135 @@
             </div>
 
 
-            {% if request.web.project %}
-                {% workbench_task_list request %}
-            {% endif %}
+            {% block css %}
+                <style>
+                    .issues-list .issue .tags .type {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #dddddd;
+                    }
+
+                    .issues-list .issue .tags .type_primary {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #007bff;
+                    }
+
+                    .issues-list .issue .tags .type_warning {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #ffc107;
+                    }
+
+                    .issues-list .issue .tags .type_success {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #28a745;
+                    }
+
+                    .issues-list .issue .tags .type_danger {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #dc3545;
+                    }
+
+                    .issues-list .issue .tags .type_info {
+                        color: white;
+                        padding: 1px 5px;
+                        border-radius: 5px;
+                        background-color: #17a2b8;
+                    }
+                </style>
+            {% endblock %}
+            <div class="col-sm-7" id="tasklist">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-tasks" aria-hidden="true"></i> 当前我的任务
+                        <label class="fa! switch">
+                            <input type="checkbox" id="myAttentionToggle" onclick="myAttentionTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                        包含我关注的
+                    </div>
+                    {#                    <div class="panel-body">#}
+                    {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
+                    {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
+                    {#                    </div>#}
+
+                    <!-- Table -->
+                    <table class="table">
+                        <tbody class="issues-list">
+                        {% for item in issues_object_list %}
+                            <tr>
+                                <td class="number">
+                                    <i class="fa fa-circle text-{{ item.priority }}"></i>
+                                    <a target="_blank"
+                                       href="{% url 'issues_detail' project_id=project_id issues_id=item.issue_id %}">#{{ item.issue_id }}</a>
+                                </td>
+                                <td class="issue">
+                                    <div>
+                                        <a target="_blank"
+                                           href="{% url 'issues_detail' project_id=project_id issues_id=item.issue_id %}">{{ item.subject }}</a>
+                                    </div>
+                                    <div class="tags">
+                            <span class="
+                                    {% if item.status == 1 %}
+                                            type_primary
+                                            {% elif item.status == 2 %}
+                                            type_warning
+                                            {% elif item.status == 3 %}
+                                            type_info
+                                            {% elif item.status == 5 %}
+                                            type_danger
+                                            {% elif item.status == 7 %}
+                                            type_success
+                                   {% else %}type{% endif %}">
+                                        {{ item.issues_type }}
+                                <i class="fa fa-refresh" aria-hidden="true"></i>
+                            {{ item.get_status_display }}
+                                    </span>
+                                        {#                            <span>#}
+                                        {##}
+                                        {#                                    </span>#}
+                                        {% if item.assign.username %}
+                                            <span>
+                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                                        {{ item.assign.username }}
+                                    </span>
+                                        {% endif %}
+                                        <span>
+                                        <i class="fa fa-user-o" aria-hidden="true"></i>
+                                        {{ item.creator.username }}
+                                    </span>
+                                        {% if item.end_date %}
+                                            <span>
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                        {{ item.end_date }} 截止
+                                    </span>
+                                        {% endif %}
+                                        <span>
+                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                        {{ item.latest_update_datetime }} 更新
+                                    </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="...">
+                    <ul class="pagination" style="margin-top: 0px">
+                        {{ page_html|safe }}
+                    </ul>
+                </nav>
+
+            </div>
 
             <div class="col-md-7" style="float: left">
                 <div class="panel panel-default">
@@ -795,7 +921,7 @@
         function legendTriggerRefresh() {
             let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
-            let legendArr = ['新建', '处理中','待反馈', '重新打开']
+            let legendArr = ['新建', '处理中', '待反馈', '重新打开']
             if (!legend) {
                 legend = '1257'
                 localStorage.setItem(legendTriggerKey, legend);
@@ -844,11 +970,13 @@
 
         function storageTriggerInit() {
             let day = localStorage.getItem(mydayTriggerKey);
+            console.log('day', day);
             if (day) {
-                document.getElementById(day).setAttribute('checked', false);
+                document.getElementById(day).setAttribute('checked', true);
             } else {
                 day = 'day7'
                 localStorage.setItem(mydayTriggerKey, day);
+                document.getElementById(day).setAttribute('checked', true);
             }
             legendTriggerRefresh()
 
