@@ -197,7 +197,11 @@ def workbench_json(request):
                                                                              | Q(creator=request.web.user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger', 'day0')
+    day_trigger = cache.get(str(request.web.user.id) + 'mydayTrigger')
+    if day_trigger is None:
+        # day trigger default day7 the web is the same
+        cache.set(str(request.web.user.id) + 'mydayTrigger','day7')
+        day_trigger = 'day7'
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 
