@@ -1,11 +1,12 @@
 import datetime
 import json
-
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
 
+from TaskChat.constants import private_message_key, push_message_key, userlist_message_key, chat_message_key
 from TaskSaasAPP import date_util
+from TaskSaasAPP.hash_map_util import HashMap
 
 
 class xChatConsumer(WebsocketConsumer):
@@ -29,11 +30,16 @@ class xChatConsumer(WebsocketConsumer):
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
+users = set()
+
+
+hash_map = HashMap()
+
 
 class yChatConsumer(WebsocketConsumer):
     def connect(self):
         self.project_id = self.scope["url_route"]["kwargs"]["project_id"]
-        self.room_group_name = 'matrix'+self.project_id
+        self.room_group_name = 'matrix' + self.project_id
         self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
         self.username = self.scope["url_route"]["kwargs"]["username"]
         # Join room group
@@ -42,9 +48,30 @@ class yChatConsumer(WebsocketConsumer):
             self.channel_name,
         )
 
-        self.accept()
+        print('self.room_group_name', self.room_group_name)
 
-        # push_message_to_group(self.room_group_name,self.username+' <已上线>')
+        async_to_sync(self.channel_layer.group_add)(
+            self.username + self.project_id,
+            self.channel_name
+        )
+
+        self.accept()
+        the_room_users = hash_map.get(self.room_group_name)
+        if the_room_users and the_room_users.val:
+            print('the_room', the_room_users)
+            room_users = the_room_users.val
+            room_users.add(self.username)
+            hash_map._put(self.room_group_name, room_users)
+            print('connect users this room ', list(hash_map.get(self.room_group_name).val))
+        else:
+            room_users = set()
+            room_users.add(self.username)
+            hash_map._put(self.room_group_name,room_users)
+            print('connect users this room ', list(hash_map.get(self.room_group_name).val))
+        push_message_to_group(self.room_group_name,list(hash_map.get(self.room_group_name).val) , userlist_message_key)
+
+        # 私人消息
+        # push_message_to_group(self.username,'欢迎来到该项目组聊天室,'+self.username,private_message_key)
 
     def disconnect(self, close_code):
         # Leave room group
@@ -52,6 +79,22 @@ class yChatConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name,
         )
+        async_to_sync(self.channel_layer.group_discard)(
+            self.username + self.project_id,
+            self.channel_name
+        )
+        the_room_users = hash_map.get(self.room_group_name)
+        if the_room_users and the_room_users.val:
+            print('the_room', the_room_users)
+            room_users = the_room_users.val
+            room_users.discard(self.username)
+            hash_map._put(self.room_group_name,room_users)
+            print('connect users this room ', list(hash_map.get(self.room_group_name).val))
+        else:
+            print('disconnect users this room ', None)
+            pass
+        push_message_to_group(self.room_group_name, list(hash_map.get(self.room_group_name).val), userlist_message_key)
+
         # push_message_to_group(self.room_group_name,self.username+' <已离线>')
 
     # Receive message from WebSocket
@@ -64,8 +107,8 @@ class yChatConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
-                'type': 'chat_message',
-                'message': username+': '+ message
+                'type': chat_message_key,
+                'message': username + ': ' + message
             }
         )
         # push(self.room_group_name,'system info')
@@ -73,21 +116,44 @@ class yChatConsumer(WebsocketConsumer):
 
     # Receive message from room group
     def chat_message(self, event):
-        message = date_util.get_today_until_second()+'>> ' + event['message']
+        message = date_util.get_today_until_second() + '>> ' + event['message']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'type': chat_message_key
         }))
+
     # 消息推送
     def push_message(self, event):
         # user = await get_user(self.scope)
         username = self.username
-        message = '❗️系统消息❗️'+event['message']
-
+        message = '❗️系统消息❗️' + event['message']
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'type': type
+        }))
+
+    def private_message(self, event):
+        # user = await get_user(self.scope)
+        username = self.username
+        message = '😄私人消息😄' + event['message']
+        type = event['type']
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'message': message,
+            'type': type
+        }))
+
+    def userlist_message(self, event):
+        username = self.username
+        message = event['message']
+        type = event['type']
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'message': message,
+            'type': type
         }))
 
 
@@ -101,7 +167,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.username = self.scope["url_route"]["kwargs"]["username"]
         self.project_id = self.scope["url_route"]["kwargs"]["project_id"]
         # print(self.username)
-        self.room_group_name = 'matrix'+self.project_id
+        self.room_group_name = 'matrix' + self.project_id
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -148,6 +214,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message
         }))
 
+
 # class PushConsumer(AsyncWebsocketConsumer):
 #   async def connect(self):
 #     self.group_name = self.scope['url_route']['kwargs']['username']
@@ -168,12 +235,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 #       "event": event['event']
 #     }))
 
-def push_message_to_group(group_name, message):
-  channel_layer = get_channel_layer()
-  async_to_sync(channel_layer.group_send)(
-    group_name,
-    {
-      "type": "push.message",
-      "message": message
-    }
-  )
+def push_message_to_group(group_name, message, type=None):
+    channel_layer = get_channel_layer()
+    if type is None:
+        type = push_message_key
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            "type": type,
+            "message": message
+        }
+    )

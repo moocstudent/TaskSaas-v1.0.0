@@ -378,9 +378,9 @@
                         {#                        <textarea id="chat-log" disabled class="col-md-10"#}
                         {#                                  style="resize:none;height: 300px;background-color: floralwhite"></textarea>#}
                         <div class="col-md-2" style="float: right">
-                            用户:
-                            <div id="chatMembers">
-                                <ul>
+                            online用户:
+                            <div>
+                                <ul id="chatMembers">
 
                                     {#                                <li>小明</li>#}
                                     {#                                <li>小红</li>#}
@@ -413,41 +413,41 @@
 
 {% block js %}
 
-    <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js'%}"></script>
+    <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js' %}"></script>
     <script>
-    Date.prototype.pattern=function(fmt) {
-    var o = {
-    "M+" : this.getMonth()+1, //月份
-    "d+" : this.getDate(), //日
-    "h+" : this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时
-    "H+" : this.getHours(), //小时
-    "m+" : this.getMinutes(), //分
-    "s+" : this.getSeconds(), //秒
-    "q+" : Math.floor((this.getMonth()+3)/3), //季度
-    "S" : this.getMilliseconds() //毫秒
-    };
-    var week = {
-    "0" : "周日",
-    "1" : "周一",
-    "2" : "周二",
-    "3" : "周三",
-    "4" : "周四",
-    "5" : "周五",
-    "6" : "周日"
-    };
-    if(/(y+)/.test(fmt)){
-        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
-    }
-    if(/(E+)/.test(fmt)){
-        fmt=fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length>2 ? "星期" : "") : "")+week[this.getDay()+""]);
-    }
-    for(var k in o){
-        if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+        Date.prototype.pattern = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours() % 12 == 0 ? 12 : this.getHours() % 12, //小时
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            var week = {
+                "0": "周日",
+                "1": "周一",
+                "2": "周二",
+                "3": "周三",
+                "4": "周四",
+                "5": "周五",
+                "6": "周日"
+            };
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            }
+            if (/(E+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? "星期" : "") : "") + week[this.getDay() + ""]);
+            }
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
+            }
+            return fmt;
         }
-    }
-    return fmt;
-}
 
         function myAttentionTrigger() {
             console.log("myAttentionTrigger")
@@ -557,17 +557,17 @@
                 feature: {
                     dataView: {
                         show: true, readOnly: false,
-                        lang : ['{{ request.web.user.username }} '+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+' '+ '工作量视图', '关闭', '导出excel'],
-                         contentToOption: function (opts) {
-                        $("#worktasksTable").table2excel({           // 下载jquery.table2excel.js，引入，$("#tempChart")是Echarts容器
-                            exclude: ".noExl", //过滤位置的 css 类名， 有class = “noExl” 的行不被导出
-                            filename: '{{ request.web.user.username }}_'+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+'_工作量视图'+new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") +".xls", // 文件名称
-                            name: '{{ request.web.user.username }}_'+ getDayPlainTag(localStorage.getItem("mydayTrigger"))+'_工作量视图'+new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") ,
-                            exclude_img: true,
-                            exclude_links: true,
-                            exclude_inputs: true
-                        });
-                    },
+                        lang: ['{{ request.web.user.username }} ' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + ' ' + '工作量视图', '关闭', '导出excel'],
+                        contentToOption: function (opts) {
+                            $("#worktasksTable").table2excel({           // 下载jquery.table2excel.js，引入，$("#tempChart")是Echarts容器
+                                exclude: ".noExl", //过滤位置的 css 类名， 有class = “noExl” 的行不被导出
+                                filename: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss") + ".xls", // 文件名称
+                                name: '{{ request.web.user.username }}_' + getDayPlainTag(localStorage.getItem("mydayTrigger")) + '_工作量视图' + new Date().pattern("yyyy-MM-dd_EE_HH_mm_ss"),
+                                exclude_img: true,
+                                exclude_links: true,
+                                exclude_inputs: true
+                            });
+                        },
                         optionToContent: function (opt) {
                             console.log('opt', opt);
                             var tdHeads = '<td  style="padding:0 10px">{{ request.web.user.username }}</td>';
@@ -590,7 +590,6 @@
                         },
 
                     },
-
 
 
                     magicType: {show: true, type: ['line', 'bar']},
@@ -1013,11 +1012,26 @@
          */
         function websocketInit() {
             ws.onmessage = function (e) {
+                console.log('evt e ', e)
                 var data = JSON.parse(e.data);
-                var message = data['message'];
-                document.querySelector('#chat-log').innerHTML += (message + '<br>');
-                localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
-                document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+
+                console.log('>>>>>', data.type)
+                if (data.type == 'userlist.message') {
+                    let userlistval = eval(data.message);
+                    console.log(userlistval)
+                    console.log('userlistmessage refresh userlist ')
+                    var userlist = ''
+                    for (let i = 0; i < userlistval.length; i++) {
+                        userlist += ` <li>` + userlistval[i] + `</li>`;
+                    }
+                    $("#chatMembers").html(userlist);
+                    return
+                } else {
+                    var message = data['message'];
+                    document.querySelector('#chat-log').innerHTML += (message + '<br>');
+                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
+                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                }
 
 
                 {#var message = eval('(' + e.data + ')');#}
@@ -1117,6 +1131,7 @@
                     {#createOrConnectWebSocket()#}
                     console.log('reconnect ws 3')
                 }
+                console.log('ws.send(stringifyMsg)', stringifyMsg)
                 ws.send(stringifyMsg);
                 messageInputDom.value = '';
             }
@@ -1139,13 +1154,18 @@
 
         chatHisInit()
 
-        function getDayPlainTag(dayTrigger){
-            switch (dayTrigger){
-                case 'day1':return "当天";
-                case 'day7':return "近七天";
-                case 'day30':return "本月";
-                case 'day0':return "不限时间";
-                default:return ''
+        function getDayPlainTag(dayTrigger) {
+            switch (dayTrigger) {
+                case 'day1':
+                    return "当天";
+                case 'day7':
+                    return "近七天";
+                case 'day30':
+                    return "本月";
+                case 'day0':
+                    return "不限时间";
+                default:
+                    return ''
             }
         }
 
