@@ -9,6 +9,7 @@ from django.db.models import Count, Q, F
 
 
 def dashboard(request, project_id):
+    # print(request.web.project.id)
     """概览"""
     # 项目状态
     status_dict = collections.OrderedDict()
@@ -21,10 +22,10 @@ def dashboard(request, project_id):
     bugs_count = []
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
-    trigger = cache.get(str(request.web.user.id)+'mytaskTrigger','off')
+    trigger = cache.get('mytaskTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'off')
     if trigger == 'on':
         issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user))
-    main_legend_trigger = cache.get(str(request.web.user.id) + 'mainLegendTrigger','任务,功能,Bug,需求确认')
+    main_legend_trigger = cache.get('mainLegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'任务,功能,Bug,需求确认')
     types = []
     type_ids = ''
     all_type_ids = ''

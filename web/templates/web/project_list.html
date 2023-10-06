@@ -233,7 +233,7 @@
                 })
             })
         }
-
+        {#deprecated#}
         function sendFreshTriggerVal(){
             {#let csrf = {{ csrf_token }}#}
                 $.ajax({
@@ -253,7 +253,7 @@
 
                 })
         }
-        sendFreshTriggerVal()
+        {#sendFreshTriggerVal()#}
 
     </script>
 {% endblock %}

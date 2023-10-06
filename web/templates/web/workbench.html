@@ -252,6 +252,48 @@
         .HoverLabel label:hover {
             background-color: #EEE;
         }
+
+        .issues-list .issue .tags .type {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #dddddd;
+        }
+
+        .issues-list .issue .tags .type_primary {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #007bff;
+        }
+
+        .issues-list .issue .tags .type_warning {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #ffc107;
+        }
+
+        .issues-list .issue .tags .type_success {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #28a745;
+        }
+
+        .issues-list .issue .tags .type_danger {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #dc3545;
+        }
+
+        .issues-list .issue .tags .type_info {
+            color: white;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: #17a2b8;
+        }
     </style>
 {% endblock %}
 
@@ -290,52 +332,6 @@
                 </div>
             </div>
 
-
-            {% block css %}
-                <style>
-                    .issues-list .issue .tags .type {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #dddddd;
-                    }
-
-                    .issues-list .issue .tags .type_primary {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #007bff;
-                    }
-
-                    .issues-list .issue .tags .type_warning {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #ffc107;
-                    }
-
-                    .issues-list .issue .tags .type_success {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #28a745;
-                    }
-
-                    .issues-list .issue .tags .type_danger {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #dc3545;
-                    }
-
-                    .issues-list .issue .tags .type_info {
-                        color: white;
-                        padding: 1px 5px;
-                        border-radius: 5px;
-                        background-color: #17a2b8;
-                    }
-                </style>
-            {% endblock %}
             <div class="col-sm-7" id="tasklist">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -359,12 +355,12 @@
                                 <td class="number">
                                     <i class="fa fa-circle text-{{ item.priority }}"></i>
                                     <a target="_blank"
-                                       href="{% url 'issues_detail' project_id=project_id issues_id=item.issue_id %}">#{{ item.issue_id }}</a>
+                                       href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">#{{ item.issue_id }}</a>
                                 </td>
                                 <td class="issue">
                                     <div>
                                         <a target="_blank"
-                                           href="{% url 'issues_detail' project_id=project_id issues_id=item.issue_id %}">{{ item.subject }}</a>
+                                           href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{{ item.subject }}</a>
                                     </div>
                                     <div class="tags">
                             <span class="
