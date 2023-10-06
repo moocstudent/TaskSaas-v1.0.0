@@ -795,9 +795,9 @@
         function legendTriggerRefresh() {
             let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
-            let legendArr = ['新建', '处理中', '已解决', '待反馈', '重新打开']
+            let legendArr = ['新建', '处理中','待反馈', '重新打开']
             if (!legend) {
-                legend = '12357'
+                legend = '1257'
                 localStorage.setItem(legendTriggerKey, legend);
             } else {
                 if (legend) {
