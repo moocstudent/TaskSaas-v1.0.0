@@ -383,6 +383,9 @@
         const mydayTriggerKey = "mydayTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
         console.log('mydayTriggerKey', mydayTriggerKey)
 
+        const legendTriggerKey = "legendTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('legendTriggerKey', legendTriggerKey)
+
         function myAttentionTrigger() {
             console.log("myAttentionTrigger")
             let isChecked = $('input[type="checkbox"]').prop('checked');
@@ -732,6 +735,11 @@
             if (val.重新打开) {
                 reqVal += 7
             }
+            if (!reqVal) {
+                alert('至少保留一项😄')
+                location.reload();
+                return
+            }
             console.log(reqVal)
             $.ajax({
                 url: "{% url 'echart_legend_cache' %}",
@@ -744,7 +752,7 @@
                 success: function (res) {
                     console.log('sendFreshEchartLegendTriggerVal res', res);
                     if (res.code) {
-                        localStorage.setItem("legendTrigger", reqVal)
+                        localStorage.setItem(legendTriggerKey, reqVal)
                         console.log("reload")
                         {#legendTriggerRefresh()#}
                         {#reloadWorkBenchJson()#}
@@ -785,7 +793,7 @@
         }
 
         function legendTriggerRefresh() {
-            let legend = localStorage.getItem("legendTrigger");
+            let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
             let legendArr = ['新建', '处理中', '已解决', '待反馈', '重新打开']
             if (legend) {
