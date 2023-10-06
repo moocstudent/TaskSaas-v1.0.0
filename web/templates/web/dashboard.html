@@ -511,30 +511,9 @@
             }
         })
 
-        // echarts点击事件获取对应的index和公司名称---跳转对应的数据核查页面ok
-        {# myChart.getZr().on('click', params => { // 柱形图点击事件#}
-        {#let pointInPixel = [params.offsetX, params.offsetY];#}
-        {# if (myChart.containPixel('grid', pointInPixel)) {#}
-        {#     let pointInGrid = myChart.convertFromPixel({#}
-        {#         seriesIndex: 0#}
-        {#     }, pointInPixel);#}
-        {#     let xIndex = pointInGrid[0]; //索引#}
-        {#     console.log('xIndex',xIndex);#}
-        {#     let handleIndex = Number(xIndex);#}
-        {#     let seriesObj = myChart.getOption(); //图表object对象#}
-        {#     var op = myChart.getOption();#}
-        {#     //获得图表中点击的列#}
-        {#     var month = op.series[0].data[handleIndex];  //获取点击的列名#}
-        {#     console.log(seriesObj);#}
-        {##}
-        {#console.log(name)#}
-        {#         // console.log('--------打印index和公司名称-----------------')#}
-        {##}
-        {#       }#}
-        {# })#}
 
         function legendTriggerRefresh() {
-            let legend = localStorage.getItem("mainLegendTrigger");
+            let legend = localStorage.getItem(dashboardLegendTriggerKey);
             console.log('mainLegendTrigger le>>', legend);
             let legendArr = ['任务', '功能', 'Bug', '需求确认']
             if (legend) {
