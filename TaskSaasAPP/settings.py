@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 import django
 from django.utils.encoding import smart_str
+
 django.utils.encoding.smart_text = smart_str
 
 from django.conf.urls import static
@@ -44,10 +45,8 @@ INSTALLED_APPS = [
     'TaskChat',
     'TaskSaas.apps.TasksaasConfig',
     'web.apps.WebConfig',
-    'rest_framework', # django restframework
+    'rest_framework',  # django restframework
 ]
-
-
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -69,14 +68,14 @@ MIDDLEWARE = [
 ]
 
 CHANNEL_LAYERS = {
-     "default": {
-         "BACKEND": "channels_redis.core.RedisChannelLayer",
-         "CONFIG": {
-             "hosts": [("127.0.0.1", 6379)],
-              #或"hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')],
-         },
-     },
- }
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            # 或"hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')],
+        },
+    },
+}
 
 ROOT_URLCONF = 'TaskSaasAPP.urls'
 
@@ -112,7 +111,8 @@ DATABASES = {
         'PASSWORD': 'zhangqi1112',
         'HOST': 'localhost',
         'PORT': 3306,
-        'CHARSET': 'utf8'
+        'CHARSET': 'utf8',
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
 
