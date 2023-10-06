@@ -91,7 +91,7 @@
             font-size: 12px;
         }
 
-    .issues-list .issue .tags .type {
+        .issues-list .issue .tags .type {
             color: white;
             padding: 1px 5px;
             border-radius: 5px;
@@ -518,6 +518,8 @@
         var POST_ISSUES = "{% url 'issues' project_id=request.web.project.id %}";
         var INVITE_URL = "{% url 'invite_url' project_id=request.web.project.id %}";
 
+        const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('mytaskTriggerKey', mytaskTriggerKey)
 
         $(function () {
             bindBootStrapShowEvent();
@@ -651,10 +653,10 @@
             let isChecked = $('input[type="checkbox"][name="trigger"]').prop('checked');
             if (isChecked) {
                 console.log("勾选");
-                localStorage.setItem("mytaskTrigger", "on")
+                localStorage.setItem(mytaskTriggerKey, "on")
             } else {
                 console.log("未勾选");
-                localStorage.setItem("mytaskTrigger", "off")
+                localStorage.setItem(mytaskTriggerKey, "off")
             }
             sendFreshTriggerVal()
 
@@ -667,7 +669,7 @@
                 url: "{% url 'cache' %}",
                 type: "POST",
                 data: {
-                    "trigger": localStorage.getItem("mytaskTrigger"),
+                    "trigger": localStorage.getItem(mytaskTriggerKey),
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -685,7 +687,7 @@
         }
 
         function storageTriggerInit() {
-            let item = localStorage.getItem("mytaskTrigger");
+            let item = localStorage.getItem(mytaskTriggerKey);
             console.log("trigger", item)
             if (item == "on") {
                 $('input[type="checkbox"][name="trigger"]').prop('checked', true);

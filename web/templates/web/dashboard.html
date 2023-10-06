@@ -629,17 +629,18 @@
         }
 
         function sendInitDashboardEchartLegendTriggerVal() {
+            const initialDashBoardLegend = '任务,功能,Bug,需求确认'
             $.ajax({
                 url: "{% url 'main_echart_legend_cache' %}",
                 type: "POST",
                 data: {
-                    "trigger": '任务,功能,Bug,需求确认',
+                    "trigger":initialDashBoardLegend ,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
                 success: function (res) {
                     if (res.code) {
-                        localStorage.setItem(dashboardLegendTriggerKey, reqVal)
+                        localStorage.setItem(dashboardLegendTriggerKey, initialDashBoardLegend)
                         console.log("sendInitDashboardEchartLegendTriggerVal reload")
                         {#legendTriggerRefresh()#}
                         {#reloadWorkBenchJson()#}
