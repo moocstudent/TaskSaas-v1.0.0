@@ -384,11 +384,11 @@
         }
         var pid = JSON.parse(document.getElementById("pid").value);
 
-        const dashboardLegendTriggerKey = "mainLegendTrigger"+'{{ request.web.user.id }}'+'_'+'{{ request.web.project.id }}'
-        console.log('dashboardLegendTriggerKey',dashboardLegendTriggerKey)
+        const dashboardLegendTriggerKey = "mainLegendTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('dashboardLegendTriggerKey', dashboardLegendTriggerKey)
 
-        const mytaskTriggerKey = "mytaskTrigger"+'{{ request.web.user.id }}'+'_'+'{{ request.web.project.id }}'
-        console.log('mytaskTriggerKey',mytaskTriggerKey)
+        const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
+        console.log('mytaskTriggerKey', mytaskTriggerKey)
 
 
         // 基于准备好的dom，初始化echarts实例
@@ -517,6 +517,8 @@
             console.log('mainLegendTrigger le>>', legend);
             let legendArr = ['任务', '功能', 'Bug', '需求确认']
             if (!legend) {
+                {#intilize the dashboard#}
+                sendInitDashboardEchartLegendTriggerVal()
                 legend = '任务,功能,Bug,需求确认'
             }
             if (legend) {
@@ -614,6 +616,31 @@
                     if (res.code) {
                         localStorage.setItem(dashboardLegendTriggerKey, reqVal)
                         console.log("reload")
+                        {#legendTriggerRefresh()#}
+                        {#reloadWorkBenchJson()#}
+                        location.reload();
+                        {#$("#tasklist").load(issues_object_list=[])#}
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+        function sendInitDashboardEchartLegendTriggerVal() {
+            $.ajax({
+                url: "{% url 'main_echart_legend_cache' %}",
+                type: "POST",
+                data: {
+                    "trigger": '任务,功能,Bug,需求确认',
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.code) {
+                        localStorage.setItem(dashboardLegendTriggerKey, reqVal)
+                        console.log("sendInitDashboardEchartLegendTriggerVal reload")
                         {#legendTriggerRefresh()#}
                         {#reloadWorkBenchJson()#}
                         location.reload();
