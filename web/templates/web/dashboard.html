@@ -516,6 +516,9 @@
             let legend = localStorage.getItem(dashboardLegendTriggerKey);
             console.log('mainLegendTrigger le>>', legend);
             let legendArr = ['任务', '功能', 'Bug', '需求确认']
+            if (!legend) {
+                legend = '任务,功能,Bug,需求确认'
+            }
             if (legend) {
                 let splitLegend = legend.split(",");
                 for (var i = 0; i < 4; i++) {
