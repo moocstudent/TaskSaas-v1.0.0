@@ -23,10 +23,11 @@ def dashboard(request, project_id):
     bugs_count = []
     demand_count = []
     issues_filter = models.Issues.objects.filter(project_id=project_id)
+    print('issues_filter size bef filter ', len(issues_filter))
     trigger = cache.get('mytaskTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'off')
     if trigger == 'on':
         issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user)).distinct()
-    print('issues_filter size aft filter ', len(issues_filter))
+        print('issues_filter size aft filter ', len(issues_filter))
     main_legend_trigger = cache.get('mainLegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'任务,功能,Bug,需求确认')
     types = []
     type_ids = ''
@@ -65,11 +66,18 @@ def dashboard(request, project_id):
                                                             status=key).count())
         # keys.index(index,key)
         index += 1
-
-    issues_data = issues_filter.values('status').annotate(ct=Count('id'))
+    print('issues size bef ct ', len(issues_filter))
+    n = 0
+    for i in issues_filter:
+        print('i>>>>',i.status)
+        if i.status ==1 :
+            n+=1
+    print('n>>>',n)
+    issues_data = issues_filter.values('status').annotate(ct=Count('id',distinct=True))
 
     print('issues_data', issues_data)
     for item in issues_data:
+        print("item['status'] {} ct:{}".format(item['status'],item['ct']))
         status_dict[item['status']]['count'] = item['ct']
 
     for item in sorted(status_dict.items()):

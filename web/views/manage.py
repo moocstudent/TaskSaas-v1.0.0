@@ -98,7 +98,7 @@ def workbench(request, project_id):
         people_involve_q = people_involve_q | Q(attention=request.web.user)
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (people_involve_q)
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
-        select={'ordering': ordering}, order_by=('ordering', 'id',))
+        select={'ordering': ordering}, order_by=('ordering', 'id',)).distinct()
     day_trigger = cache.get('mydayTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
