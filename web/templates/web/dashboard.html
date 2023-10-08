@@ -5,6 +5,7 @@
 
 {% block css %}
     <style>
+
         .switch {
             position: relative;
             display: inline-block;
@@ -242,10 +243,10 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-list-ul" aria-hidden="true"></i>
-                        动态
+                        动态 {{ top_ten_size }} 次
                     </div>
                     <div class="panel-body top-10">
-                        <table class="table">
+                        <table class="table" style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;display: block;overflow-y: scroll;">
                             <tbody>
                             {% for key,item in top_ten.items %}
                                 {#                                                                {{ key }}#}

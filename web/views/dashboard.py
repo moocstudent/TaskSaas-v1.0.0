@@ -92,8 +92,6 @@ def dashboard(request, project_id):
 
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
     if trigger == 'on':
-        print("trigger == 'on':")
-        print(request.web.user)
         top_ten=top_ten.filter(Q(assign=request.web.user)|Q(attention=request.web.user)
                              |Q(creator=request.web.user))
     print('tt size', len(top_ten))
@@ -142,6 +140,7 @@ def dashboard(request, project_id):
         'status_dict': status_dict,
         'join_user': join_user,
         'top_ten': top_ten_re_sorted,
+        'top_ten_size': len(top_ten_re_sorted),
         'echarts_data': echarts_data,
         'tasks_count': tasks_count,
         'funcs_count': funcs_count,
