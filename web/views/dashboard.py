@@ -25,7 +25,8 @@ def dashboard(request, project_id):
     issues_filter = models.Issues.objects.filter(project_id=project_id)
     trigger = cache.get('mytaskTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'off')
     if trigger == 'on':
-        issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user))
+        issues_filter=issues_filter.filter(Q(assign=request.web.user)|Q(attention=request.web.user)|Q(creator=request.web.user)).distinct()
+    print('issues_filter size aft filter ', len(issues_filter))
     main_legend_trigger = cache.get('mainLegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'任务,功能,Bug,需求确认')
     types = []
     type_ids = ''

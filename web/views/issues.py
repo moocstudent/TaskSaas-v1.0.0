@@ -159,7 +159,8 @@ def issues(request, project_id):
             print("trigger == 'on':")
             print(request.web.user)
             queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
-                                       | Q(creator=request.web.user))
+                                       | Q(creator=request.web.user)).distinct()
+        print('issues_filter size aft filter ', len(queryset))
         page_object = Pagination(
             current_page=request.GET.get('page'),
             all_count=queryset.count(),

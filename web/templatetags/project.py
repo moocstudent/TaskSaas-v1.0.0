@@ -157,8 +157,10 @@ def right_side_manage_menu_list(request):
     return {'right_side_data_list': right_side_data_list}
 
 
+# not use
 @register.inclusion_tag('inclusion/workbench_task_list.html')
 def workbench_task_list(request):
+    print('workbench_task_list pid ',request.web.project.id)
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
     legendTriggrer = cache.get('myechartlegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id), '1257')
