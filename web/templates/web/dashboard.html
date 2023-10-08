@@ -263,7 +263,7 @@
                                                     更新了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                    <label>【{{ item.title }}】</label>
+                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
                                                 </label>
                                                 <label style="width: 300px;">
                                                     更新于:{{ key }}
@@ -290,8 +290,8 @@
                                                 <label>更新了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                    <label>【{{ item.title }}】</label>
-                                                    <label>{{ item.desc }}</label>
+                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
+                                                    <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
                                                 </label>
                                                 {#                                            <div>指派#}
                                                 {#                                                给 {{ item.assign }}#}
@@ -303,8 +303,8 @@
                                                 <label>回复了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
-                                                    <label>【{{ item.title }}】</label>
-                                                    <label>{{ item.desc }}</label>
+                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
+                                                    <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
                                                 </label>
                                                 {#                                            <div>指派#}
                                                 {#                                                给 {{ item.assign }}#}

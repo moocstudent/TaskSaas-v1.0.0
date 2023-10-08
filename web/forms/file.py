@@ -3,7 +3,9 @@ from web.forms.bootstrap import BootStrapForm
 from django import forms
 from django.core.exceptions import ValidationError
 from utils.tencent.cos import check_file
-
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    file = forms.FileField()
 
 class FileFolderModelForm(BootStrapForm, forms.ModelForm):
     def __init__(self, request, parent_object, *args, **kwargs):
@@ -48,31 +50,30 @@ class FileModelForm(forms.ModelForm):
 
     def clean(self):
         key = self.cleaned_data['key']
-        etag = self.cleaned_data['etag']
         size = self.cleaned_data['file_size']
 
-        if not key or not etag:
+        if not key :
             return self.cleaned_data
 
         # 向COS校验文件是否合法
-
-        from qcloud_cos.cos_exception import CosServiceError
-
-        try:
-
-            result = check_file(self.request.web.project.bucket, self.request.web.project.region, key)
-
-        except CosServiceError as e:
-            self.add_error(key, '文件不存在！')
-            return self.cleaned_data
-
-        cos_etag = result.get('ETag')
-
-        if etag != cos_etag:
-            self.add_error('etag', 'ETag错误')
-
-        cos_length = result.get('Content-Length')
-        if int(cos_length) != size:
-            self.add_error('size', '文件大小错误')
+        #
+        # from qcloud_cos.cos_exception import CosServiceError
+        #
+        # try:
+        #
+        #     result = check_file(self.request.web.project.bucket, self.request.web.project.region, key)
+        #
+        # except CosServiceError as e:
+        #     self.add_error(key, '文件不存在！')
+        #     return self.cleaned_data
+        #
+        # cos_etag = result.get('ETag')
+        #
+        # if etag != cos_etag:
+        #     self.add_error('etag', 'ETag错误')
+        #
+        # cos_length = result.get('Content-Length')
+        # if int(cos_length) != size:
+        #     self.add_error('size', '文件大小错误')
 
         return self.cleaned_data

@@ -5,6 +5,7 @@ from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api
 from TaskSaasAPP import settings
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard
+from web.views.upload import FileUploadView
 
 urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': 'web/static'}, name='static'),
@@ -21,6 +22,7 @@ urlpatterns = [
     re_path(r'^webhook/gitlab/$', oauth_callback_api.webhook_callback, name='webhook_callback'),
     path('', home.index, name=''),
 
+    re_path(r'^upload/(?P<filename>[^/]+)$', FileUploadView.as_view()),
     # re_path(r'^issues_status_cache_set/', cache.issues_status_cache_set, name='issues_status_cache'),
     # 项目列表
     re_path(r'^project/list/', project.project_list, name='project_list'),
@@ -35,7 +37,6 @@ urlpatterns = [
 
     re_path(r'^profile/$', user_api.profile, name='profile'),
     re_path(r'^profile_git/$', user_api.profile_git, name='profile_git'),
-
 
     re_path(r'^manage/(?P<project_id>\d+)/', include([
         re_path(r'^cache_set/', cache.cache_set, name='cache'),
@@ -58,7 +59,7 @@ urlpatterns = [
         re_path(r'^file/$', file.file, name='file'),
         re_path(r'^file/delete/$', file.file_delete, name='file_delete'),
         re_path(r'^cos/credential/$', file.cos_credential, name='cos_credential'),
-        re_path(r'^file/post/$', file.file_post, name='file_post'),
+        re_path(r'^file/post/$', file.upload_file, name='file_post'),
         re_path(r'^file/download/(?P<file_id>\d+)/$', file.file_download, name='file_download'),
 
         re_path(r'^setting/$', setting.setting, name='setting'),

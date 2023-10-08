@@ -69,10 +69,10 @@ def dashboard(request, project_id):
     print('issues size bef ct ', len(issues_filter))
     n = 0
     for i in issues_filter:
-        print('i>>>>',i.status)
+        # print('i>>>>',i.status)
         if i.status ==1 :
             n+=1
-    print('n>>>',n)
+    # print('n>>>',n)
     issues_data = issues_filter.values('status').annotate(ct=Count('id',distinct=True))
 
     print('issues_data', issues_data)

@@ -1,4 +1,7 @@
+from django.conf.global_settings import STATIC_ROOT
 from django.db import models
+
+from TaskSaasAPP.settings import STATIC_URL
 
 
 # Create your models here.
@@ -139,7 +142,8 @@ class Wiki(models.Model):
 
     def __str__(self):
         return self.title
-
+def upload_to(instance, filename):
+ return '/'.join(['uploads', filename])
 
 class FileRepository(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -150,10 +154,14 @@ class FileRepository(models.Model):
         (2, '文件夹')
     }
     file_type = models.SmallIntegerField(verbose_name='类型', choices=file_type_choices)
-    name = models.CharField(verbose_name='文件夹名称', max_length=32, help_text="文件/文件夹名")
+    file_mime_type = models.CharField(verbose_name='文件类型',null=True,blank=True,max_length=80)
+    name = models.CharField(verbose_name='文件夹名称', max_length=500, help_text="文件/文件夹名")
     key = models.CharField(verbose_name='文件存储在COS中的KEY', max_length=128, null=True, blank=True)
     file_size = models.BigIntegerField(verbose_name='文件大小', null=True, blank=True, help_text='字节')
     file_path = models.CharField(verbose_name='文件路径', max_length=255, null=True, blank=True)
+    file_url = models.CharField(verbose_name='网络路径', max_length=255, null=True, blank=True)
+    ab_file_path = models.CharField(verbose_name='服务器绝对路径', max_length=255, null=True, blank=True)
+    file = models.FileField(null=True,upload_to=upload_to,max_length=500)
 
     parent = models.ForeignKey(verbose_name='父级目录', to='self', related_name='child', null=True, blank=True,on_delete=models.SET_NULL)
 

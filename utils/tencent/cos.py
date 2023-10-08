@@ -86,18 +86,18 @@ def delete_file_list(bucket, region, key_list):
     :param region:
     :return:
     """
-    config = CosConfig(Region=region, SecretId=settings.SECRET_ID, SecretKey=settings.SECRET_KEY, )
-    client = CosS3Client(config)
+    # config = CosConfig(Region=region, SecretId=settings.SECRET_ID, SecretKey=settings.SECRET_KEY, )
+    # client = CosS3Client(config)
 
-    objects = {
-        "Quiet": "true",
-        "Object": key_list
-    }
+    # objects = {
+    #     "Quiet": "true",
+    #     "Object": key_list
+    # }
 
-    client.delete_objects(
-        Bucket=bucket,
-        Delete=objects
-    )
+    # client.delete_objects(
+    #     Bucket=bucket,
+    #     Delete=objects
+    # )
 
 
 def check_file(bucket, region, key):

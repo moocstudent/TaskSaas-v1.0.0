@@ -68,11 +68,11 @@
                     <div class="btn btn-primary btn-xs upload" style="position:relative ">
                         <div><i class="fa fa-upload" aria-hidden="true"></i> 上传文件</div>
                         <input type="file" multiple name="uploadFile" id="uploadFile">
-
                     </div>
 
 
-                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#addModal" data-whatever="新建文件夹">
+                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#addModal"
+                       data-whatever="新建文件夹">
                         <i class="fa fa-plus-circle" aria-hidden="true"></i>新建文件夹
                     </a>
                 </div>
@@ -278,69 +278,48 @@
                 $.each(filelist, function (index, fileObject) {
                     checkFileList.push({"name": fileObject.name, "size": fileObject.size})
                 });
-                //将数据发送到django后台，进行容量的校验
-                //没有问题，返回临时凭证，否则返回错误信息
-                var cos_credential = new COS({
-                    getAuthorization: function (options, callback) {
-                        $.post(COS_CREDENTIAL, JSON.stringify(checkFileList), function (res) {
-
-                            if (res.status) {
-                                var credentials = res.data && res.data.credentials;
-                                if (!res.data || !credentials) return console.error('credentials invalid');
-                                callback({
-                                    TmpSecretId: credentials.tmpSecretId,
-                                    TmpSecretKey: credentials.tmpSecretKey,
-                                    XCosSecurityToken: credentials.sessionToken,
-                                    StartTime: res.data.startTime,
-                                    ExpiredTime: res.data.expiredTime
-                                });
-
-                                //授权通过之后，展示进度条
-                                $('#uploadProgress').removeClass('hide');
-
-                            } else {
-                                alert(res.error)
-                            }
-                        })
-                    }
-                });
-
+                //授权通过之后，展示进度条
+                $('#uploadProgress').removeClass("hide")
                 $.each(filelist, function (index, fileObject) {
+                    console.log('fileObject', fileObject);
                     //上传文件
                     var fileName = fileObject.name;
                     var fileSize = fileObject.size;
                     var key = (new Date()).getTime() + "_" + fileName;
 
-
                     var $tr = $('#progressTemplate').find('tr').clone();
                     $tr.find('.name').text(fileName);
                     $('#progressList').append($tr);
 
-                    //异步上传
-                    cos_credential.putObject({
-                        Bucket: '{{request.web.project.bucket}}',
-                        Region: '{{request.web.project.region}}',
-                        Key: key,
-                        Body: fileObject,
-                        onProgress: function (progressData) {
-                            console.log("文件上传进度--->", fileName, JSON.stringify(progressData))
 
-                            var percent = progressData.percent * 100 + '%';
-                            $tr.find('.progress-bar').text(percent)
-                            $tr.find('.progress-bar').css('width', percent)
-                        }
-                    }, function (err, data) {
-                        console.log(err || data);
-                        if (data && data.statusCode == 200) {
-                            //上传成功，将本次上传的文件上传到后台
-                            $.post(FILE_POST, {
-                                name: fileName,
-                                key: key,
-                                file_size: fileSize,
-                                parent: CURRENT_FOLDER_ID,
-                                etag: data.ETag,
-                                file_path: data.Location
-                            }, function (res) {
+                    //异步上传
+                    {% comment %}     cos_credential.putObject({
+                             Bucket: '{{request.web.project.bucket}}',
+                             Region: '{{request.web.project.region}}',
+                             Key: key,
+                             Body: fileObject,
+                             onProgress: function (progressData) {
+                                 console.log("文件上传进度--->", fileName, JSON.stringify(progressData))
+     {% endcomment %}
+                    var percent = 0.7 * 100 + '%';
+                    $tr.find('.progress-bar').text(percent)
+                    $tr.find('.progress-bar').css('width', percent)
+                    var formData = new FormData();
+                    formData.append('file', fileObject)
+                    formData.append('parent_id', CURRENT_FOLDER_ID)
+                    {#var upload_file = $("#upload_file_ajax")[0].files[0];#}
+
+                    $.ajax({
+                        url: FILE_POST,
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+
+                        success: function (res) {
+                            if (res.status) {
+                                {#alert("上传成功!")#}
+                                console.log('file post ', res)
                                 //数据库加入成功
                                 var newTr = $('#rowTpl').find('tr').clone();
                                 newTr.find('.name').text(res.data.name);
@@ -350,14 +329,64 @@
                                 newTr.find('.delete').attr('data-fid', res.data.id);
                                 newTr.find('.download').attr('href', res.data.download_url);
                                 $('#rowList').append(newTr);
-
+                                var percent = 1 * 100 + '%';
+                                $tr.find('.progress-bar').text(percent+'上传完成')
+                                $tr.find('.progress-bar').css('width', percent)
+                                setTimeout(function () {
                                 $tr.remove();
-                            })
-                        } else {
+                                $("#uploadProgress").addClass("hide")
+                                   }, 2000)
+                            } else {
+                                $tr.find('.progress-error').text('上传失败！')
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
                             $tr.find('.progress-error').text('上传失败！')
                         }
                     });
+
                 })
+                {% comment %}
+
+
+       }
+   }, function (err, data) {
+       console.log(err || data);
+       if (data && data.statusCode == 200) {
+           //上传成功，将本次上传的文件上传到后台
+           $.post(FILE_POST, {
+               name: fileName,
+               key: key,
+               file_size: fileSize,
+               parent: CURRENT_FOLDER_ID,
+               etag: data.ETag,
+               file_path: data.Location
+           }, function (res) {
+               //数据库加入成功
+               var newTr = $('#rowTpl').find('tr').clone();
+               newTr.find('.name').text(res.data.name);
+               newTr.find('.file-size').text(res.data.file_size);
+               newTr.find('.update_user__username').text(res.data.username);
+               newTr.find('.update_datetime').text(res.data.datetime);
+               newTr.find('.delete').attr('data-fid', res.data.id);
+               newTr.find('.download').attr('href', res.data.download_url);
+               $('#rowList').append(newTr);
+
+               $tr.remove();
+           })
+       } else {
+           $tr.find('.progress-error').text('上传失败！')
+       }
+   });{% endcomment %}
+            })
+        }
+
+        function delay(time) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, time);
             });
         }
 

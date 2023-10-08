@@ -1,15 +1,21 @@
 import json
+import os.path
+from datetime import datetime
+
 import requests
 
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.shortcuts import render
 from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 
+from TaskSaasAPP import settings
+from TaskSaasAPP.file_util import get_file_type
 from web import models
-from web.forms.file import FileFolderModelForm, FileModelForm
+from web.forms.file import FileFolderModelForm, FileModelForm, UploadFileForm
 from utils.tencent.cos import delete_file, delete_file_list, credential
+from web.models import FileRepository
 
 
 def file(request, project_id):
@@ -78,18 +84,18 @@ def file_delete(request, project_id):
     if fid.isdecimal():
         delete_object = models.FileRepository.objects.filter(id=fid, project=request.web.project).first()
 
-    if delete_object.file_type == 1:
-        # 删除文件(数据库文件删除，cos文件删除，项目空间容量设置)
+        if delete_object.file_type == 1:
+            # 删除文件(数据库文件删除，cos文件删除，项目空间容量设置)
 
-        # 删除文件时，项目空间容量设置
-        request.web.project.user_space -= delete_object.file_size
-        request.web.project.save()
+            # 删除文件时，项目空间容量设置
+            # request.web.project.user_space -= delete_object.file_size
+            # request.web.project.save()
 
-        # cos中删除文件
-        delete_file(request.web.project.bucket, request.web.project.region, delete_object.key)
-        delete_object.delete()
+            # cos中删除文件
+            # delete_file(request.web.project.bucket, request.web.project.region, delete_object.key)
+            delete_object.delete()
 
-        return JsonResponse({'status': True})
+            return JsonResponse({'status': True})
 
     # 删除文件夹下所有文件(数据库文件删除，cos文件删除，项目空间容量设置)
     total_size = 0
@@ -108,14 +114,17 @@ def file_delete(request, project_id):
                 # 放入文件列表
                 key_list.append({"Key": child.key})
 
-    if key_list:
+    # if key_list:
         # 批量删除
-        delete_file_list(request.web.project.bucket, request.web.project.region, key_list)
+        # delete_file_list(request.web.project.bucket, request.web.project.region, key_list)
+        # for k in key_list:
 
-    if total_size:
-        # 删除文件时，项目空间容量设置
-        request.web.project.user_space -= total_size
-        request.web.project.save()
+
+
+    # if total_size:
+    #     # 删除文件时，项目空间容量设置
+    #     request.web.project.user_space -= total_size
+    #     request.web.project.save()
 
     # 删除数据库文件
     delete_object.delete()
@@ -154,6 +163,50 @@ def cos_credential(request, project_id):
     return JsonResponse({'status': True, 'data': data_dict})
 
 
+
+
+@csrf_exempt
+def upload_file(request,project_id):
+    upload_file = request.FILES['file']
+    parent_id = request.POST.get('parent_id')
+    print('upload_file',upload_file)
+    upload_path = None
+
+    if upload_file:
+        fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'
+        ab_upload_path = os.path.join(settings.STATICFILES_DIRS[0]+'/uploads',fix+upload_file.name)
+        f = open(ab_upload_path, 'wb')
+        for i in upload_file.chunks():
+            f.write(i)
+        f.close()
+        file_url = "http://localhost:3000/static/uploads/"+fix+upload_file.name
+        file_path = "/static/uploads/"+fix+upload_file.name
+        file_repository = FileRepository(name=upload_file.name, file=ab_upload_path,file_path=file_path,file_url=file_url,
+                                         ab_file_path=ab_upload_path,
+                                         file_size=upload_file.size,file_type=1,file_mime_type=get_file_type(upload_file),
+                                         update_user=request.web.user,project_id=project_id,parent_id=parent_id)
+        file_repository.save()
+
+    # 项目的已使用空间更新
+    # request.web.project.user_space += data_dict['file_size']
+    # request.web.project.save()
+
+        result = {
+            'id': file_repository.id,
+            'name': file_repository.name,
+            'file_size': file_repository.file_size,
+            'username': file_repository.update_user.username,
+            'datetime': file_repository.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
+            'file_type': file_repository.get_file_type_display(),
+            'download_url': reverse('file_download',
+                                    kwargs={'project_id': request.web.project.id, 'file_id': file_repository.id})
+        }
+
+        return JsonResponse({'status': True, 'data': result})
+
+    # return JsonResponse({'status': False, 'data': "文件错误"})
+
+
 @csrf_exempt
 def file_post(request, project_id):
     """
@@ -173,7 +226,6 @@ def file_post(request, project_id):
     if form.is_valid():
         # 校验通过
         data_dict = form.cleaned_data
-        data_dict.pop('etag')
         data_dict.update({'project': request.web.project, 'file_type': 1, 'update_user': request.web.user})
         instance = models.FileRepository.objects.create(**data_dict)
 
@@ -205,11 +257,19 @@ def file_download(request, project_id, file_id):
     #     data = f.read()
 
     file_object = models.FileRepository.objects.filter(project_id=project_id, id=file_id).first()
+    ab_file_path = file_object.ab_file_path
+    file_name = file_object.name
+    file_url = file_object.file_url
+    content_type = file_object.file_mime_type
 
-    res = requests.get(file_object.file_path)
-    data = res.content
+    if ab_file_path and content_type:
+        file = open(ab_file_path, 'rb')  # 打开文件
+        response = FileResponse(file)  # 创建FileResponse对象
+        return response
+        # with open(ab_file_path, 'rb') as fh:
+        #     response = HttpResponse(fh.read(), content_type=content_type)
+        #     response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_url)
+        #     return response
 
-    response = HttpResponse(data)
-    response['Content-Disposition'] = "attachment;filename={}".format(file_object.name)
 
-    return response
+
