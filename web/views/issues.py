@@ -294,7 +294,11 @@ def issues_change(request, project_id, issues_pk):
             creator=request.web.user
         )
 
+        success = None
+        if new_object.id:
+            success = True
         new_reply_dict = {
+            'status':success,
             'id': new_object.id,
             'reply_type_text': new_object.get_reply_type_display(),
             'content': new_object.content,

@@ -388,6 +388,7 @@
          * @param nodeDict
          */
         function createRecordNode(nodeDict) {
+            console.log('createRecordNode',createRecordNode)
             var $item = $("#recordTemplate").find('.item').clone();
             $item.find('.left-avatar').html(nodeDict.creator[0].toUpperCase());
             $item.find('pre').html(nodeDict.content);
@@ -498,8 +499,10 @@
                 data: JSON.stringify(postDict),
                 dataType: 'JSON',
                 success: function (res) {
+                    console.log('res',res)
                     if (res.status) {
                         createRecordNode(res.data);
+                        location.reload()
                     } else {
                         $('#id_' + postDict.name).parent().next('.error-msg').text(res.error);
                     }

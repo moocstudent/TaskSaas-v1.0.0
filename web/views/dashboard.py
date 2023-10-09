@@ -86,8 +86,6 @@ def dashboard(request, project_id):
         # echarts_data[d['count']]
     join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
 
-    print('join_user', join_user)
-    print('echarts_data', echarts_data)
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
 
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
@@ -104,6 +102,7 @@ def dashboard(request, project_id):
     print('tr size', len(top_ten_reply))
     top_ten_dict = collections.OrderedDict()
     for t in top_ten:
+        print('t entity {} t issue_id {}'.format(t,t.issue_id))
         is_assign = 0
         assign = None
         if t.assign_id:
@@ -119,7 +118,7 @@ def dashboard(request, project_id):
                                                   'creator':tr.creator.username,'assign':tr.reply_id,
                                                   'desc': tr.content,'reply_type':tr.reply_type,
                                                   'title':tr.issues.subject,
-                                                  'issue_id':t.issue_id,'id':tr.issues_id}
+                                                  'issue_id':tr.issues.issue_id,'id':tr.issues_id}
 
     top_ten_re_sorted = dict(sorted(top_ten_dict.items(), key=operator.itemgetter(0), reverse=True))
 
