@@ -142,7 +142,7 @@ class Wiki(models.Model):
 
     def __str__(self):
         return self.title
-def upload_to(instance, filename):
+def upload_to(filename):
  return '/'.join(['uploads', filename])
 
 class FileRepository(models.Model):
