@@ -13,6 +13,7 @@ from utils.encrypt import uid
 from utils.pagination import Pagination
 from web import models
 from web.forms.issues import IssuesModelForm, IssuesReplyModelForm, IssuesInviteModelForm
+from web.models import IssuesLog
 
 
 class CheckFilter(object):
@@ -22,12 +23,13 @@ class CheckFilter(object):
         self.name = name
         self.data_list = sorted(data_list)
         self.request = request
+
     # fixme
     def __iter__(self):
-        print('len>>>>',len(self.data_list))
+        print('len>>>>', len(self.data_list))
         for item in self.data_list:
             key = str(item[0])
-            print('key>>',key)
+            print('key>>', key)
             text = item[1]
             ck = ""
             # 如果用户请求的url中status和当前key相等
@@ -47,21 +49,20 @@ class CheckFilter(object):
             else:
                 value = value_list
 
-            print('self.request.GET.get(self.name) >>>',value)
+            print('self.request.GET.get(self.name) >>>', value)
             query_dict = self.request.GET.copy()  # {'status',[1]}
-        # if value:
+            # if value:
             if key in value:
                 ck = "checked"
-                print('key in value',ck)
+                print('key in value', ck)
                 value.remove(key)  # 1,2,3:{'status',[2]}
             else:
                 print('key not in value', ck)
                 value.append(key)  # 1,2,3:{'status',[2]}
             query_dict.setlist(self.name, value)  # {'status',[]}
-        # 在当前url的参数上，新增参数
+            # 在当前url的参数上，新增参数
 
             query_dict._mutable = True  # 允许修改
-
 
             if 'page' in query_dict:
                 query_dict.pop('page')
@@ -118,24 +119,25 @@ class SelectFilter(object):
 
         yield mark_safe("</select>")
 
+
 # todo 改为对应的restframework form
 def issues(request, project_id):
-    print('issues pid ',request.web.project.id)
+    print('issues pid ', request.web.project.id)
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
         # 筛选条件(根据用户通过GET传过来的参数实现)
         # ?status=1&status=2&issues_type=1
         condition = {}
         for name in allow_filter_name:
-            print('name>>>>>>',name)
+            print('name>>>>>>', name)
             value_list = request.GET.getlist(name)
-            print('request value_list',value_list)
+            print('request value_list', value_list)
             request_object = request.GET.get(name)
             if name == 'issues_type' and request_object:
                 issues_type_ids = request_object.split(',')
                 if issues_type_ids:
-                    print('request value_str',issues_type_ids)
-                    if len(value_list)>len(issues_type_ids):
+                    print('request value_str', issues_type_ids)
+                    if len(value_list) > len(issues_type_ids):
                         print('BIG')
                         condition['{}__in'.format(name)] = value_list
                     else:
@@ -154,7 +156,7 @@ def issues(request, project_id):
 
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
-        trigger = cache.get('mytaskTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'off')
+        trigger = cache.get('mytaskTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'off')
         if trigger == 'on':
             print("trigger == 'on':")
             print(request.web.user)
@@ -206,13 +208,19 @@ def issues(request, project_id):
         form.instance.project = request.web.project
         form.instance.creator = request.web.user
         form.instance.issue_id = this_proj_max_issue_id + 1
-        print('form>>',form.instance.desc)
-        if form.instance.desc is None or len(form.instance.desc)==0:
-            form.instance.desc=form.instance.subject
+        print('form>>', form.instance.desc)
+        if form.instance.desc is None or len(form.instance.desc) == 0:
+            form.instance.desc = form.instance.subject
         # 保存
         form.save()
+        change_record = "{} 创建问题 {}".format(request.web.user.username, form.instance.subject)
+        issues_log = IssuesLog(issues=form.instance, creator=request.web.user,
+                                            record=change_record,
+                                             log_type=1,
+                                            create_datetime=form.instance.create_datetime)
+        issues_log.save()
         return JsonResponse({'status': True, })
-    print('form is invalid',form.errors)
+    print('form is invalid', form.errors)
     return JsonResponse({'status': False, 'error': form.errors})
 
 
@@ -224,6 +232,7 @@ def issues_detail(request, project_id, issues_id):
     form = IssuesModelForm(request, instance=issues_object)
 
     context = {
+        'id' : issues_id,
         'form': form,
         'issues_object': issues_object
     }
@@ -298,7 +307,7 @@ def issues_change(request, project_id, issues_pk):
         if new_object.id:
             success = True
         new_reply_dict = {
-            'status':success,
+            'status': success,
             'id': new_object.id,
             'reply_type_text': new_object.get_reply_type_display(),
             'content': new_object.content,
@@ -316,14 +325,23 @@ def issues_change(request, project_id, issues_pk):
                 return JsonResponse({'status': False, 'error': '您选择的值不能为空！'})
             setattr(issues_object, name, None)
             issues_object.save()
+
             # 记录
-            change_record = "{}更新为空".format(field_object.verbose_name)
+            change_record = "{} 更新为空".format(field_object.verbose_name)
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                   record=change_record,
+                                   create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
 
         else:
             setattr(issues_object, name, value)
             issues_object.save()
             # 记录
-            change_record = "{}更新为{}".format(field_object.verbose_name, value)
+            change_record = "{} 更新为 {}".format(field_object.verbose_name, value)
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                                record=change_record,
+                                                create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
 
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
@@ -335,7 +353,11 @@ def issues_change(request, project_id, issues_pk):
             setattr(issues_object, name, None)
             issues_object.save()
             # 记录
-            change_record = "{}更新为空".format(field_object.verbose_name)
+            change_record = "{} 更新为空 ".format(field_object.verbose_name)
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                   record=change_record,
+                                   create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
 
         else:
             if name == 'assign':
@@ -352,15 +374,19 @@ def issues_change(request, project_id, issues_pk):
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
 
             else:
-                print('用户输入的值是自己的值value:',value)
+                print('用户输入的值是自己的值value:', value)
                 # 用户输入的值是自己的值
                 instance = field_object.rel.model.objects.filter(id=value, project_id=project_id).first()
                 if not instance:
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
 
-            change_record = "{}更新为{}".format(field_object.verbose_name, str(instance))
+            change_record = "{} 更新为 {}".format(field_object.verbose_name, str(instance))
             setattr(issues_object, name, instance)
             issues_object.save()
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                   record=change_record,
+                                   create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
 
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
@@ -375,7 +401,11 @@ def issues_change(request, project_id, issues_pk):
 
         setattr(issues_object, name, value)
         issues_object.save()
-        change_record = "{}更新为{}".format(field_object.verbose_name, seleted_text)
+        change_record = "{} 更新为 {}".format(field_object.verbose_name, seleted_text)
+        issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                               record=change_record,
+                               create_datetime=issues_object.latest_update_datetime)
+        issues_log.save()
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
     # M2M字段
@@ -388,7 +418,11 @@ def issues_change(request, project_id, issues_pk):
         if not value:
             issues_object.attention.set([])
             issues_object.save()
-            change_record = "{}更新为空".format(field_object.verbose_name)
+            change_record = "{} 更新为空".format(field_object.verbose_name)
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                   record=change_record,
+                                   create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
         else:
             # values=[1,2,3,4] 参与者/创建者
             # 获取当前项目所有成员
@@ -407,7 +441,11 @@ def issues_change(request, project_id, issues_pk):
 
             issues_object.attention.set(value)
             issues_object.save()
-            change_record = "{}更新为{}".format(field_object.verbose_name, ",".join(username_list))
+            change_record = "{} 更新为 {}".format(field_object.verbose_name, ",".join(username_list))
+            issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
+                                   record=change_record,
+                                   create_datetime=issues_object.latest_update_datetime)
+            issues_log.save()
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
     return JsonResponse({'status': False, 'error': 'Error！'})

@@ -4248,7 +4248,7 @@ hr.editormd-page-break {
   -o-border-radius: 500px;
   border-radius: 500px;
   display: none;
-  background-color: #ccc;
+  background-color: red;
   position: absolute;
   top: 25px;
   right: 35px;

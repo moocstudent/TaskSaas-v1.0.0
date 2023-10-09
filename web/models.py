@@ -151,7 +151,8 @@ class FileRepository(models.Model):
     project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
     file_type_choices = {
         (1, '文件'),
-        (2, '文件夹')
+        (2, '文件夹'),
+        (3, 'EditorUpload')
     }
     file_type = models.SmallIntegerField(verbose_name='类型', choices=file_type_choices)
     file_mime_type = models.CharField(verbose_name='文件类型',null=True,blank=True,max_length=80)
@@ -221,6 +222,26 @@ class Issues(models.Model):
     def __str__(self):
         return self.subject
 
+class IssuesLog(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    issues = models.ForeignKey(to="Issues",null=True,blank=True,on_delete=models.SET_NULL)
+    """问题"""
+    creator = models.ForeignKey(verbose_name='更新者', to='UserInfo',null=True,blank=True, on_delete=models.SET_NULL)
+    record = models.TextField(verbose_name='更新记录',null=True,blank=True)
+
+    type_choices = {
+        (1, '新建'),
+        (2, '更新'),
+        (3, '回复'),
+        (4, '删除'),
+    }
+
+    log_type = models.SmallIntegerField(verbose_name='日志类型', choices=type_choices, default=2)
+    # 或之前issues再次更改，会再产生一条新的issuesChangeLog，create_datetime对应其latest_update_datetime
+    create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
+    def __str__(self):
+        return self.issues
 
 class Module(models.Model):
     id = models.BigAutoField(primary_key=True)

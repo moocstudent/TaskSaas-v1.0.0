@@ -37,7 +37,7 @@ def file(request, project_id):
             parent = parent.parent
 
         # 获取当前页面所有的文件以及文件夹
-        queryset = models.FileRepository.objects.filter(project=request.web.project)
+        queryset = models.FileRepository.objects.filter(project=request.web.project,file_type__in=(1,2))
 
         if parent_object:
             file_object_list = queryset.filter(parent=parent_object).order_by('-file_type')
@@ -170,7 +170,6 @@ def upload_file(request,project_id):
     upload_file = request.FILES['file']
     parent_id = request.POST.get('parent_id')
     print('upload_file',upload_file)
-    upload_path = None
 
     if upload_file:
         fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'

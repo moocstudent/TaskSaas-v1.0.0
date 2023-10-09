@@ -87,13 +87,12 @@ def dashboard(request, project_id):
     join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
 
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
-
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
     if trigger == 'on':
         top_ten=top_ten.filter(Q(assign=request.web.user)|Q(attention=request.web.user)
                              |Q(creator=request.web.user))
     print('tt size', len(top_ten))
-    top_ten_reply = models.IssuesReply.objects.filter(issues__project_id=project_id).exclude(content__startswith='指派更新').order_by('-create_datetime')
+    top_ten_reply = models.IssuesReply.objects.filter(issues__project_id=project_id,reply_type=2).order_by('-create_datetime')
     if trigger == 'on':
         print("trigger == 'on':")
         print(request.web.user)
@@ -101,21 +100,20 @@ def dashboard(request, project_id):
                              |Q(issues__creator=request.web.user))
     print('tr size', len(top_ten_reply))
     top_ten_dict = collections.OrderedDict()
-    for t in top_ten:
-        print('t entity {} t issue_id {}'.format(t,t.issue_id))
-        is_assign = 0
-        assign = None
-        if t.assign_id:
-            is_assign=1
-            assign = t.assign.username
-        top_ten_dict[t.latest_update_datetime] = {'is_assign': is_assign, 'is_fresh': 1,'is_reply':0,
-                                                  'creator':t.creator.username,'assign':assign,
-                                                  'desc':t.subject,'reply_type':0,
-                                                  'title': t.subject,
-                                                  'issue_id':t.issue_id,'id':t.id}
+    top_ten_log = models.IssuesLog.objects.filter(issues__project_id=project_id).order_by('-create_datetime')
+    for t in top_ten_log:
+        top_ten_dict[t.latest_update_datetime] = {'type': t.log_type, 'is_reply':0,
+                                                  'creator':t.creator.username,'assign':'','reply_to':None,
+                                                  'desc':t.record,'reply_type':0,
+                                                  'title': t.issues.subject,
+                                                  'issue_id':t.issues.issue_id,'id':t.issues_id}
     for tr in top_ten_reply:
-        top_ten_dict[tr.create_datetime] = {'is_assign': 0, 'is_fresh': 0,'is_reply':1,
-                                                  'creator':tr.creator.username,'assign':tr.reply_id,
+        reply_to = None
+        if tr.reply_id:
+            reply_to = tr.reply.creator.username
+            print('reply_to',reply_to)
+        top_ten_dict[tr.create_datetime] = {'type': 3, 'is_reply':1,
+                                                  'creator':tr.creator.username,'assign': '','reply_to':reply_to,
                                                   'desc': tr.content,'reply_type':tr.reply_type,
                                                   'title':tr.issues.subject,
                                                   'issue_id':tr.issues.issue_id,'id':tr.issues_id}

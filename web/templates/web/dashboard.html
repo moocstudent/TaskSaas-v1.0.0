@@ -256,55 +256,38 @@
                                         <div class="avatar">{{ item.creator.0|upper }}</div>
                                     </td>
                                     <td>
-                                        {% if item.is_fresh %}
-                                            {% if not item.is_assign %}
+                                        {% if item.type == 1 %}
                                                 <div>{{ item.creator }}</div>
                                                 <label>
-                                                    更新了
+                                                    创建了
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
                                                     <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
                                                 </label>
                                                 <label style="width: 300px;">
-                                                    更新于:{{ key }}
+                                                    创建于:{{ key }}
                                                 </label>
-                                            {% endif %}
                                         {% endif %}
-                                        {% if item.is_assign and item.assign %}
+                                        {% if item.type == 2 %}
                                             <div>{{ item.creator }}</div>
-                                            <label>更新了指派
+                                            <label>更新了
                                                 <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                 {#                                            给 {{ item.assign.username }}#}
                                                 <label>【{{ item.title }}】</label>
-                                            </label>
-                                            <label>指派
-                                                给 {{ item.assign }}
+                                                <label>{{ item.desc }}</label>
                                             </label>
                                             <label style="width: 300px;">
-                                                指派于:{{ key }}
+                                                更新于:{{ key }}
                                             </label>
                                         {% endif %}
-                                        {% if item.is_reply %}
+                                        {% if item.type == 3 %}
                                             <div>{{ item.creator }}</div>
-                                            {% if item.reply_type == 1 %}
-                                                <label>更新了
+                                                <label>回复了 {% if item.reply_to %}{{ item.reply_to }}{% endif %}
                                                     <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                     {#                                            给 {{ item.assign.username }}#}
                                                     <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                                    <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
-                                                </label>
-                                                {#                                            <div>指派#}
-                                                {#                                                给 {{ item.assign }}#}
-                                                {#                                            </div>#}
-                                                <label style="width: 300px;">
-                                                    更新于:{{ key }}
-                                                </label>
-                                            {% else %}
-                                                <label>回复了
-                                                    <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                    {#                                            给 {{ item.assign.username }}#}
-                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                                    <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
+                                                    <br>
+                                                    >> <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
                                                 </label>
                                                 {#                                            <div>指派#}
                                                 {#                                                给 {{ item.assign }}#}
@@ -312,7 +295,6 @@
                                                 <label style="width: 300px;">
                                                     回复于:{{ key }}
                                                 </label>
-                                            {% endif %}
 
                                         {% endif %}
 

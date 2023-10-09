@@ -5,8 +5,25 @@
 {% block css %}
     <link rel="stylesheet" href="{% static 'web/plugin/editor-md/css/editormd.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap-select/css/bootstrap-select.min.css' %}">
     <style>
+        #editor.fullscreen .modal-dialog {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        #editor.fullscreen .modal-content {
+            height: 100%;
+            border: 0;
+        }
+
+        #editor.fullscreen .modal-body {
+            height: 100%;
+            overflow: auto;
+        }
+
         .comment-area .item {
             margin-top: 20px;
         }
@@ -55,6 +72,35 @@
         .editormd-fullscreen {
             z-index: 1001;
         }
+
+
+        .editormd-preview-close-btn {
+            color: orange;
+            padding: 4px 6px;
+            font-size: 18px;
+            -webkit-border-radius: 500px;
+            -moz-border-radius: 500px;
+            -ms-border-radius: 500px;
+            -o-border-radius: 500px;
+            border-radius: 500px;
+            display: none;
+            background-color: red;
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            z-index: 19;
+            -webkit-transition: background-color 300ms ease-out;
+            /* Safari, Chrome */
+            -moz-transition: background-color 300ms ease-out;
+            /* Firefox 4.0~16.0 */
+            transition: background-color 300ms ease-out;
+            /* IE >9, FF >15, Opera >12.0 */
+        }
+
+        .editormd-preview-close-btn:hover {
+            background-color: red;
+        }
+
     </style>
 
 
@@ -68,7 +114,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading edit-heading">
                     <div>
-                        <i class="fa fa-edit" aria-hidden="true"></i> 更新问题
+                        <i class="fa fa-edit" aria-hidden="true"></i> 更新问题 {% if id %}#{{ id }}{% endif %}
                     </div>
 
                 </div>
@@ -119,10 +165,12 @@
                                    class="col-md-2 control-label">{{ form.desc.label }}</label>
                             <div class="col-md-10">
                                 <div>
+                                    <button type="button" id="fullscreen-btn">全屏切换
+                                    </button>
+                                    <label id="browserTip">使用谷歌或火狐来进行编辑获得最佳体验</label>
                                     <div id="editor">
                                         {{ form.desc }}
                                     </div>
-
                                     <div class="error-msg"></div>
                                 </div>
                                 <div class="error-msg"></div>
@@ -306,6 +354,7 @@
 {% block js %}
     <script src="{% static 'web/plugin/editor-md/editormd.min.js' %}"></script>
     <script src="{% static 'web/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+    <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'web/plugin/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
     <script src="{% static 'web/plugin/bootstrap-select/js/bootstrap-select.min.js' %}"></script>
     <script src="{% static 'web/plugin/bootstrap-select/js/i18n/defaults-zh_CN.min.js' %}"></script>
@@ -388,7 +437,7 @@
          * @param nodeDict
          */
         function createRecordNode(nodeDict) {
-            console.log('createRecordNode',createRecordNode)
+            console.log('createRecordNode', createRecordNode)
             var $item = $("#recordTemplate").find('.item').clone();
             $item.find('.left-avatar').html(nodeDict.creator[0].toUpperCase());
             $item.find('pre').html(nodeDict.content);
@@ -499,7 +548,7 @@
                 data: JSON.stringify(postDict),
                 dataType: 'JSON',
                 success: function (res) {
-                    console.log('res',res)
+                    console.log('res', res)
                     if (res.status) {
                         createRecordNode(res.data);
                         location.reload()
@@ -509,6 +558,105 @@
                 }
             })
         }
+
+        function showFullScreenBtn2Preview() {
+            $('#fullscreen-btn').show()
+            $('#browserTip').hide()
+        }
+
+        function hideFullScreenBtn2Preview() {
+            $('#fullscreen-btn').hide()
+            $('#browserTip').show()
+        }
+
+        function browserDetect() {
+            var userAgent = navigator.userAgent; // 取得浏览器的userAgent字符串
+            console.log(userAgent)
+
+            var isFirefox = navigator.userAgent.indexOf('Firefox') > -1  // 是否是火狐  ，火狐内核Gecko
+            console.log('火狐' + isFirefox)  // 返回 true  则是 ，false  则不是
+
+
+            var isWebKit = navigator.userAgent.indexOf('WebKit') > -1  // 是否是WebKit 内核
+            console.log('谷歌内核' + isWebKit)  // 返回 true  则是，false  则不是
+
+            var isChrome = navigator.userAgent.indexOf('Chrome') > -1  // 是否是谷歌
+            console.log('谷歌' + isChrome)  // 返回 true  则是 ，false  则不是
+
+            var isOpera = navigator.userAgent.indexOf('Opera') > -1  // 是否是opera ， opera内核 Presto
+            console.log('Opera' + isOpera)  // 返回 true  则是 ，false  则不是
+
+            var isTrident = navigator.userAgent.indexOf('Trident') > -1  // 是否是IE内核
+            console.log('IE内核' + isTrident)  // 返回 true  则是 ，false  则不是
+
+            var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera
+            console.log('IE ' + isIE)  //判断是否IE浏览器
+            //  因为ie10-ie11的版本问题，不再支持document.all判断，所以ie判断函数要重新写
+            var isIeL = !!window.ActiveXObject || "ActiveXObject" in window
+            console.log('IELLQ ' + isIeL)  //判断是否IE浏览器
+
+            var isIE9 = navigator.userAgent.indexOf("MSIE 9.0") > 0
+            console.log('IE999 ' + isIE9)  //判断是否IE9  ;如果是其他IE版本，则 MSIE 7.0   MSIE 8.0
+
+
+            if (isFirefox || isChrome) {
+                showFullScreenBtn2Preview()
+            } else {
+                hideFullScreenBtn2Preview()
+            }
+            // 判断是否为移动端
+            var browser = {
+                versions: function () {
+                    var u = navigator.userAgent;
+                    return {
+                        trident: u.indexOf('Trident') > -1, //IE内核
+                        presto: u.indexOf('Presto') > -1, //opera内核
+                        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                        gecko: u.indexOf('Firefox') > -1, //火狐内核Gecko
+                        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+                        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios
+                        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android
+                        iPhone: u.indexOf('iPhone') > -1, //iPhone
+                        iPad: u.indexOf('iPad') > -1, //iPad
+                        webApp: u.indexOf('Safari') > -1 //Safari
+                    };
+                }()
+            }
+            var isPhone = browser.versions.mobile || browser.versions.ios || browser.versions.android || browser.versions.iPhone || browser.versions.iPad
+            console.log('是否为移动端' + isPhone)
+
+// JS判断浏览器是否是IE9以下，处理可能遇到的兼容性问题
+            if (navigator.appName == "Microsoft Internet Explorer" && parseInt(navigator.appVersion.split(";")[1].replace(/[ ]/g, "").replace("MSIE", "")) < 9) {
+                console.log("您的浏览器版本过低，请使用IE9及以上版本");
+            }
+        }
+
+        browserDetect()
+
+        $('#fullscreen-btn').click(function () {
+
+            var modal = $('#editor'); // 弹出框的ID
+            if (modal.hasClass('fullscreen')) {
+                // 如果已经是全屏状态，则退出全屏
+                let removeClass = modal.removeClass('fullscreen');
+                if (!removeClass) {
+                    document.exitFullscreen();
+                }
+                //再次进入全屏
+                modal.addClass('fullscreen');
+                var element = modal.get(0);
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                }
+            } else {
+                // 否则进入全屏
+                modal.addClass('fullscreen');
+                var element = modal.get(0);
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                }
+            }
+        });
 
     </script>
 

@@ -1,13 +1,20 @@
+import os
+from datetime import datetime
+
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 
+from TaskSaasAPP import settings
+from TaskSaasAPP.file_util import get_file_type
 from web import models
 from web.forms.wiki import WikiModelForm
 
 from utils.encrypt import uid
 from utils.tencent.cos import upload_file
+from web.models import FileRepository
 
 
 def wiki(request, project_id):
@@ -94,6 +101,7 @@ def wiki_edit(request, project_id, wiki_id):
 
 
 @csrf_exempt
+@xframe_options_exempt
 def wiki_upload(request, project_id):
     """Markdown上传图片"""
     result = {
@@ -102,20 +110,34 @@ def wiki_upload(request, project_id):
         'url': None,
     }
 
-    image_object = request.FILES.get('editormd-image-file')
+    upload_file = request.FILES.get('editormd-image-file')
 
-    if not image_object:
+
+    if not upload_file:
         result['massage'] = '文件不存在'
         return JsonResponse(result)
+    if upload_file:
+        fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'
+        ab_upload_path = os.path.join(settings.STATICFILES_DIRS[0] + '/uploads', fix + upload_file.name)
+        f = open(ab_upload_path, 'wb')
+        for i in upload_file.chunks():
+            f.write(i)
+        f.close()
+        file_url = "http://localhost:3000/static/uploads/" + fix + upload_file.name
+        file_path = "/static/uploads/" + fix + upload_file.name
+        file_repository = FileRepository(name=upload_file.name, file=ab_upload_path, file_path=file_path,
+                                         file_url=file_url,
+                                         ab_file_path=ab_upload_path,
+                                         file_size=upload_file.size, file_type=3,
+                                         file_mime_type=get_file_type(upload_file),
+                                         update_user=request.web.user, project_id=project_id, parent_id='')
+        file_repository.save()
+        result['success'] = 1
+        result['url'] = file_url
 
-    bucket = request.web.project.bucket
-    region = request.web.project.region
-    ext = image_object.name.rsplit('.')[-1]
-    key = "{}.{}".format(uid(request.web.user.mobile_phone), ext)
+        print('>>>',result['url'] )
 
-    file_url = upload_file(bucket, region, image_object, key)
+        return JsonResponse(result)
 
-    result['success'] = 1
-    result['url'] = file_url
 
-    return JsonResponse(result)
+
