@@ -179,7 +179,15 @@
                                     <div class="col-sm-4">
                                         {#                                       id {{ request.web.project.creator.id }}#}
                                         <a href="" onclick="showMemberWithProjInfos()">
-                                            <div class="avatar">{{ request.web.project.creator.username.0|upper }}</div>
+                                            <div class="avatar">
+                                                {% if  request.web.project.creator.git_avatar %}
+                                                    <img class="avatar"
+                                                         src="{{ request.web.project.creator.git_avatar }}" alt="">
+                                                {% else %}
+                                                    {{ request.web.project.creator.username.0|upper }}
+                                                {% endif %}
+
+                                            </div>
                                         </a>
                                         <div class="text">{{ request.web.project.creator.username }}</div>
                                     </div>
@@ -190,7 +198,11 @@
                                         <div class="col-sm-4">
                                             {#                                        id {{ item.0 }}#}
                                             <a href="" onclick="showMemberWithProjInfos()">
-                                                <div class="avatar">{{ item.1.0 |upper }}</div>
+                                                {% if item.2 %}
+                                                    <img class="avatar" src="{{ item.2 }}" alt="">
+                                                {% else %}
+                                                    <div class="avatar">{{ item.1.0 |upper }}</div>
+                                                {% endif %}
                                             </a>
                                             <div class="text">{{ item.1 }}</div>
                                         </div>
@@ -246,27 +258,32 @@
                         动态 {{ top_ten_size }} 次
                     </div>
                     <div class="panel-body top-10">
-                        <table class="table" style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;display: block;overflow-y: scroll;">
+                        <table class="table"
+                               style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;display: block;overflow-y: scroll;">
                             <tbody>
                             {% for key,item in top_ten.items %}
                                 {#                                                                {{ key }}#}
                                 {#                                {{ item }}#}
                                 <tr>
                                     <td style="width: 46px;">
-                                        <div class="avatar">{{ item.creator.0|upper }}</div>
+                                                {% if item.avatar %}
+                                                    <img class="avatar" src="{{ item.avatar }}" alt="">
+                                                {% else %}
+                                                    <div class="avatar">{{ item.creator.0|upper }}</div>
+                                                {% endif %}
                                     </td>
                                     <td>
                                         {% if item.type == 1 %}
-                                                <div>{{ item.creator }}</div>
-                                                <label>
-                                                    创建了
-                                                    <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                    {#                                            给 {{ item.assign.username }}#}
-                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                                </label>
-                                                <label style="width: 300px;">
-                                                    创建于:{{ key }}
-                                                </label>
+                                            <div>{{ item.creator }}</div>
+                                            <label>
+                                                创建了
+                                                <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
+                                                {#                                            给 {{ item.assign.username }}#}
+                                                <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
+                                            </label>
+                                            <label style="width: 300px;">
+                                                创建于:{{ key }}
+                                            </label>
                                         {% endif %}
                                         {% if item.type == 2 %}
                                             <div>{{ item.creator }}</div>
@@ -282,19 +299,19 @@
                                         {% endif %}
                                         {% if item.type == 3 %}
                                             <div>{{ item.creator }}</div>
-                                                <label>回复了 {% if item.reply_to %}{{ item.reply_to }}{% endif %}
-                                                    <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                    {#                                            给 {{ item.assign.username }}#}
-                                                    <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                                    <br>
-                                                    >> <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
-                                                </label>
-                                                {#                                            <div>指派#}
-                                                {#                                                给 {{ item.assign }}#}
-                                                {#                                            </div>#}
-                                                <label style="width: 300px;">
-                                                    回复于:{{ key }}
-                                                </label>
+                                            <label>回复了 {% if item.reply_to %}{{ item.reply_to }}{% endif %}
+                                                <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
+                                                {#                                            给 {{ item.assign.username }}#}
+                                                <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
+                                                <br>
+                                                >> <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
+                                            </label>
+                                            {#                                            <div>指派#}
+                                            {#                                                给 {{ item.assign }}#}
+                                            {#                                            </div>#}
+                                            <label style="width: 300px;">
+                                                回复于:{{ key }}
+                                            </label>
 
                                         {% endif %}
 

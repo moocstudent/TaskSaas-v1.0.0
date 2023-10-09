@@ -84,7 +84,7 @@ def dashboard(request, project_id):
         echarts_data.insert(item[0] - 1, item[1]['count'])
         # print('count',d['count'])
         # echarts_data[d['count']]
-    join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
+    join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username','user__git_avatar')
 
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
@@ -104,6 +104,7 @@ def dashboard(request, project_id):
     for t in top_ten_log:
         top_ten_dict[t.latest_update_datetime] = {'type': t.log_type, 'is_reply':0,
                                                   'creator':t.creator.username,'assign':'','reply_to':None,
+                                                  'avatar':t.creator.git_avatar,
                                                   'desc':t.record,'reply_type':0,
                                                   'title': t.issues.subject,
                                                   'issue_id':t.issues.issue_id,'id':t.issues_id}
@@ -114,6 +115,7 @@ def dashboard(request, project_id):
             print('reply_to',reply_to)
         top_ten_dict[tr.create_datetime] = {'type': 3, 'is_reply':1,
                                                   'creator':tr.creator.username,'assign': '','reply_to':reply_to,
+                                                'avatar': tr.creator.git_avatar,
                                                   'desc': tr.content,'reply_type':tr.reply_type,
                                                   'title':tr.issues.subject,
                                                   'issue_id':tr.issues.issue_id,'id':tr.issues_id}
@@ -148,5 +150,9 @@ def dashboard(request, project_id):
         'type_ids':type_ids,
         'all_type_ids':all_type_ids
     }
+
+    project = models.Project.objects.filter(id=project_id).first()
+
+    request.web.project.creator.git_avatar = project.creator.git_avatar
 
     return render(request, 'web/dashboard.html', context)
