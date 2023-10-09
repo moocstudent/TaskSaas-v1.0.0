@@ -147,7 +147,7 @@ def manage_menu_list(request):
 @register.inclusion_tag('inclusion/right_side_manage_menu_list.html')
 def right_side_manage_menu_list(request):
     right_side_data_list = [
-        {'id': 'workbench', 'title': '(新)*工作台',
+        {'id': 'workbench', 'title': '工作台',
          'url': reverse('workbench', kwargs={'project_id': request.web.project.id})}
     ]
 

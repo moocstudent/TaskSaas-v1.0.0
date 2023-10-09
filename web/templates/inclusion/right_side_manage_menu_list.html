@@ -1,5 +1,5 @@
 {% for item in right_side_data_list %}
     <li {% if item.style %}style="{{ item.style }}"{% endif %}  {% if item.id %}id="{{ item.id }}"{% endif %} {% if item.class %}class="{{ item.class }}"{% endif %}><a href="{{ item.url }}">
-       <b> <span style="color:red;"> {{ item.title }}</span></b>
+       <b>  {{ item.title }}</b>
     </a></li>
 {% endfor %}
