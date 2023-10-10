@@ -45,7 +45,6 @@ def profile_git(request):
             oauth_token_res = json.loads(requests.post("http://39.99.215.169:8099/oauth/token", parameters).text)
             user_git_info_res = json.loads(
                 requests.get("http://39.99.215.169:8099/api/v4/user?access_token=" + oauth_token_res['access_token']).text)
-            print(user_git_info_res)
             if user_git_info_res['username'] == git_un and user:
                 # 获取用户ok，存git信息到userinfo
                 user.git_username = git_un

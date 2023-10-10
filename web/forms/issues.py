@@ -38,6 +38,8 @@ class IssuesModelForm(BootStrapForm, forms.ModelForm):
         project_user_list = models.ProjectUser.objects.filter(project=request.web.project).values_list('user_id',
                                                                                                        'user__username')
 
+        print('total_user_list',total_user_list)
+        print('project_user_list',project_user_list)
         total_user_list.extend(project_user_list)
 
         self.fields['assign'].choices = [('', '没有选中任何项')] + total_user_list
