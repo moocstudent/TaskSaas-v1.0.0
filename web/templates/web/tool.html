@@ -1,0 +1,119 @@
+{% extends 'layout/manage.html' %}
+{% block title %}{% endblock %}
+
+{% block css %}
+    <style>
+        .list-group .choices {
+            border-left: 2px solid #f90 !important;
+        }
+
+        textarea {
+            width: 120px;
+            resize: none; /* 禁止用户调整文本框的大小 */
+            overflow-y: hidden; /* 隐藏竖直滚动条 */
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container clearfix" style="margin-top: 20px">
+        <div class="col-md-12">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                    随机字符串生成
+                </div>
+                <div class="panel-body" style="height: 300px">
+
+                    {#                        {% csrf_token %}#}
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">给定位数字符串</label>
+                        <div class="col-sm-5">
+                            <input id="generate_str_length" type="text" oninput="value=value.replace(/[^\d]/g,'')" maxlength="4" class="form-control" placeholder="请输入位数"
+                                   name="str_length">
+                            <span class="error-msg">{{ error }}</span>
+                        </div>
+
+                    </div>
+                    <div class="form-group" style="padding-top: 35px">
+                        <div class="col-sm-offset-5 col-sm-5">
+                            <input id="generateStrBtn" type="button" class="btn btn-info" value="生 成">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-md-8">
+                        <span><input type="input" id="generate_str"></span>
+                        <button onclick="touch()" id="copyText" type="button" class="success">复制文本
+                        </button>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        function generateStr() {
+            generate_str_length = $("#generate_str_length").val()
+            console.log('generate_str_length', generate_str_length)
+            $.ajax({
+                url: "{% url 'tool_generate_str' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'str_length': generate_str_length,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        {#reloadWorkBenchJson()#}
+                        $("#generate_str").show()
+                                     $("#copyText").show()
+                       document.getElementById("generate_str").value=(res.str);
+                        {#location.reload();#}
+                        {#$("#tasklist").load(issues_object_list=[])#}
+                    } else {
+
+                    }
+                }
+
+            })
+
+        }
+
+        $("#copyText").hide()
+        $("#generate_str").hide()
+
+        $("#generateStrBtn").click(generateStr)
+
+        function touch() {
+            // 获取文本框的值
+            var generate_str = document.getElementById("generate_str");
+
+            // 选择文本
+            generate_str.select();
+
+            // 复制文本到剪贴板
+            document.execCommand("copy");
+
+            // 取消文本选择
+            window.getSelection().removeAllRanges();
+
+            // 提示用户已复制
+            alert("已复制到剪贴板，文本长度：" + generate_str.value.length);
+        }
+
+
+
+    </script>
+{% endblock %}

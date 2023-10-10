@@ -300,3 +300,10 @@ def filter_by_day(my_issues_set, day_trigger):
     else:
         print('day0 no filtered')
         return my_issues_set
+
+
+def tool(request,project_id):
+    context = {
+    }
+    return render(request, 'web/tool.html', context)
+

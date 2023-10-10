@@ -4,7 +4,7 @@ from django.urls import re_path, include, path
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api
 from TaskSaasAPP import settings
-from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard
+from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool
 from web.views.upload import FileUploadView
 
 urlpatterns = [
@@ -47,6 +47,8 @@ urlpatterns = [
 
         re_path(r'^statistics/$', manage.statistics, name='statistics'),
         re_path(r'^git/$', manage.git, name='git'),
+        re_path(r'^tool/$', manage.tool, name='tool'),
+        re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),
         re_path(r'^workbench/$', manage.workbench, name='workbench'),
 
         re_path(r'^wiki/$', wiki.wiki, name='wiki'),
@@ -80,6 +82,11 @@ urlpatterns = [
         # path('<str:room_name>/', chat_views.room, name='room'),
         path('ws/', consumers.ChatConsumer.as_asgi()),
     ], None)),
+
+    # re_path('tool/',include([
+    #     path('', manage.tool, name='tool'),
+    #     re_path(r'^generate/(?P<str_length>\d+)/$', tool.generate_random_chinese_string,name='tool_generate_str'),
+    # ],None)),
 
     # 邀请页面
     re_path(r'^invite/join/(?P<code>\w+)/$', issues.invite_join, name='invite_join'),

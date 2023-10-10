@@ -123,7 +123,7 @@ def wiki_upload(request, project_id):
         for i in upload_file.chunks():
             f.write(i)
         f.close()
-        file_url = "http://localhost:3000/static/uploads/" + fix + upload_file.name
+        file_url = "http://192.168.10.172:3000/static/uploads/" + fix + upload_file.name
         file_path = "/static/uploads/" + fix + upload_file.name
         file_repository = FileRepository(name=upload_file.name, file=ab_upload_path, file_path=file_path,
                                          file_url=file_url,

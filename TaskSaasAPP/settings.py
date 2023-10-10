@@ -147,6 +147,9 @@ USE_L10N = True
 
 USE_TZ = False
 
+# 错误：The Cross-Origin-Opener-Policy header has been ignored, because the URL's origin was untrustworthy. It was defined either in the final response or a redirect.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'None'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
