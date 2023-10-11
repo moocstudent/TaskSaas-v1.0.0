@@ -11,6 +11,51 @@
     <link rel="stylesheet" href="{% static 'web/plugin/select2/css/select2.min.css' %}">
 
     <style>
+
+        .elementList2 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .elementList2 ul {
+            margin: 0;
+            padding: 0
+        }
+
+        .elementList2 ul li {
+            width: 100%;
+            height: 25px;
+            line-height: 25px;
+            text-indent: 15px;
+            border-bottom: 1px dashed #ccc;
+            color: #666;
+            cursor: pointer;
+            change: expression(
+              this.οnmοuseοver=function(){
+                this.style.background="#F2F5EF";
+              },
+              this.οnmοuseοut=function(){
+                this.style.background="";
+              }
+             )
+        }
+
+        .elementList {
+            position: relative;
+            width: 204px;
+            height: 127px;
+            z-index: 1;
+            background: #FFF;
+            border: 1px solid #000;
+            margin-top: -100px;
+            display: none;
+        }
+
         .switch {
             position: relative;
             display: inline-block;
@@ -298,6 +343,11 @@
 {% endblock %}
 
 {% block content %}
+    <audio id="notifyAudio" hidden="hidden">
+        <source src="{% static 'web/audio/notify.mp3' %}" type="audio/mpeg">
+        您的浏览器不支持 audio 与元素。
+    </audio>
+
 
     <div class="container-fluid" style="margin-top: 20px">
         <div class="row">
@@ -432,17 +482,24 @@
                             <div>
                                 <ul id="chatMembers">
 
-                                    {#                                <li>小明</li>#}
-                                    {#                                <li>小红</li>#}
-                                    {#                                <li>小双</li>#}
-                                    {#                                <li>晓丹</li>#}
                                 </ul>
                             </div>
 
                         </div>
                     </div>
                     <div class="col-md-4" style="float: right;padding-top: 0%">
-                        <input id="chat-message-input" type="text" placeholder="聊天信息发送"/><br/>
+                        <div id="atMembers" style="position: absolute" class="elementList" hidden="hidden">
+                            <ul id="atMembersUl" class="elementList2">
+                            </ul>
+                        </div>
+                        <div id="atTasks" style="position: absolute" class="elementList" hidden="hidden">
+                            <ul id="atTasksUl" class="elementList2">
+                            </ul>
+                        </div>
+                        <input id="chat-message-input"
+                               oninput="msginputOnchange(event,this)" {% comment %}oncancel="msginputOnchange(event,this)"{% endcomment %}
+                               type="text"
+                               placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>
                         <input id="chat-message-submit" onclick="msgSubmit()" type="button" value="Send"/>
                     </div>
                 </div>
@@ -553,6 +610,7 @@
             alert('【功能暂不可用】正在紧锣密鼓开发中')
         }
 
+        let userlist_online = []
 
         {#调整为当天，近七天，近一月，近三个月相关数据展示#}
         {#当天的切换为漏洞图#}
@@ -1005,6 +1063,80 @@
             }
         };
 
+        document.querySelector('#chat-message-input').change = function (e) {
+            console.log('msg input change:', e)
+        }
+
+        function closeInputChooseElements() {
+            $("#atMembers").hide()
+            $("#atTasks").hide()
+            document.querySelector('#chat-message-input').focus();
+        }
+
+        let atMemberFlag = false
+        let atTaskFlag = false
+        let atMemberNames = []
+
+        function msginputOnchange(evt, ipt) {
+            console.log('msg input change:', evt.target.selectionStart)
+            const cursorPosition = evt.target.selectionStart
+            let text = ipt.value
+            const textBfCursor = text.substring(0, cursorPosition)
+            const lastChar = textBfCursor.charAt(textBfCursor.length - 1)
+            $("#atMembersUl > li").remove()
+            console.log('lastChar ', lastChar)
+            if (lastChar === '@') {
+                if (userlist_online.length > 0) {
+                    $("#atMembers").show()
+                    let ul = $("#atMembersUl")
+                    for (var u in userlist_online) {
+                        let element = document.createElement("li");
+                        element.setAttribute('onmousedown', 'getValue("chat-message-input", "' + userlist_online[u] + '")')
+                        var m = document.createTextNode(userlist_online[u]);
+                        element.appendChild(m);
+                        console.log(element)
+                        ul.append(element)
+                    }
+                }
+            } else if (lastChar === '#') {
+                alert("task ing")
+            } else {
+                $("#atMembers").hide()
+                $("#atTasks").hide()
+                {#atMemberFlag = false#}
+                {#atTaskFlag = false#}
+            }
+            {#document.querySelector('#chat-message-input').focus();#}
+        }
+
+        function showAndHide(obj, types) {
+            var Layer = window.document.getElementById(obj);
+            switch (types) {
+                case "show":
+                    Layer.style.display = "block";
+                    break;
+                case "hide":
+                    Layer.style.display = "none";
+                    break;
+            }
+        }
+
+        function getValue(obj, str) {
+            console.log('getvalue')
+            var input = window.document.getElementById(obj);
+            input.value += str + ' ';
+
+            if (atMemberNames.indexOf(str) > -1) {
+                console.log('indexof has')
+            } else {
+                atMemberNames.push(str)
+            }
+            if (atMemberNames.length > 0) {
+                atMemberFlag = true
+            }
+            console.log(atMemberNames)
+            document.querySelector('#chat-message-input').focus();
+        }
 
         function isOpen(ws) {
             return ws.readyState === ws.OPEN
@@ -1048,6 +1180,7 @@
                 if (data.type == 'userlist.message') {
                     let userlistval = eval(data.message);
                     console.log(userlistval)
+                    userlist_online = userlistval
                     console.log('userlistmessage refresh userlist ')
                     var userlist = ''
                     for (let i = 0; i < userlistval.length; i++) {
@@ -1055,6 +1188,15 @@
                     }
                     $("#chatMembers").html(userlist);
                     return
+                } else if (data.type == 'private.message') {
+                    var message = data['message'];
+                    document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');
+                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
+                    //todo 记录到hint消息历史
+                    const notify_audio = document.getElementById('notifyAudio')
+                    notify_audio.play();
+                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+
                 } else {
                     var message = data['message'];
                     document.querySelector('#chat-log').innerHTML += (message + '<br>');
@@ -1145,8 +1287,28 @@
                 message = "<a href=" + message + " target='_blank'" + ">" + message + "</a>"
             }
             let stringifyMsg = JSON.stringify({
-                'message': message
+                'message': message,
+                'type': 'normal'
             });
+            if (atMemberFlag) {
+                console.log('atMemberFlag', atMemberFlag)
+                let atMembersConfirm = []
+                for (m in atMemberNames) {
+                    if (message.indexOf('@' + atMemberNames[m]) > -1) {
+                        console.log('confirm hint user ', atMemberNames[m])
+                        atMembersConfirm.push(atMemberNames[m])
+                    }
+                }
+                if (atMembersConfirm.length > 0) {
+                    //send hint msg
+                    stringifyMsg = JSON.stringify({
+                        'message': message,
+                        'type': 'hint',
+                        'receivers': atMembersConfirm
+                    });
+                }
+            }
+
 
             if (isOnlineCurrUser()) {
                 ws.send(stringifyMsg);

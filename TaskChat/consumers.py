@@ -4,6 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
 
+from TaskChat import constants
 from TaskChat.constants import private_message_key, push_message_key, userlist_message_key, chat_message_key
 from TaskSaasAPP import date_util
 from TaskSaasAPP.hash_map_util import HashMap
@@ -100,6 +101,8 @@ class yChatConsumer(WebsocketConsumer):
     # Receive message from WebSocket
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        type = text_data_json['type']
+        print('msg type',type)
         message = text_data_json['message']
         username = self.username
 
@@ -111,6 +114,15 @@ class yChatConsumer(WebsocketConsumer):
                 'message': username + ': ' + message
             }
         )
+
+        if type == 'hint':
+            receivers = text_data_json['receivers']
+            print('hint msg receivers ',receivers)
+            for receiver in receivers:
+                print('push hint msg to ',receiver)
+                push_message_to_group(receiver+str(self.project_id),message,constants.private_message_key)
+
+             # push_message_to_group()
         # push(self.room_group_name,'system info')
         # async_to_sync(system_info_push(self))
 
@@ -138,7 +150,7 @@ class yChatConsumer(WebsocketConsumer):
     def private_message(self, event):
         # user = await get_user(self.scope)
         username = self.username
-        message = '😄私人消息😄' + event['message']
+        message = '😄来自'+username+'的提示消息😄' + event['message']
         type = event['type']
         # Send message to WebSocket
         self.send(text_data=json.dumps({
