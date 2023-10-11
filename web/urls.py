@@ -49,6 +49,7 @@ urlpatterns = [
         re_path(r'^git/$', manage.git, name='git'),
         re_path(r'^tool/$', manage.tool, name='tool'),
         re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),
+        re_path(r'^tool_encrypt_druid_password/$', tool.encrypt_druid_password, name='tool_encrypt_druid_password'),
         re_path(r'^workbench/$', manage.workbench, name='workbench'),
 
         re_path(r'^wiki/$', wiki.wiki, name='wiki'),

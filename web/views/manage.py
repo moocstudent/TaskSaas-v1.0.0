@@ -49,10 +49,9 @@ def git(request, project_id):
                 members_response = json.loads(requests.get(members_url).text)
                 project_info_response = json.loads(requests.get(project_info_url).text)
                 project_events_response = json.loads(requests.get(project_events_url).text)
-                print('project_info_response',project_info_response)
-                print('project_events_response',project_events_response)
                 project_branches_response = json.loads(requests.get(project_branches_url).text)
                 commit_base_url = project_info_response['web_url']
+                project_info_response['desc'] = git_info.desc
                 for br in project_branches_response:
                     br['graph_url'] = br['web_url'].replace('tree','network')
 
@@ -78,7 +77,7 @@ def git(request, project_id):
                 }
                 project_infos.append(one_project_info)
             except Exception as e:
-                print('get git_project error',git_project_id)
+                print('get git_project error',e)
                 continue
     context = {
         'task_project_name': task_project_name,

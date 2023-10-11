@@ -130,8 +130,8 @@
                                         <img src="{{ m.avatar_url }}" style="height: 30px;width: 30px"/>
                                     {% endfor %}
                                     <br/>
-                                    {% if git_project.project_info.description %}
-                                        介绍:{{ git_project.project_info.description }}
+                                    {% if git_project.project_info.desc %}
+                                        介绍:{{ git_project.project_info.desc }}
                                     {% endif %}
                                     {% if git_project.project_info.tag_list %}
                                         Tags:{{ git_project.project_info.tag_list }}
