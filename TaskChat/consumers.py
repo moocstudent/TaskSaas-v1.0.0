@@ -71,7 +71,7 @@ class yChatConsumer(WebsocketConsumer):
             print('connect users this room ', list(hash_map.get(self.room_group_name).val))
         push_message_to_group(self.room_group_name,list(hash_map.get(self.room_group_name).val) , userlist_message_key)
 
-        # 私人消息
+        # 提示消息
         # push_message_to_group(self.username,'欢迎来到该项目组聊天室,'+self.username,private_message_key)
 
     def disconnect(self, close_code):
@@ -150,7 +150,7 @@ class yChatConsumer(WebsocketConsumer):
     def private_message(self, event):
         # user = await get_user(self.scope)
         username = self.username
-        message = '😄来自'+username+'的提示消息😄' + event['message']
+        message = '😄来自'+username+'的私人消息😄' + event['message']
         type = event['type']
         # Send message to WebSocket
         self.send(text_data=json.dumps({
