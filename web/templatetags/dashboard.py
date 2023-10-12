@@ -2,6 +2,9 @@ from django.template import Library
 
 register = Library()
 
+@register.simple_tag
+def get_data(value):
+    return value
 
 @register.simple_tag
 def user_space(size):

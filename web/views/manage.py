@@ -171,8 +171,11 @@ def workbench(request, project_id):
         'success': success_count,
     }
 
+    all_object_list = (list(my_issues_set.values_list("issue_id","subject")))
+    all_object_list = json.dumps(all_object_list)
     # c = login(request, request.web.user)
     context = {
+        'all_object_list':all_object_list,
         'issues_object_list': issues_object_list,
         'page_html': page_object.page_html(),
         'count_data': count_data,
@@ -238,9 +241,7 @@ def workbench_json(request):
         reopen_counts.append(my_issues_set.filter(Q(status=7) & (Q(create_datetime__date=d) |
                                                                  Q(latest_update_datetime__date=d))).count())
 
-    my_issues_set.filter()
     fresh_count = my_issues_set.filter(status=1).count()
-    print('fresh c', fresh_count)
     handle_count = my_issues_set.filter(status=2).count()
     resolve_count = my_issues_set.filter(status=3).count()
     wait_count = my_issues_set.filter(status=5).count()
@@ -261,6 +262,7 @@ def workbench_json(request):
     )
     issues_object_list = my_issues_set[page_object.start:page_object.end]
 
+    print('myis size', len(issues_object_list))
     print('myis size', len(issues_object_list))
     count_data = {
         'danger': danger_count,
@@ -306,3 +308,14 @@ def tool(request,project_id):
     }
     return render(request, 'web/tool.html', context)
 
+
+def calendar(request,project_id):
+    return render(request, 'web/calendar.html', {})
+
+
+def remind(request,project_id):
+    return render(request, 'web/remind.html', {})
+
+
+def collect(request,project_id):
+    return render(request, 'web/collect.html', {})

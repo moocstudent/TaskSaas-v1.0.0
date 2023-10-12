@@ -1,4 +1,5 @@
 {% extends 'layout/manage.html' %}
+{% load dashboard %}
 {% load project %}
 {% load issues %}
 {% load static %}
@@ -17,9 +18,23 @@
             left: 0;
             top: 0;
             width: 100%;
-            height: auto;
-            overflow: hidden;
+            height: 8em;
+        {#overflow: hidden;#} overflow: scroll;
+            overflow-x: hidden;
             z-index: 1;
+        }
+
+        .elementList2Task {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        {#overflow: hidden;#} overflow: scroll;
+            z-index: 1;
+            word-wrap: break-word;
+            word-break: break-all;
+            text-overflow: ellipsis;
         }
 
         .elementList2 ul {
@@ -35,14 +50,29 @@
             border-bottom: 1px dashed #ccc;
             color: #666;
             cursor: pointer;
+        {#overflow: hidden;#} overflow: scroll;
+            overflow-x: hidden;
             change: expression(
-              this.οnmοuseοver=function(){
+              this.onmousedown=function(){
                 this.style.background="#F2F5EF";
               },
-              this.οnmοuseοut=function(){
+              this.onmousedown=function(){
                 this.style.background="";
               }
              )
+        }
+
+        .elementListTask {
+            position: relative;
+            width: 604px;
+            height: 127px;
+            z-index: 1;
+            background: #FFF;
+            border: 1px solid #000;
+            margin-top: -100px;
+            display: none;
+            text-overflow: ellipsis;
+        {#word-break: normal;#}
         }
 
         .elementList {
@@ -470,7 +500,7 @@
             <div class="col-md-7" style="float: left">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (开发中)
+                        <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (@选择提醒用户 #选择task)
                     </div>
                     <div>
                         <div id="chat-log" class="col-md-10" contenteditable="false"
@@ -492,8 +522,8 @@
                             <ul id="atMembersUl" class="elementList2">
                             </ul>
                         </div>
-                        <div id="atTasks" style="position: absolute" class="elementList" hidden="hidden">
-                            <ul id="atTasksUl" class="elementList2">
+                        <div id="atTasks"  style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden">
+                            <ul id="atTasksUl" class="elementList2Task">
                             </ul>
                         </div>
                         <input id="chat-message-input"
@@ -515,6 +545,7 @@
         <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
         <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
         <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
+        <input id="all_object_list" value="{{ all_object_list }}" hidden="hidden"/>
     </div>
 {% endblock %}
 
@@ -623,8 +654,11 @@
         var reopen_counts = eval(document.getElementById("reopen_counts").value);
         var project_id = eval(document.getElementById("project_id").value);
         var user_id = eval(document.getElementById("user_id").value);
+        var all_object_list = eval(document.getElementById("all_object_list").value)
         var username = document.getElementById("username").value;
 
+        var all_object_ids = all_object_list.map(o => o[0])
+        console.log(all_object_ids)
         var tasks = ['task']
         for (d in days) {
             tasks.push(days[d])
@@ -1076,6 +1110,7 @@
         let atMemberFlag = false
         let atTaskFlag = false
         let atMemberNames = []
+        let atTaskIds = []
 
         function msginputOnchange(evt, ipt) {
             console.log('msg input change:', evt.target.selectionStart)
@@ -1091,7 +1126,7 @@
                     let ul = $("#atMembersUl")
                     for (var u in userlist_online) {
                         let element = document.createElement("li");
-                        element.setAttribute('onmousedown', 'getValue("chat-message-input", "' + userlist_online[u] + '")')
+                        element.setAttribute('onmousedown', 'getValue("chat-message-input", "' + userlist_online[u] + '","member")')
                         var m = document.createTextNode(userlist_online[u]);
                         element.appendChild(m);
                         console.log(element)
@@ -1099,7 +1134,22 @@
                     }
                 }
             } else if (lastChar === '#') {
-                alert("task ing")
+                if (atTaskIds.length > 0) {
+                    alert('一次只能拉取一条task。')
+                    return
+                }
+                if (all_object_list.length > 0) {
+                    $("#atTasks").show()
+                    let ul = $("#atTasksUl")
+                    for (var t in all_object_list) {
+                        let element = document.createElement("li");
+                        element.setAttribute('onmousedown', 'getValue("chat-message-input", "' + all_object_list[t] + '","task")')
+                        var t = document.createTextNode(all_object_list[t]);
+                        element.appendChild(t);
+                        console.log(element)
+                        ul.append(element)
+                    }
+                }
             } else {
                 $("#atMembers").hide()
                 $("#atTasks").hide()
@@ -1121,20 +1171,32 @@
             }
         }
 
-        function getValue(obj, str) {
+        function getValue(obj, str, type) {
             console.log('getvalue')
             var input = window.document.getElementById(obj);
             input.value += str + ' ';
-
-            if (atMemberNames.indexOf(str) > -1) {
-                console.log('indexof has')
-            } else {
-                atMemberNames.push(str)
+            if (type === 'member') {
+                if (atMemberNames.indexOf(str) > -1) {
+                    console.log('user indexof has')
+                } else {
+                    atMemberNames.push(str)
+                }
+                if (atMemberNames.length > 0) {
+                    atMemberFlag = true
+                }
+                console.log(atMemberNames)
+            } else if (type === 'task') {
+                taskid = parseInt(str.split(',')[0])
+                if (all_object_ids.includes(taskid) && atTaskIds.includes(taskid)) {
+                    console.log('task contains')
+                } else if (all_object_ids.includes(taskid) && !atTaskIds.includes(taskid)) {
+                    atTaskIds.push(taskid)
+                }
+                if (atTaskIds.length > 0) {
+                    atTaskFlag = true
+                }
+                console.log(atTaskIds)
             }
-            if (atMemberNames.length > 0) {
-                atMemberFlag = true
-            }
-            console.log(atMemberNames)
             document.querySelector('#chat-message-input').focus();
         }
 
@@ -1290,16 +1352,16 @@
                 'message': message,
                 'type': 'normal'
             });
+            let atMembersConfirm = []
             if (atMemberFlag) {
                 console.log('atMemberFlag', atMemberFlag)
-                let atMembersConfirm = []
                 for (m in atMemberNames) {
                     if (message.indexOf('@' + atMemberNames[m]) > -1) {
                         console.log('confirm hint user ', atMemberNames[m])
                         atMembersConfirm.push(atMemberNames[m])
                     }
                 }
-                if (atMembersConfirm.length > 0) {
+                if (atMembersConfirm.length > 0 && !atTaskFlag) {
                     //send hint msg
                     stringifyMsg = JSON.stringify({
                         'message': message,
@@ -1309,10 +1371,41 @@
                 }
             }
 
+            if (atTaskFlag) {
+                console.log('atTaskFlag', atTaskFlag)
+                let atTasksConfirm = []
+                for (t in atTaskIds) {
+                    if (message.indexOf('#' + atTaskIds[t]) > -1) {
+                        console.log('confirm hint task ', atTaskIds[t])
+                        atTasksConfirm.push(atTaskIds[t])
+                    }
+                }
+                if (atTasksConfirm.length > 0) {
+                    let task_message = ''
+                    for (t in atTasksConfirm) {
+                        let taskid = atTasksConfirm[t]
+                        const request_detail_url = "{% url 'issues_detail' project_id=request.web.project.id issues_id=1 %}".replace("detail/1", "detail/" + taskid)
+                        task_message = "<a href=" + request_detail_url + " target='_blank'>" + message + "</a>"
+                        break;
+                    }
+                    //send hint msg
+                    stringifyMsg = JSON.stringify({
+                        'message': task_message,
+                        'type': atMemberFlag?'hint':'normal',
+                        'receivers': atMemberFlag?atMembersConfirm:[],
+                    });
+                }
+            }
+
+            console.log(stringifyMsg)
 
             if (isOnlineCurrUser()) {
                 ws.send(stringifyMsg);
                 messageInputDom.value = '';
+                atMemberNames = []
+                atTaskIds = []
+                atMemberFlag = false
+                atTaskFlag = false
             } else {
                 console.log('reconnect ws...')
                 createOrConnectWebSocket()
@@ -1325,8 +1418,11 @@
                 console.log('ws.send(stringifyMsg)', stringifyMsg)
                 ws.send(stringifyMsg);
                 messageInputDom.value = '';
+                atMemberNames = []
+                atTaskIds = []
+                atMemberFlag = false
+                atTaskFlag = false
             }
-
         };
 
         function chatHisInit() {

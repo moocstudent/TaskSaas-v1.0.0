@@ -144,12 +144,17 @@ def manage_menu_list(request):
 
     return {'data_list': data_list}
 
-
 @register.inclusion_tag('inclusion/right_side_manage_menu_list.html')
 def right_side_manage_menu_list(request):
     right_side_data_list = [
-        {'id': 'workbench', 'title': '工作台',
-         'url': reverse('workbench', kwargs={'project_id': request.web.project.id})}
+        {'id': 'workbench', 'title': '工作台','icon':'fa-desktop',
+         'url': reverse('workbench', kwargs={'project_id': request.web.project.id})},
+        {'id': 'calendar', 'title': '日历', 'icon': 'fa-calendar',
+         'url': reverse('calendar', kwargs={'project_id': request.web.project.id})},
+        {'id': 'remind', 'title': '提醒', 'icon': 'fa-bell-o',
+         'url': reverse('remind', kwargs={'project_id': request.web.project.id})},
+        {'id': 'collect', 'title': '收藏', 'icon': 'fa-bookmark',
+         'url': reverse('collect', kwargs={'project_id': request.web.project.id})},
     ]
 
     for item in right_side_data_list:
