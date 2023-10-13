@@ -9,6 +9,7 @@ from django.shortcuts import render
 
 from TaskSaasAPP import date_util
 from TaskSaasAPP.date_util import get_every_day, get_today, get_last_week_since_today
+from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
 
@@ -16,15 +17,18 @@ from web import models
 def statistics(request, project_id):
     return render(request, 'web/statistics.html')
 
+
 # todo commit具体信息 当点击页面commit message时弹出详情
-def git_commit(request,git_project_id,commit_hash):
+def git_commit(request, git_project_id, commit_hash):
     # 'http://39.99.215.169:8099/api/v4/projects/4/repository/commits/56b02ef687f66e4e375effbd95c3b2d5776dc595'
     git_host = "http://39.99.215.169:8099"
     # project = models.Project.objects.filter(id=project_id).first()
     print(request.web.project)
-    relation_git_infos = models.GitInfoRelation.objects.filter(project_id=request.web.project).order_by('create_datetime')
+    relation_git_infos = models.GitInfoRelation.objects.filter(project_id=request.web.project).order_by(
+        'create_datetime')
 
     return HttpResponse()
+
 
 def git(request, project_id):
     project = models.Project.objects.filter(id=project_id).first()
@@ -53,7 +57,7 @@ def git(request, project_id):
                 commit_base_url = project_info_response['web_url']
                 project_info_response['desc'] = git_info.desc
                 for br in project_branches_response:
-                    br['graph_url'] = br['web_url'].replace('tree','network')
+                    br['graph_url'] = br['web_url'].replace('tree', 'network')
 
                 for br in project_events_response:
                     push_data = br.get('push_data')
@@ -61,7 +65,7 @@ def git(request, project_id):
                         commit_from = push_data.get('commit_from')
                         commit_to = push_data.get('commit_to')
                         if commit_from is not None:
-                            br['commit_from_url'] = commit_base_url+'/-/commit/'+commit_from
+                            br['commit_from_url'] = commit_base_url + '/-/commit/' + commit_from
                         if commit_to is not None:
                             br['commit_to_url'] = commit_base_url + '/-/commit/' + commit_to
 
@@ -77,7 +81,7 @@ def git(request, project_id):
                 }
                 project_infos.append(one_project_info)
             except Exception as e:
-                print('get git_project error',e)
+                print('get git_project error', e)
                 continue
     context = {
         'task_project_name': task_project_name,
@@ -87,18 +91,28 @@ def git(request, project_id):
 
 
 def workbench(request, project_id):
-    print('workbench pid ',request.web.project.id)
+    q = request.GET.get('q')
+    print('workbench pid ', request.web.project.id)
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get('myechartlegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'1257')
-    attention_trigger = cache.get('myAttentionTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'off')
-    people_involve_q = Q(assign=request.web.user)| Q(creator=request.web.user)
+    legendTriggrer = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+                               '1257')
+    attention_trigger = cache.get('myAttentionTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+                                  'off')
+    people_involve_q = Q(assign=request.web.user) | Q(creator=request.web.user)
     if attention_trigger == 'on':
         people_involve_q = people_involve_q | Q(attention=request.web.user)
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (people_involve_q)
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',)).distinct()
-    day_trigger = cache.get('mydayTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'day7')
+    if q:
+        qq = None
+        if isint(q):
+            qq = Q(issue_id=q) | Q(subject__contains=q)
+        else:
+            qq = Q(subject__contains=q)
+        my_issues_set = my_issues_set.filter(qq)
+    day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
 
@@ -117,10 +131,10 @@ def workbench(request, project_id):
                     continue
             min_date = v
     days = []
-    print('min_date',min_date)
-    if min_date and day_trigger!='day1':
+    print('min_date', min_date)
+    if min_date and day_trigger != 'day1':
         days = get_every_day(day_trigger, min_date, '%Y-%m-%d')
-    elif day_trigger=='day1':
+    elif day_trigger == 'day1':
         days = get_every_day(day_trigger, date_util.get_today(), '%Y-%m-%d')
     print('days', days)
 
@@ -148,7 +162,6 @@ def workbench(request, project_id):
     resolve_count = my_issues_set.filter(status=3).count()
     wait_count = my_issues_set.filter(status=5).count()
     reopen_count = my_issues_set.filter(status=7).count()
-
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
     if int(pagesize) != pagesize:
@@ -163,19 +176,17 @@ def workbench(request, project_id):
         per_page=3
     )
     issues_object_list = my_issues_set[page_object.start:page_object.end]
-
     print('myis size', len(issues_object_list))
     count_data = {
         'danger': danger_count,
         'warning': warning_count,
         'success': success_count,
     }
-
-    all_object_list = (list(my_issues_set.values_list("issue_id","subject")))
+    all_object_list = (list(my_issues_set.values_list("issue_id", "subject")))
     all_object_list = json.dumps(all_object_list)
     # c = login(request, request.web.user)
     context = {
-        'all_object_list':all_object_list,
+        'all_object_list': all_object_list,
         'issues_object_list': issues_object_list,
         'page_html': page_object.page_html(),
         'count_data': count_data,
@@ -195,16 +206,16 @@ def workbench_json(request):
     project_id = request.POST.get('project_id')
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get('myechartlegendTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'1257')
+    legendTriggrer = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+                               '1257')
     my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=request.web.user)
                                                                              | Q(attention=request.web.user)
                                                                              | Q(creator=request.web.user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get('mydayTrigger'+str(request.web.user.id)+'_'+str(request.web.project.id),'day7')
+    day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
-
     print('total size', len(my_issues_set))
     danger_count = my_issues_set.filter(priority='danger').count()
     warning_count = my_issues_set.filter(priority='warning').count()
@@ -223,7 +234,6 @@ def workbench_json(request):
     if min_date:
         days = get_every_day(day_trigger, min_date, '%Y-%m-%d')
     print('days', days)
-
     fresh_counts = ['新建']
     handle_counts = ['处理中']
     resolve_counts = ['已解决']
@@ -240,13 +250,11 @@ def workbench_json(request):
                                                                Q(latest_update_datetime__date=d))).count())
         reopen_counts.append(my_issues_set.filter(Q(status=7) & (Q(create_datetime__date=d) |
                                                                  Q(latest_update_datetime__date=d))).count())
-
     fresh_count = my_issues_set.filter(status=1).count()
     handle_count = my_issues_set.filter(status=2).count()
     resolve_count = my_issues_set.filter(status=3).count()
     wait_count = my_issues_set.filter(status=5).count()
     reopen_count = my_issues_set.filter(status=7).count()
-
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
     if int(pagesize) != pagesize:
@@ -261,7 +269,6 @@ def workbench_json(request):
         per_page=3
     )
     issues_object_list = my_issues_set[page_object.start:page_object.end]
-
     print('myis size', len(issues_object_list))
     print('myis size', len(issues_object_list))
     count_data = {
@@ -303,19 +310,19 @@ def filter_by_day(my_issues_set, day_trigger):
         return my_issues_set
 
 
-def tool(request,project_id):
+def tool(request, project_id):
     context = {
     }
     return render(request, 'web/tool.html', context)
 
 
-def calendar(request,project_id):
+def calendar(request, project_id):
     return render(request, 'web/calendar.html', {})
 
 
-def remind(request,project_id):
+def remind(request, project_id):
     return render(request, 'web/remind.html', {})
 
 
-def collect(request,project_id):
+def collect(request, project_id):
     return render(request, 'web/collect.html', {})

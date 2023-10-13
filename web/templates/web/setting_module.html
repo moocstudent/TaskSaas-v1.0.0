@@ -21,12 +21,14 @@
                 <div class="list-group" style="border-radius: 0">
                     <div>
                         <a href="{% url 'setting_module' project_id=request.web.project.id %}"
-                           class="list-group-item">项目模块</a>
-{#                        <a href="#" class="list-group-item">修改密码</a>#}
+                           class="list-group-item choices">项目模块</a>
+                        {#                        <a href="#" class="list-group-item">修改密码</a>#}
                         <a href="{% url 'setting_delete' project_id=request.web.project.id %}"
-                           class="list-group-item choices">删除项目</a>
+                           class="list-group-item">删除项目</a>
                     </div>
+
                 </div>
+
             </div>
         </div>
 
@@ -35,33 +37,38 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    删除项目 (现删除后不可找回)
+                    项目模块
                 </div>
                 <div class="panel-body">
 
                     <form class="form-horizontal" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label class="col-sm-4 control-label">项目名</label>
+                            <label class="col-sm-4 control-label">模块名</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" placeholder="请输入项目名称"
-                                       name="project_name">
-                                <span class="error-msg">{{ error }}</span>
-                            </div>
-                            <label class="col-sm-4 control-label">登录密码</label>
-                            <div class="col-sm-5">
-                                <input type="password" class="form-control" placeholder="请输入登录密码"
-                                       name="password">
+                                <input type="text" class="form-control" placeholder="请输入模块名称"
+                                       name="title">
                                 <span class="error-msg">{{ error }}</span>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div class="col-sm-offset-5 col-sm-5">
-                                <input type="submit" class="btn btn-danger" value="删 除">
+                                <input type="submit" class="btn btn-info" value="新 增">
                             </div>
                         </div>
+
+
                     </form>
+                    <div>
+                        <ul>
+                            {% for item in list %}
+                                <li>{{ item.title }}
+                                    <button onclick="delModule({{ item.id }})">删除</button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
                 </div>
             </div>
@@ -69,8 +76,30 @@
         </div>
 
     </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 
 {% endblock %}
 
+
 {% block js %}
+    <script>
+        function delModule(id) {
+            $.ajax({
+                url: "{% url 'setting_module_del' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'id': id,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        location.reload()
+                    } else {
+                        console.log('err')
+                    }
+                }
+            })
+        }
+    </script>
 {% endblock %}

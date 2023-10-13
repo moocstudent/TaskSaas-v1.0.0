@@ -422,6 +422,18 @@
                         </label>
                         包含我关注的
                     </div>
+                    <form method="get" action="{% url 'workbench' project_id=request.web.project.id %}">
+                        <div class="input-group">
+                                 <span class="input-group-btn">
+                         <button class="btn btn-default" type="submit">搜索</button>
+                     </span>
+                            <input onclick="setF(this)" type="text" name="q" class="form-control"
+                                   placeholder="Search for..." value={{ value }}>
+                            <span class="input-group-btn">
+                         <button class="btn btn-default" type="submit">搜索</button>
+                     </span>
+                        </div>
+                    </form>
                     {#                    <div class="panel-body">#}
                     {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
                     {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
@@ -522,7 +534,7 @@
                             <ul id="atMembersUl" class="elementList2">
                             </ul>
                         </div>
-                        <div id="atTasks"  style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden">
+                        <div id="atTasks" style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden">
                             <ul id="atTasksUl" class="elementList2Task">
                             </ul>
                         </div>
@@ -553,6 +565,10 @@
 
     <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js' %}"></script>
     <script>
+        function setF(the) {
+            this.focus()
+        }
+
         Date.prototype.pattern = function (fmt) {
             var o = {
                 "M+": this.getMonth() + 1, //月份
@@ -1104,7 +1120,7 @@
         function closeInputChooseElements() {
             $("#atMembers").hide()
             $("#atTasks").hide()
-            document.querySelector('#chat-message-input').focus();
+            {#document.querySelector('#chat-message-input').focus();#}
         }
 
         let atMemberFlag = false
@@ -1391,8 +1407,8 @@
                     //send hint msg
                     stringifyMsg = JSON.stringify({
                         'message': task_message,
-                        'type': atMemberFlag?'hint':'normal',
-                        'receivers': atMemberFlag?atMembersConfirm:[],
+                        'type': atMemberFlag ? 'hint' : 'normal',
+                        'receivers': atMemberFlag ? atMembersConfirm : [],
                     });
                 }
             }

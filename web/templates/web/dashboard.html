@@ -30,7 +30,6 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
-
         .slider:before {
             position: absolute;
             content: "";
@@ -42,57 +41,45 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
-
         input:checked + .slider {
             background-color: #2196F3;
         }
-
         input:focus + .slider {
             box-shadow: 0 0 1px #2196F3;
         }
-
         input:checked + .slider:before {
             -webkit-transform: translateX(26px);
             -ms-transform: translateX(26px);
             transform: translateX(26px);
         }
-
         /* Rounded sliders */
         .slider.round {
             border-radius: 34px;
         }
-
         .slider.round:before {
             border-radius: 50%;
         }
-
         .table-right > tbody > tr > td.label-left {
             width: 90px;
         }
-
         .table-right > tbody > tr > td {
             border: 0;
         }
-
         .status-count {
             text-align: center;
             margin-top: 10px;
             margin-bottom: 30px;
             font-size: 14px;
         }
-
         .status-count .count {
             font-size: 25px;
         }
-
         .status-count a {
             text-decoration: none;
         }
-
         .user-item .title {
             margin-bottom: 20px;
         }
-
         .user-item .avatar, .top-10 .avatar {
             float: left;
             margin-right: 10px;
@@ -105,19 +92,15 @@
             line-height: 30px;
             border-radius: 50%;
         }
-
         .user-item .text {
             line-height: 30px;
         }
-
         .top-10 .avatar {
             margin-right: 0;
         }
-
         .top-10 td {
             padding: 5px 10px;
         }
-
         .top-10 .table > tbody > tr > td {
             border-top: 0;
             border-bottom: 1px solid #ddd;
@@ -213,8 +196,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
 
             <div class="col-md-4">
@@ -329,7 +310,7 @@
             </div>
         </div>
     </div>
-    <div {% load dashboard %} hidden="hidden"></div>
+{#    <div {% load dashboard %} hidden="hidden"></div>#}
     <input id="echarts_data" value="{{ echarts_data }}" hidden="hidden"/>
     <input id="tasks_count" value="{{ tasks_count }}" hidden="hidden"/>
     <input id="funcs_count" value="{{ funcs_count }}" hidden="hidden"/>
@@ -344,6 +325,9 @@
 {% endblock %}
 
 {% block js %}
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
+            integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById("chart"));
         var echartsData = JSON.parse(document.getElementById("echarts_data").value);

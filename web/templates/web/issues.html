@@ -210,6 +210,18 @@
                 <div class="panel-heading">
                     <i class="fa fa-quora" aria-hidden="true"></i> 问题
                 </div>
+                <form method="get" action="{% url 'issues' project_id=request.web.project.id %}">
+                    <div class="input-group">
+                                 <span class="input-group-btn">
+                         <button class="btn btn-default" type="submit">搜索</button>
+                     </span>
+                        <input type="text" name="q" class="form-control" placeholder="Search for..." value={{ value }}>
+                        <span class="input-group-btn">
+                         <button class="btn btn-default" type="submit">搜索</button>
+                     </span>
+                    </div>
+                </form>
+
                 <div class="panel-body">
                     <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>
                     <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>
@@ -690,7 +702,7 @@
             let item = localStorage.getItem(mytaskTriggerKey);
             if (!item) {
                 item = 'off'
-                localStorage.setItem(mytaskTriggerKey,item);
+                localStorage.setItem(mytaskTriggerKey, item);
             } else {
                 console.log("trigger", item)
                 if (item == "on") {

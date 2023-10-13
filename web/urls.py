@@ -4,7 +4,7 @@ from django.urls import re_path, include, path
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api
 from TaskSaasAPP import settings
-from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool
+from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module
 from web.views.upload import FileUploadView
 
 urlpatterns = [
@@ -71,6 +71,8 @@ urlpatterns = [
 
         re_path(r'^setting/$', setting.setting, name='setting'),
         re_path(r'^setting/delete/$', setting.setting_delete, name='setting_delete'),
+        re_path(r'^setting/module/$', module.setting_module, name='setting_module'),
+        re_path(r'^setting/module_del/$', module.setting_module_del, name='setting_module_del'),
 
         re_path(r'^issues/$', issues.issues, name='issues'),
         re_path(r'^issues/detail/(?P<issues_id>\d+)/$', issues.issues_detail, name='issues_detail'),

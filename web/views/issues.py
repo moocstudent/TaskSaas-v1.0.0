@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
+from TaskSaasAPP.type_util import isint
 from utils.encrypt import uid
 from utils.pagination import Pagination
 from web import models
@@ -123,6 +124,9 @@ class SelectFilter(object):
 # todo 改为对应的restframework form
 def issues(request, project_id):
     print('issues pid ', request.web.project.id)
+
+    q = request.GET.get('q')
+    print('q>',q)
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
         # 筛选条件(根据用户通过GET传过来的参数实现)
@@ -156,6 +160,13 @@ def issues(request, project_id):
 
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
+        if q:
+            qq = None
+            if isint(q):
+                qq = Q(issue_id=q) | Q(subject__contains=q)
+            else:
+                qq = Q(subject__contains=q)
+            queryset=queryset.filter(qq)
         trigger = cache.get('mytaskTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'off')
         if trigger == 'on':
             print("trigger == 'on':")
@@ -376,7 +387,7 @@ def issues_change(request, project_id, issues_pk):
             else:
                 print('用户输入的值是自己的值value:', value)
                 # 用户输入的值是自己的值
-                instance = field_object.rel.model.objects.filter(id=value, project_id=project_id).first()
+                instance = field_object.remote_field.model.objects.filter(id=value, project_id=project_id).first()
                 if not instance:
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
 
