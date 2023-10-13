@@ -108,9 +108,9 @@ def workbench(request, project_id):
     if q:
         qq = None
         if isint(q):
-            qq = Q(issue_id=q) | Q(subject__contains=q)
+            qq = Q(issue_id=q) | Q(subject__icontains=q)
         else:
-            qq = Q(subject__contains=q)
+            qq = Q(subject__icontains=q)
         my_issues_set = my_issues_set.filter(qq)
     day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)

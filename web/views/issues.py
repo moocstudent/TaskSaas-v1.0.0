@@ -163,9 +163,9 @@ def issues(request, project_id):
         if q:
             qq = None
             if isint(q):
-                qq = Q(issue_id=q) | Q(subject__contains=q)
+                qq = Q(issue_id=q) | Q(subject__icontains=q)
             else:
-                qq = Q(subject__contains=q)
+                qq = Q(subject__icontains=q)
             queryset=queryset.filter(qq)
         trigger = cache.get('mytaskTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'off')
         if trigger == 'on':
