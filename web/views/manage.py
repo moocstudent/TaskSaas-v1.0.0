@@ -321,7 +321,10 @@ def calendar(request, project_id):
 
 
 def remind(request, project_id):
-    return render(request, 'web/remind.html', {})
+    context = {
+        'info_size' : 10
+    }
+    return render(request, 'web/remind.html',context=context)
 
 
 def collect(request, project_id):

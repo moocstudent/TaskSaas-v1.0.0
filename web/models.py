@@ -11,27 +11,29 @@ class UserInfo(models.Model):
     用户信息
     """
     username = models.CharField(verbose_name="用户名", max_length=100, db_index=True)  # db_index=True 索引
-    nick_name = models.CharField(verbose_name="昵称",default='', max_length=100, db_index=True)  # db_index=True 索引
-    git_username = models.CharField(verbose_name="Git用户名", max_length=100,default='', db_index=True)  # db_index=True 索引
+    nick_name = models.CharField(verbose_name="昵称", default='', max_length=100, db_index=True)  # db_index=True 索引
+    git_username = models.CharField(verbose_name="Git用户名", max_length=100, default='',
+                                    db_index=True)  # db_index=True 索引
     email = models.EmailField(verbose_name="邮箱", max_length=100)
-    git_avatar = models.CharField(verbose_name="Git头像",default='', max_length=300)
+    git_avatar = models.CharField(verbose_name="Git头像", default='', max_length=300)
     mobile_phone = models.CharField(verbose_name="手机号码", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=100)
-    git_password = models.CharField(verbose_name="Git密码",default='', max_length=100)
-
+    git_password = models.CharField(verbose_name="Git密码", default='', max_length=100)
 
     # price_policy = models.ForeignKey(verbose_name='价格策略', to='PricePolicy', null=True, blank=True)
     def __str__(self):
         return self.username
 
+
 # git信息，不同项目关联的不同的git信息
 class GitInfoRelation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    project = models.ForeignKey(verbose_name="项目id",default=0, null=True, blank=True,to="Project",on_delete=models.SET_NULL)
-    git_project_id = models.BigIntegerField(verbose_name="Git项目id",default=0, null=True, blank=True)
-    git_access_token = models.CharField(verbose_name="Git访问Token",default='',null=False,blank=False,max_length=60)
-    desc = models.CharField(verbose_name="简介",default='',null=True,blank=True,max_length=100)
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name="项目id", default=0, null=True, blank=True, to="Project",
+                                on_delete=models.SET_NULL)
+    git_project_id = models.BigIntegerField(verbose_name="Git项目id", default=0, null=True, blank=True)
+    git_access_token = models.CharField(verbose_name="Git访问Token", default='', null=False, blank=False, max_length=60)
+    desc = models.CharField(verbose_name="简介", default='', null=True, blank=True, max_length=100)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
 
@@ -73,8 +75,8 @@ class Transaction(models.Model):
 
     order = models.CharField(verbose_name='订单号', max_length=64, unique=True)  # 唯一索引
 
-    user = models.ForeignKey(verbose_name='用户', to='UserInfo',null=True,on_delete=models.SET_NULL)
-    price_policy = models.ForeignKey(verbose_name='价格策略', to='PricePolicy',null=True,on_delete=models.SET_NULL)
+    user = models.ForeignKey(verbose_name='用户', to='UserInfo', null=True, on_delete=models.SET_NULL)
+    price_policy = models.ForeignKey(verbose_name='价格策略', to='PricePolicy', null=True, on_delete=models.SET_NULL)
 
     count = models.IntegerField(verbose_name='数量(年)', help_text='0表示无限期')
 
@@ -108,7 +110,7 @@ class Project(models.Model):
     star = models.BooleanField(verbose_name='星标', default=False)
 
     join_count = models.SmallIntegerField(verbose_name='参与人数', default=1)
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True,on_delete=models.SET_NULL)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
     bucket = models.CharField(verbose_name='COS桶', max_length=128)
@@ -120,11 +122,13 @@ class ProjectUser(models.Model):
     """
     项目参与者
     """
-    user = models.ForeignKey(verbose_name='用户', to='UserInfo', null=True, related_name='projects',on_delete=models.SET_NULL)
+    user = models.ForeignKey(verbose_name='用户', to='UserInfo', null=True, related_name='projects',
+                             on_delete=models.SET_NULL)
 
-    project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
 
-    invitee = models.ForeignKey(verbose_name='邀请人', to='UserInfo', related_name='invites', on_delete=models.SET_NULL,null=True, blank=True)
+    invitee = models.ForeignKey(verbose_name='邀请人', to='UserInfo', related_name='invites', on_delete=models.SET_NULL,
+                                null=True, blank=True)
 
     star = models.BooleanField(verbose_name='星标', default=False)
 
@@ -133,54 +137,59 @@ class ProjectUser(models.Model):
 
 class Wiki(models.Model):
     id = models.BigAutoField(primary_key=True)
-    project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
     title = models.CharField(verbose_name='标题', max_length=32)
     content = models.TextField(verbose_name='内容')
     depth = models.IntegerField(verbose_name='深度', default=1)
 
     # 自关联
-    parent = models.ForeignKey(verbose_name='父文章', to='Wiki', null=True, blank=True, related_name='children',on_delete=models.SET_NULL)
+    parent = models.ForeignKey(verbose_name='父文章', to='Wiki', null=True, blank=True, related_name='children',
+                               on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.title
+
+
 def upload_to(filename):
- return '/'.join(['uploads', filename])
+    return '/'.join(['uploads', filename])
+
 
 class FileRepository(models.Model):
     id = models.BigAutoField(primary_key=True)
     """文件库对象"""
-    project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
     file_type_choices = {
         (1, '文件'),
         (2, '文件夹'),
         (3, 'EditorUpload')
     }
     file_type = models.SmallIntegerField(verbose_name='类型', choices=file_type_choices)
-    file_mime_type = models.CharField(verbose_name='文件类型',null=True,blank=True,max_length=80)
+    file_mime_type = models.CharField(verbose_name='文件类型', null=True, blank=True, max_length=80)
     name = models.CharField(verbose_name='文件夹名称', max_length=500, help_text="文件/文件夹名")
     key = models.CharField(verbose_name='文件存储在COS中的KEY', max_length=128, null=True, blank=True)
     file_size = models.BigIntegerField(verbose_name='文件大小', null=True, blank=True, help_text='字节')
     file_path = models.CharField(verbose_name='文件路径', max_length=255, null=True, blank=True)
     file_url = models.CharField(verbose_name='网络路径', max_length=255, null=True, blank=True)
     ab_file_path = models.CharField(verbose_name='服务器绝对路径', max_length=255, null=True, blank=True)
-    file = models.FileField(null=True,upload_to=upload_to,max_length=500)
+    file = models.FileField(null=True, upload_to=upload_to, max_length=500)
 
-    parent = models.ForeignKey(verbose_name='父级目录', to='self', related_name='child', null=True, blank=True,on_delete=models.SET_NULL)
+    parent = models.ForeignKey(verbose_name='父级目录', to='self', related_name='child', null=True, blank=True,
+                               on_delete=models.SET_NULL)
 
-    update_user = models.ForeignKey(verbose_name='最近更新者',null=True, to='UserInfo',on_delete=models.SET_NULL)
+    update_user = models.ForeignKey(verbose_name='最近更新者', null=True, to='UserInfo', on_delete=models.SET_NULL)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
 
 
 class Issues(models.Model):
     id = models.BigAutoField(primary_key=True)
-    issue_id = models.BigIntegerField(default=0,null=True,blank=True)
+    issue_id = models.BigIntegerField(default=0, null=True, blank=True)
     """问题"""
-    project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
-    issues_type = models.ForeignKey(verbose_name='问题类型', to='IssuesType',null=True,on_delete=models.SET_NULL)
-    module = models.ForeignKey(verbose_name='模块', to='Module', null=True, blank=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
+    issues_type = models.ForeignKey(verbose_name='问题类型', to='IssuesType', null=True, on_delete=models.SET_NULL)
+    module = models.ForeignKey(verbose_name='模块', to='Module', null=True, blank=True, on_delete=models.SET_NULL)
 
     subject = models.CharField(verbose_name='主题', max_length=80)
-    desc = models.TextField(verbose_name='问题描述',null=True,blank=True)
+    desc = models.TextField(verbose_name='问题描述', null=True, blank=True)
     priority_choices = {
         ("danger", "高"),
         ("warning", "中"),
@@ -200,7 +209,8 @@ class Issues(models.Model):
     }
     status = models.SmallIntegerField(verbose_name='状态', choices=status_choices, default=1)
 
-    assign = models.ForeignKey(verbose_name='指派', to='UserInfo', related_name='task', null=True, blank=True,on_delete=models.SET_NULL)
+    assign = models.ForeignKey(verbose_name='指派', to='UserInfo', related_name='task', null=True, blank=True,
+                               on_delete=models.SET_NULL)
     attention = models.ManyToManyField(verbose_name='关注者', to='UserInfo', related_name='observe', blank=True)
 
     start_date = models.DateField(verbose_name='开始时间', null=True, blank=True)
@@ -215,7 +225,8 @@ class Issues(models.Model):
     parent = models.ForeignKey(verbose_name='父问题', to='self', related_name='child', null=True, blank=True,
                                on_delete=models.SET_NULL)
 
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True,blank=True, on_delete=models.SET_NULL,related_name='create_problems')
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name='create_problems')
 
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
@@ -223,12 +234,13 @@ class Issues(models.Model):
     def __str__(self):
         return self.subject
 
+
 class IssuesLog(models.Model):
     id = models.BigAutoField(primary_key=True)
-    issues = models.ForeignKey(to="Issues",null=True,blank=True,on_delete=models.SET_NULL)
+    issues = models.ForeignKey(to="Issues", null=True, blank=True, on_delete=models.SET_NULL)
     """问题"""
-    creator = models.ForeignKey(verbose_name='更新者', to='UserInfo',null=True,blank=True, on_delete=models.SET_NULL)
-    record = models.TextField(verbose_name='更新记录',null=True,blank=True)
+    creator = models.ForeignKey(verbose_name='更新者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
+    record = models.TextField(verbose_name='更新记录', null=True, blank=True)
 
     type_choices = {
         (1, '新建'),
@@ -241,27 +253,46 @@ class IssuesLog(models.Model):
     # 或之前issues再次更改，会再产生一条新的issuesChangeLog，create_datetime对应其latest_update_datetime
     create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
+
     def __str__(self):
         return self.issues
+
 
 class Module(models.Model):
     id = models.BigAutoField(primary_key=True)
     """模块(里程碑)"""
-    project = models.ForeignKey(verbose_name='项目',null=True, to='Project',on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', null=True, to='Project', on_delete=models.SET_NULL)
     title = models.CharField(verbose_name='模块名称', max_length=32)
 
     def __str__(self):
         return self.title
 
 
+class InfoLog(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    type_choices = {
+        (1, '系统信息'),
+        (2, '提醒信息'),
+        # (3, '回复'),
+        # (4, '删除'),
+    }
+    type = models.SmallIntegerField(verbose_name='信息类型', choices=type_choices, default=2)
+    content = models.TextField(verbose_name="信息内容", default='')
+    sender = models.ForeignKey(verbose_name='发送者', to='UserInfo', null=True, on_delete=models.SET_NULL)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
+    def __str__(self):
+        return self.content
+
+
 class IssuesType(models.Model):
     id = models.BigAutoField(primary_key=True)
     """问题类型 例如：任务，功能，Bug，需求确认"""
 
-    PROJECT_INIT_LIST = ["任务", "功能", "Bug","需求确认"]
+    PROJECT_INIT_LIST = ["任务", "功能", "Bug", "需求确认"]
 
     title = models.CharField(verbose_name='类型名称', max_length=32)
-    project = models.ForeignKey(verbose_name='项目',  null=True,to='Project',on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', null=True, to='Project', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.title
@@ -277,18 +308,20 @@ class IssuesReply(models.Model):
     )
     reply_type = models.IntegerField(verbose_name='类型', choices=reply_type_choices)
 
-    issues = models.ForeignKey(verbose_name='问题',db_column='issues_pk', to="Issues",null=True,on_delete=models.SET_NULL)
+    issues = models.ForeignKey(verbose_name='问题', db_column='issues_pk', to="Issues", null=True,
+                               on_delete=models.SET_NULL)
     content = models.TextField(verbose_name='描述')
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True, related_name='create_reply',on_delete=models.SET_NULL)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, related_name='create_reply',
+                                on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
-    reply = models.ForeignKey(verbose_name='回复', to='self', null=True, blank=True,on_delete=models.SET_NULL)
+    reply = models.ForeignKey(verbose_name='回复', to='self', null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class ProjectInvite(models.Model):
     id = models.BigAutoField(primary_key=True)
     """ 项目邀请码 """
-    project = models.ForeignKey(verbose_name='项目', to='Project',null=True,on_delete=models.SET_NULL)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
     code = models.CharField(verbose_name='邀请码', max_length=64, unique=True)
     count = models.PositiveIntegerField(verbose_name='限制数量', null=True, blank=True, help_text='空表示无数量限制')
     use_count = models.PositiveIntegerField(verbose_name='已邀请数量', default=0)
@@ -300,4 +333,5 @@ class ProjectInvite(models.Model):
     )
     period = models.IntegerField(verbose_name='有效期', choices=period_choices, default=1440)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo',null=True, related_name='create_invite',on_delete=models.SET_NULL)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, related_name='create_invite',
+                                on_delete=models.SET_NULL)
