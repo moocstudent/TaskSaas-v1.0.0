@@ -252,7 +252,7 @@ class IssuesLog(models.Model):
     log_type = models.SmallIntegerField(verbose_name='日志类型', choices=type_choices, default=2)
     # 或之前issues再次更改，会再产生一条新的issuesChangeLog，create_datetime对应其latest_update_datetime
     create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
-    latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
 
     def __str__(self):
         return self.issues
@@ -280,7 +280,7 @@ class InfoLog(models.Model):
     content = models.TextField(verbose_name="信息内容", default='')
     sender = models.ForeignKey(verbose_name='发送者', to='UserInfo', null=True, on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-    latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
     def __str__(self):
         return self.content
 
