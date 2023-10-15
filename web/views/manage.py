@@ -327,7 +327,8 @@ def remind(request, project_id):
     hints = collections.OrderedDict()
     for re in reminds_hint:
         hints[re.id] = {'sender':re.sender.username,'receiver':re.receiver.username,
-                        'create_time':re.create_datetime,'content':re.content,'status':re.status}
+                        'create_time':re.create_datetime,'content':re.content,'status':re.status,
+                        'pure_link':re.pure_link,'pure_content':re.pure_content}
 
 
     context = {

@@ -1,5 +1,7 @@
 import datetime
 import json
+import re
+from bs4 import BeautifulSoup
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import WebsocketConsumer
@@ -269,12 +271,43 @@ def push_message_to_group(group_name, message, type=None):
         }
     )
 
+pattern = r'<a\s+href="([^"]*)">(.*?)</a>'
 
 def save_msg_to_db_impl(msg,sender,receiver,type,project_id):
     user = models.UserInfo.objects.filter(username=sender).first()
     receiver_ = models.UserInfo.objects.filter(username=receiver).first()
     project = models.Project.objects.filter(id=project_id).first()
-    info_log = InfoLog(content=msg,sender=user,receiver=receiver_,type=type,project_id=project)
+    pure_content = None
+    pure_link = None
+    if msg.__contains__('<a'):
+        print('contains a',msg)
+        # 使用正则表达式提取a标签的链接和文本内容
+        for link,text in extract_links_and_text(msg):
+            print(link)
+            pure_link=link
+            print(text)
+            pure_content=text
+
+    info_log = InfoLog(content=msg,sender=user,receiver=receiver_,type=type,project_id=project,
+                       pure_link=pure_link,pure_content=pure_content)
     info_log.save()
 
 
+
+def extract_links_and_text(text):
+    # 使用正则表达式提取a标签
+    pattern = r'<a\s+href=[\'"]?([^\'" >]+)[\'"]?[^>]*>(.*?)<\/a>'
+    matches = re.findall(pattern, text)
+
+    # 使用BeautifulSoup解析a标签内容
+    soup = BeautifulSoup(text, 'html.parser')
+    links_and_text = []
+
+    for match in matches:
+        link = match[0]
+        # 解析a标签内容，去除HTML标签
+        soup_link = BeautifulSoup(match[1], 'html.parser')
+        text = soup_link.get_text()
+        links_and_text.append((link, text))
+
+    return links_and_text

@@ -279,6 +279,8 @@ class InfoLog(models.Model):
     project_id = models.ForeignKey(verbose_name="项目",to="Project",null=True,on_delete=models.SET_NULL)
     type = models.SmallIntegerField(verbose_name='信息类型', choices=type_choices, default=2)
     content = models.TextField(verbose_name="信息内容", default='')
+    pure_content = models.TextField(verbose_name="信息内容取净值，如去掉a标签", default='',null=True,blank=True)
+    pure_link = models.CharField(verbose_name="链接指向",default='',max_length=300,null=True,blank=True)
     sender = models.ForeignKey(verbose_name='发送者', related_name='sender',to='UserInfo', null=True, on_delete=models.SET_NULL)
     receiver = models.ForeignKey(verbose_name='接受者', to='UserInfo',related_name='receiver', null=True, on_delete=models.SET_NULL)
     status_choices = {

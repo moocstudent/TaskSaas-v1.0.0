@@ -241,8 +241,9 @@
                                 <tr>
 
                                     <td class="col-xs-4">
-                                        <label class="label label-default {% if item.status == 1 %}label-primary{% else %}label-left{% endif %}"
-                                               for="">from:<label>{{ item.sender }}</label></label>
+                                    <a onclick="status({{ key }})">
+                                        <label class="label label-default {% if item.status == 1 %}label-danger{% else %}label-left{% endif %}"
+                                               for="">from:<label>{{ item.sender }}</label></label></a>
 
 
                                         {% if item.avatar %}
@@ -253,7 +254,10 @@
                                     </td>
                                     <td class="col-xs-8">
                                         <a onclick="status({{ key }})"><label
-                                                style="color: {% if item.status == 1 %}hotpink{% else %}darkgray{% endif %}"> {{ item.content }}</label></a>
+                                                style="color: {% if item.status == 1 %}hotpink{% else %}darkgray{% endif %}">
+                                            {% if item.pure_link %}<a href="{{ item.pure_link }}"
+                                                                      onclick="status({{ key }})" style="color: {% if item.status == 1 %}dodgerblue;text-decoration: underline dotted{% else %}darkgray{% endif %}" target="_blank">{{ item.pure_content }}</a>{% else %}{{ item.content }}{% endif %}
+                                            </label></a>
                                         {% if item.type == 1 %}
                                             <div>{{ item.creator }}</div>
                                             <label>
