@@ -1,3 +1,4 @@
+import collections
 import json
 
 import requests
@@ -321,11 +322,35 @@ def calendar(request, project_id):
 
 
 def remind(request, project_id):
+    reminds = models.InfoLog.objects.filter(receiver=request.web.user,project_id=project_id).order_by('status','-create_datetime')
+    reminds_hint = reminds.filter(type=2)
+    hints = collections.OrderedDict()
+    for re in reminds_hint:
+        hints[re.id] = {'sender':re.sender.username,'receiver':re.receiver.username,
+                        'create_time':re.create_datetime,'content':re.content,'status':re.status}
+
+
     context = {
-        'info_size' : 10
+        'info_size' : 10,
+        'hint_size' : len(reminds_hint),
+        'sys_size': 10,
+        'hints':hints
     }
+    # raise Exception
     return render(request, 'web/remind.html',context=context)
 
 
+#标记已读
+def remind_status(request,project_id):
+    remind_id = request.POST.get('id')
+    print(remind_id)
+    print(project_id)
+    info = models.InfoLog.objects.filter(project_id=project_id,id=remind_id).first()
+    info.status = 2
+    info.save()
+    return JsonResponse({'status':1})
+
 def collect(request, project_id):
     return render(request, 'web/collect.html', {})
+
+

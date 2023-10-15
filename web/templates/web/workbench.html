@@ -1273,7 +1273,9 @@
                     //todo 记录到hint消息历史
                     const notify_audio = document.getElementById('notifyAudio')
                     notify_audio.play();
+
                     document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                    $("#badge").load(location.href + " #badge")
 
                 } else {
                     var message = data['message'];
@@ -1416,12 +1418,14 @@
             console.log(stringifyMsg)
 
             if (isOnlineCurrUser()) {
-                ws.send(stringifyMsg);
+                let send = ws.send(stringifyMsg);
+                console.log('send', send)
                 messageInputDom.value = '';
                 atMemberNames = []
                 atTaskIds = []
                 atMemberFlag = false
                 atTaskFlag = false
+
             } else {
                 console.log('reconnect ws...')
                 createOrConnectWebSocket()
@@ -1432,7 +1436,8 @@
                     console.log('reconnect ws 3')
                 }
                 console.log('ws.send(stringifyMsg)', stringifyMsg)
-                ws.send(stringifyMsg);
+                let send = ws.send(stringifyMsg);
+                console.log('send', send)
                 messageInputDom.value = '';
                 atMemberNames = []
                 atTaskIds = []

@@ -146,12 +146,13 @@ def manage_menu_list(request):
 
 @register.inclusion_tag('inclusion/right_side_manage_menu_list.html')
 def right_side_manage_menu_list(request):
+    badge_count = models.InfoLog.objects.filter(receiver=request.web.user,project_id=request.web.project.id,status=1).count()
     right_side_data_list = [
         {'id': 'workbench', 'title': '工作台','icon':'fa-desktop',
          'url': reverse('workbench', kwargs={'project_id': request.web.project.id})},
         {'id': 'calendar', 'title': '日历', 'icon': 'fa-calendar',
          'url': reverse('calendar', kwargs={'project_id': request.web.project.id})},
-        {'id': 'remind', 'title': '提醒', 'icon': 'fa-bell-o',
+        {'id': 'remind', 'title': '提醒', 'icon': 'fa-bell-o', 'badge':badge_count,'badge_id':'badge',
          'url': reverse('remind', kwargs={'project_id': request.web.project.id})},
         {'id': 'collect', 'title': '收藏', 'icon': 'fa-bookmark',
          'url': reverse('collect', kwargs={'project_id': request.web.project.id})},
@@ -160,6 +161,7 @@ def right_side_manage_menu_list(request):
     for item in right_side_data_list:
         if request.path_info.startswith(item['url']):
             item['class'] = 'active'
+
     return {'right_side_data_list': right_side_data_list}
 
 

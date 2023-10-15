@@ -221,4 +221,7 @@ sentry_sdk.init(
     # of sampled transactions.
     # We recommend adjusting this value in production.
     profiles_sample_rate=1.0,
+
 )
+SENTRY_CLIENT_ID = "af0ba8ff95be8880953b04af21f40dad702f3f5476dee83b463c556c5a321662",
+SENTRY_CLIENT_SECRET = "311a469be2aece28caaa8cbb169af43a82f14ade7bb63950c9fc7568783f973a"

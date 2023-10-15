@@ -1,5 +1,11 @@
+
+
+
+
+
 {% for item in right_side_data_list %}
     <li {% if item.style %}style="{{ item.style }}"{% endif %}  {% if item.id %}id="{{ item.id }}"{% endif %} {% if item.class %}class="{{ item.class }}"{% endif %}><a href="{{ item.url }}">
-      <i class="fa {% if item.icon %}{{ item.icon }}{% endif %}" aria-hidden="true"></i>   {{ item.title }}
+        <i class="fa {% if item.icon %}{{ item.icon }}{% endif %}" aria-hidden="true"></i>
+        {% if item.badge_id %}<span id="{{ item.badge_id }}">{% endif %} {% if item.badge %}<span class="badge" style="background-color: red">{{ item.badge }}</span>{% endif %}</span> {{ item.title }}
     </a></li>
 {% endfor %}

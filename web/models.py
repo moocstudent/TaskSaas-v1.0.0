@@ -276,9 +276,18 @@ class InfoLog(models.Model):
         # (3, '回复'),
         # (4, '删除'),
     }
+    project_id = models.ForeignKey(verbose_name="项目",to="Project",null=True,on_delete=models.SET_NULL)
     type = models.SmallIntegerField(verbose_name='信息类型', choices=type_choices, default=2)
     content = models.TextField(verbose_name="信息内容", default='')
-    sender = models.ForeignKey(verbose_name='发送者', to='UserInfo', null=True, on_delete=models.SET_NULL)
+    sender = models.ForeignKey(verbose_name='发送者', related_name='sender',to='UserInfo', null=True, on_delete=models.SET_NULL)
+    receiver = models.ForeignKey(verbose_name='接受者', to='UserInfo',related_name='receiver', null=True, on_delete=models.SET_NULL)
+    status_choices = {
+        (1, '未读'),
+        (2, '已读'),
+        # (3, '回复'),
+        # (4, '删除'),
+    }
+    status = models.SmallIntegerField(verbose_name="信息状态",choices=status_choices,default=1)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
     def __str__(self):

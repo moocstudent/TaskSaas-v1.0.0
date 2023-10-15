@@ -1,5 +1,7 @@
 import datetime
 import json
+
+from channels.db import database_sync_to_async
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
@@ -8,6 +10,8 @@ from TaskChat import constants
 from TaskChat.constants import private_message_key, push_message_key, userlist_message_key, chat_message_key
 from TaskSaasAPP import date_util
 from TaskSaasAPP.hash_map_util import HashMap
+from web import models
+from web.models import InfoLog
 
 
 class xChatConsumer(WebsocketConsumer):
@@ -28,7 +32,7 @@ class xChatConsumer(WebsocketConsumer):
         }))
 
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import WebsocketConsumer
 
 users = set()
@@ -52,7 +56,7 @@ class yChatConsumer(WebsocketConsumer):
         print('self.room_group_name', self.room_group_name)
 
         async_to_sync(self.channel_layer.group_add)(
-            self.username + self.project_id,
+            self.username +'__'+ self.project_id,
             self.channel_name
         )
 
@@ -111,7 +115,8 @@ class yChatConsumer(WebsocketConsumer):
             self.room_group_name,
             {
                 'type': chat_message_key,
-                'message': username + ': ' + message
+                'message': username + ': ' + message,
+
             }
         )
 
@@ -120,7 +125,8 @@ class yChatConsumer(WebsocketConsumer):
             print('hint msg receivers ',receivers)
             for receiver in receivers:
                 print('push hint msg to ',receiver)
-                push_message_to_group(receiver+str(self.project_id),message,constants.private_message_key)
+                self.receiver = receiver
+                push_message_to_group(receiver+'__'+str(self.project_id),message,constants.private_message_key)
 
              # push_message_to_group()
         # push(self.room_group_name,'system info')
@@ -146,6 +152,7 @@ class yChatConsumer(WebsocketConsumer):
             'message': message,
             'type': type
         }))
+        save_msg_to_db_impl(message,'admin', None,1,self.project_id)
 
     def private_message(self, event):
         # user = await get_user(self.scope)
@@ -157,6 +164,9 @@ class yChatConsumer(WebsocketConsumer):
             'message': message,
             'type': type
         }))
+        print(self.room_group_name)
+        save_msg_to_db_impl(message,username,self.receiver,2,self.project_id)
+
 
     def userlist_message(self, event):
         username = self.username
@@ -258,3 +268,13 @@ def push_message_to_group(group_name, message, type=None):
             "message": message
         }
     )
+
+
+def save_msg_to_db_impl(msg,sender,receiver,type,project_id):
+    user = models.UserInfo.objects.filter(username=sender).first()
+    receiver_ = models.UserInfo.objects.filter(username=receiver).first()
+    project = models.Project.objects.filter(id=project_id).first()
+    info_log = InfoLog(content=msg,sender=user,receiver=receiver_,type=type,project_id=project)
+    info_log.save()
+
+
