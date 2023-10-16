@@ -124,11 +124,11 @@ class yChatConsumer(WebsocketConsumer):
 
         if type == 'hint':
             receivers = text_data_json['receivers']
+            sender = text_data_json['sender']
             print('hint msg receivers ',receivers)
             for receiver in receivers:
                 print('push hint msg to ',receiver)
-                self.receiver = receiver
-                push_message_to_group(receiver+'__'+str(self.project_id),message,constants.private_message_key)
+                push_message_to_group(receiver+'__'+str(self.project_id),message,constants.private_message_key,sender)
 
              # push_message_to_group()
         # push(self.room_group_name,'system info')
@@ -159,15 +159,17 @@ class yChatConsumer(WebsocketConsumer):
     def private_message(self, event):
         # user = await get_user(self.scope)
         username = self.username
-        message = '😄来自'+username+'的私人消息😄' + event['message']
+        sender = event['sender']
+        print('sender: ',sender)
+        message = '😄来自'+sender+'的私人消息😄' + event['message']
         type = event['type']
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'message': message,
             'type': type
         }))
-        print(self.room_group_name)
-        save_msg_to_db_impl(message,username,self.receiver,2,self.project_id)
+        print('private_message self.room_group_name ',self.room_group_name)
+        save_msg_to_db_impl(message,sender,username,2,self.project_id)
 
 
     def userlist_message(self, event):
@@ -259,7 +261,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 #       "event": event['event']
 #     }))
 
-def push_message_to_group(group_name, message, type=None):
+def push_message_to_group(group_name, message, type=None,sender=None):
     channel_layer = get_channel_layer()
     if type is None:
         type = push_message_key
@@ -267,7 +269,8 @@ def push_message_to_group(group_name, message, type=None):
         group_name,
         {
             "type": type,
-            "message": message
+            "message": message,
+            'sender': sender
         }
     )
 

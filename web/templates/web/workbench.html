@@ -1270,7 +1270,6 @@
                     var message = data['message'];
                     document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');
                     localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
-                    //todo 记录到hint消息历史
                     const notify_audio = document.getElementById('notifyAudio')
                     notify_audio.play();
 
@@ -1384,7 +1383,8 @@
                     stringifyMsg = JSON.stringify({
                         'message': message,
                         'type': 'hint',
-                        'receivers': atMembersConfirm
+                        'receivers': atMembersConfirm,
+                        'sender': '{{ request.web.user.username }}'
                     });
                 }
             }
@@ -1411,6 +1411,7 @@
                         'message': task_message,
                         'type': atMemberFlag ? 'hint' : 'normal',
                         'receivers': atMemberFlag ? atMembersConfirm : [],
+                        'sender': '{{ request.web.user.username }}'
                     });
                 }
             }
