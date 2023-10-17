@@ -35,6 +35,8 @@ def dashboard(request, project_id):
     if main_legend_trigger is not None:
         types = (list(main_legend_trigger.split(',')))
         issues_filter=issues_filter.filter(issues_type__title__in=types)
+    print('types ',types)
+    print('main_legend_trigger ',main_legend_trigger)
 
     issues_types = models.IssuesType.objects.filter(project_id=project_id)
     for i in issues_types.values('id'):
@@ -45,6 +47,7 @@ def dashboard(request, project_id):
     for i in list(issues_types.filter(title__in=types).values('id')):
         type_ids+=str(i['id'])+','
     type_ids=type_ids[0:-1]
+    print('type_ids ',type_ids)
     # print('issues_types dict',dict(issues_types))
 
     # keys = []

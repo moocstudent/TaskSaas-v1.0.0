@@ -356,6 +356,7 @@
         var status_choices = JSON.parse(document.getElementById("status_choices").value);
         var type_ids = document.getElementById("type_ids").value;
         var all_type_ids = document.getElementById("all_type_ids").value;
+        console.log('all_type_ids ',all_type_ids);
         if (type_ids) {
             {#if (type_ids.indexOf(",")>-1){#}
             type_ids = type_ids.split(',')
@@ -484,6 +485,7 @@
         myChart.hideLoading();
         myChart.on("click", function (e) {
             console.log(e.name)
+            console.log(e.seriesName)
             console.log(e.seriesName == 'Bug')
             {#alert('chart on click>>', params);#}
             {#console.log((yMatchTypes.indexOf(e.name) + 1))#}
