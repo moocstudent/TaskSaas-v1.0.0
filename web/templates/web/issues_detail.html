@@ -114,6 +114,10 @@
                 <div class="panel-heading edit-heading">
                     <div>
                         <i class="fa fa-edit" aria-hidden="true"></i> 更新问题 {% if id %}#{{ id }}{% endif %}
+                    {% if is_collected %}
+                        <a  style="float:right;color: darkgray">[已收藏]</a>
+                    {% else %}<a href="" onclick="collect({{ id }},{{ issues_pk }})" style="float:right">[收藏]</a>{% endif %}
+
                     </div>
 
                 </div>
@@ -347,6 +351,7 @@
         </div>
     </div>
 
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 
 {% endblock %}
 
@@ -655,6 +660,27 @@
                 }
             }
         });
+
+        function collect(issue_id,pk){
+            $.ajax({
+                url: "{% url 'make_collect' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'issue_pk':pk,
+                    'issue_id': issue_id,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res.status)
+                        {#location.reload();#}
+                    } else {
+
+                    }
+                }
+            })
+        }
 
     </script>
 

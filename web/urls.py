@@ -2,13 +2,13 @@ from django.conf.urls import static
 from django.urls import re_path, include, path
 
 from TaskChat import chat_views, consumers
-from TaskSaas.api import oauth_callback_api, user_api
-from TaskSaasAPP import settings
+from TaskSaas.api import oauth_callback_api, user_api, collect_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry
 from web.views.upload import FileUploadView
 
 urlpatterns = [
+
     re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': 'web/static'}, name='static'),
     re_path(r'^register/', account.register, name='register'),
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
@@ -61,6 +61,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^remind/$', manage.remind, name='remind'),
     re_path(r'^remind_status/$', manage.remind_status, name='remind_status'),
     re_path(r'^collect/$', manage.collect, name='collect'),
+    re_path(r'^make_collect/$', collect_api.make_collect, name='make_collect'),
 
     re_path(r'^wiki/$', wiki.wiki, name='wiki'),
     re_path(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),

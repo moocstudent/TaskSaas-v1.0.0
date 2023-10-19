@@ -149,6 +149,17 @@ class Wiki(models.Model):
     def __str__(self):
         return self.title
 
+class Collect(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
+    issues = models.ForeignKey(verbose_name='问题',to="Issues",null=True, on_delete=models.SET_NULL)
+    creator = models.ForeignKey(verbose_name='收藏人',to='UserInfo',null=True,on_delete=models.SET_NULL)
+    title = models.CharField(verbose_name='标题', max_length=256)
+    link = models.CharField(verbose_name='链接',max_length=256)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    def __str__(self):
+        return self.link
+
 
 def upload_to(filename):
     return '/'.join(['uploads', filename])

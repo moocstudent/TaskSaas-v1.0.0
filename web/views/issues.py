@@ -239,12 +239,14 @@ def issues_detail(request, project_id, issues_id):
     """编辑问题"""
 
     issues_object = models.Issues.objects.filter(issue_id=issues_id, project_id=project_id).first()
-
+    coll = models.Collect.objects.filter(issues=issues_object,creator=request.web.user).first()
     form = IssuesModelForm(request, instance=issues_object)
 
     context = {
         'id' : issues_id,
+        'issues_pk' : issues_object.id,
         'form': form,
+        'is_collected':coll,
         'issues_object': issues_object
     }
     return render(request, 'web/issues_detail.html', context)
