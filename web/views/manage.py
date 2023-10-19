@@ -13,6 +13,7 @@ from TaskSaasAPP.date_util import get_every_day, get_today, get_last_week_since_
 from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
+from web.models import Collect
 
 
 def statistics(request, project_id):
@@ -322,36 +323,44 @@ def calendar(request, project_id):
 
 
 def remind(request, project_id):
-    reminds = models.InfoLog.objects.filter(receiver=request.web.user,project_id=project_id).order_by('status','-create_datetime')
+    reminds = models.InfoLog.objects.filter(receiver=request.web.user, project_id=project_id).order_by('status',
+                                                                                                       '-create_datetime')
     reminds_hint = reminds.filter(type=2)
     hints = collections.OrderedDict()
     for re in reminds_hint:
-        hints[re.id] = {'sender':re.sender.username,'receiver':re.receiver.username,
-                        'create_time':re.create_datetime,'content':re.content,'status':re.status,
-                        'pure_link':re.pure_link,'pure_content':re.pure_content}
-
+        hints[re.id] = {'sender': re.sender.username, 'receiver': re.receiver.username,
+                        'create_time': re.create_datetime, 'content': re.content, 'status': re.status,
+                        'pure_link': re.pure_link, 'pure_content': re.pure_content}
 
     context = {
-        'info_size' : 10,
-        'hint_size' : len(reminds_hint),
+        'info_size': 10,
+        'hint_size': len(reminds_hint),
         'sys_size': 10,
-        'hints':hints
+        'hints': hints
     }
     # raise Exception
-    return render(request, 'web/remind.html',context=context)
+    return render(request, 'web/remind.html', context=context)
 
 
-#标记已读
-def remind_status(request,project_id):
+# 标记已读
+def remind_status(request, project_id):
     remind_id = request.POST.get('id')
     print(remind_id)
     print(project_id)
-    info = models.InfoLog.objects.filter(project_id=project_id,id=remind_id).first()
+    info = models.InfoLog.objects.filter(project_id=project_id, id=remind_id).first()
     info.status = 2
     info.save()
-    return JsonResponse({'status':1})
+    return JsonResponse({'status': 1})
+
 
 def collect(request, project_id):
-    return render(request, 'web/collect.html', {})
-
-
+    collects_set = Collect.objects.filter(creator=request.web.user)
+    collects = collections.OrderedDict()
+    for coll in collects_set:
+        collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,
+                             'link': coll.link, 'id': coll.issues.issue_id,'project':coll.project.name}
+    context = {
+        'collects': collects,
+        'coll_size':len(collects)
+    }
+    return render(request, 'web/collect.html', context)
