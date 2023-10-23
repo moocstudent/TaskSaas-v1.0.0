@@ -26,8 +26,8 @@ def setting_delete(request, project_id):
     if password is None:
         return render(request, 'web/setting_delete.html', {'error': "密码错误"})
     else:
-        check_password_flag = base_user.check_password(password, request.user.password)
-        if not check_password_flag:
+        print('md5 password:{} request.web.user.password:{}'.format(encrypt.md5(password),request.web.user.password))
+        if not (encrypt.md5(password) == request.web.user.password):
             return render(request, 'web/setting_delete.html', {'error': "密码错误"})
 
     # 删除项目(只有项目创建者才能删除）
@@ -36,11 +36,11 @@ def setting_delete(request, project_id):
 
     # 删除桶里面所有文件
     # 删除桶
-    try:
-        delete_bucket(request.web.project.bucket,request.web.project.region)
-    except:
-        print('delete bucket error ',project_id)
-        pass
+    # try:
+    #     delete_bucket(request.web.project.bucket,request.web.project.region)
+    # except:
+    #     print('delete bucket error ',project_id)
+    #     pass
     if str(project_id) == str(request.web.project.id):
          # 删除项目
         models.Project.objects.filter(id=request.web.project.id).delete()
