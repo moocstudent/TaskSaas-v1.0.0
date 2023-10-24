@@ -6,8 +6,10 @@ from TaskSaas.api import oauth_callback_api, user_api, collect_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry
 from web.views.upload import FileUploadView
+from TaskSaasAPP import scheduler
 
 urlpatterns = [
+    # scheduler.run(),
 
     re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': 'web/static'}, name='static'),
     re_path(r'^register/', account.register, name='register'),

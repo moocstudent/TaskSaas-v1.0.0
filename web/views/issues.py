@@ -257,7 +257,7 @@ def issues_record(request, project_id, issues_pk):
     """初始化操作记录"""
     print(request.web.project)
     if request.method == 'GET':
-        reply_list = models.IssuesReply.objects.filter(issues=issues_pk, issues__project=request.web.project)
+        reply_list = models.IssuesReply.objects.filter(issues=issues_pk, issues__project=request.web.project).order_by('-create_datetime')
         print(reply_list)
         # 将queryset转换为json格式
         data_list = []
@@ -419,6 +419,19 @@ def issues_change(request, project_id, issues_pk):
                                record=change_record,
                                create_datetime=issues_object.latest_update_datetime)
         issues_log.save()
+
+        if name in ['status']:
+            print('name in status',)
+            if value == '3':
+                using_time_delta = datetime.datetime.now()-issues_object.create_datetime
+                using_time_str = "{}天-{}小时-{}分钟-{}秒".format(using_time_delta.days,(using_time_delta.seconds//3600),
+                                                 ((using_time_delta.seconds%3600)//60),using_time_delta.seconds%60)
+                issues_object.using_time = using_time_str
+                issues_object.save()
+            else:
+                if issues_object.using_time:
+                    issues_object.using_time = None
+                    issues_object.save()
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
     # M2M字段

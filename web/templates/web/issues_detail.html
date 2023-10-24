@@ -114,6 +114,9 @@
                 <div class="panel-heading edit-heading">
                     <div>
                         <i class="fa fa-edit" aria-hidden="true"></i> 更新问题 {% if id %}#{{ id }}{% endif %}
+                    {% if issues_object.using_time %}
+                        <span style="text-align: center">已完成,用时:{{ issues_object.using_time }}</span>
+                    {% endif %}
                     {% if is_collected %}
                         <a  style="float:right;color: darkkhaki">[已收藏]</a>
                     {% else %}<a href="" onclick="collect({{ id }},{{ issues_pk }})" style="float:right">[收藏]</a>{% endif %}
@@ -291,8 +294,8 @@
                 </div>
                 <div class="panel-body comment-area">
 
-                    <div class="comment-list">
-
+                    <div class="comment-list"  style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;
+                    display: block;overflow-y: scroll;">
 
                     </div>
 

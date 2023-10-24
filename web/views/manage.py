@@ -326,17 +326,24 @@ def remind(request, project_id):
     reminds = models.InfoLog.objects.filter(receiver=request.web.user, project_id=project_id).order_by('status',
                                                                                                        '-create_datetime')
     reminds_hint = reminds.filter(type=2)
+    reminds_sys = reminds.filter(type=1)
     hints = collections.OrderedDict()
+    sysinfos = collections.OrderedDict()
     for re in reminds_hint:
         hints[re.id] = {'sender': re.sender.username, 'receiver': re.receiver.username,
                         'create_time': re.create_datetime, 'content': re.content, 'status': re.status,
                         'pure_link': re.pure_link, 'pure_content': re.pure_content}
+    for ss in reminds_sys:
+        sysinfos[ss.id] = {'sender': ss.sender.username, 'receiver': ss.receiver.username,
+                        'create_time': ss.create_datetime, 'content': ss.content, 'status': ss.status,
+                        'pure_link': ss.pure_link, 'pure_content': ss.pure_content}
 
     context = {
         'info_size': 10,
         'hint_size': len(reminds_hint),
-        'sys_size': 10,
-        'hints': hints
+        'sys_size': len(reminds_sys),
+        'hints': hints,
+        'sysinfos':sysinfos
     }
     # raise Exception
     return render(request, 'web/remind.html', context=context)

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'TaskChat',
     'TaskSaas.apps.TasksaasConfig',
     'web.apps.WebConfig',
+    'django_apscheduler',
     'rest_framework',  # django restframework
 ]
 

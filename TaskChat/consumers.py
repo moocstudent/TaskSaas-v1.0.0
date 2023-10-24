@@ -12,6 +12,7 @@ from TaskChat import constants
 from TaskChat.constants import private_message_key, push_message_key, userlist_message_key, chat_message_key
 from TaskSaasAPP import date_util
 from TaskSaasAPP.hash_map_util import HashMap
+from utils import encrypt
 from web import models
 from web.models import InfoLog
 
@@ -58,7 +59,7 @@ class yChatConsumer(WebsocketConsumer):
         print('self.room_group_name', self.room_group_name)
 
         async_to_sync(self.channel_layer.group_add)(
-            self.username +'__'+ self.project_id,
+            encrypt.md5(self.username) +'__'+ self.project_id,
             self.channel_name
         )
 
@@ -87,7 +88,7 @@ class yChatConsumer(WebsocketConsumer):
             self.channel_name,
         )
         async_to_sync(self.channel_layer.group_discard)(
-            self.username + self.project_id,
+            encrypt.md5(self.username) + self.project_id,
             self.channel_name
         )
         the_room_users = hash_map.get(self.room_group_name)
@@ -128,7 +129,7 @@ class yChatConsumer(WebsocketConsumer):
             print('hint msg receivers ',receivers)
             for receiver in receivers:
                 print('push hint msg to ',receiver)
-                push_message_to_group(receiver+'__'+str(self.project_id),message,constants.private_message_key,sender)
+                push_message_to_group(encrypt.md5(receiver)+'__'+str(self.project_id),message,constants.private_message_key,sender)
 
              # push_message_to_group()
         # push(self.room_group_name,'system info')

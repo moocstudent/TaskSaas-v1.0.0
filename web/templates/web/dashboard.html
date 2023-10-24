@@ -30,6 +30,7 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
+
         .slider:before {
             position: absolute;
             content: "";
@@ -41,45 +42,57 @@
             -webkit-transition: .4s;
             transition: .4s;
         }
+
         input:checked + .slider {
             background-color: #2196F3;
         }
+
         input:focus + .slider {
             box-shadow: 0 0 1px #2196F3;
         }
+
         input:checked + .slider:before {
             -webkit-transform: translateX(26px);
             -ms-transform: translateX(26px);
             transform: translateX(26px);
         }
+
         /* Rounded sliders */
         .slider.round {
             border-radius: 34px;
         }
+
         .slider.round:before {
             border-radius: 50%;
         }
+
         .table-right > tbody > tr > td.label-left {
             width: 90px;
         }
+
         .table-right > tbody > tr > td {
             border: 0;
         }
+
         .status-count {
             text-align: center;
             margin-top: 10px;
             margin-bottom: 30px;
             font-size: 14px;
         }
+
         .status-count .count {
             font-size: 25px;
         }
+
         .status-count a {
             text-decoration: none;
         }
+
         .user-item .title {
             margin-bottom: 20px;
         }
+
         .user-item .avatar, .top-10 .avatar {
             float: left;
             margin-right: 10px;
@@ -92,15 +105,19 @@
             line-height: 30px;
             border-radius: 50%;
         }
+
         .user-item .text {
             line-height: 30px;
         }
+
         .top-10 .avatar {
             margin-right: 0;
         }
+
         .top-10 td {
             padding: 5px 10px;
         }
+
         .top-10 .table > tbody > tr > td {
             border-top: 0;
             border-bottom: 1px solid #ddd;
@@ -155,6 +172,8 @@
                             <div class="panel-heading">
                                 <i class="fa fa-user" aria-hidden="true"></i>
                                 项目成员
+                                <a style="float: right;" class="btn btn-primary btn-sm"
+                                   data-toggle="modal" data-target="#inviteModal">邀请成员</a>
                             </div>
                             <div class="panel-body user-item">
                                 <div class="col-sm-12 title">创建者</div>
@@ -194,6 +213,48 @@
 
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div  class="modal fade in" id="inviteModal" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">邀请成员</h4>
+                        </div>
+                        <div class="modal-body" style="padding-right: 40px;">
+                            <form id="inviteForm">
+                                {% csrf_token %}
+                                {% for item in invite_form %}
+                                    <div class="form-group">
+                                        <label for="{{ item.id_for_label }}">{{ item.label }}</label>
+                                        <span>{% if  item.help_text %}（{{ item.help_text }}）{% endif %}</span>
+                                        {{ item }}
+                                        <span class="error-msg"></span>
+                                    </div>
+                                {% endfor %}
+                                <button type="button" class="btn btn-success" id="btnGenInviteCode">生成邀请码</button>
+                            </form>
+                            <div id="inviteArea" class="hide">
+                                <hr/>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <input type="button" value="邀请链接" class="btn btn-default">
+                                        </div>
+                                        <input type="text" class="form-control" id="inviteUrl">
+                                        <div class="input-group-btn">
+                                            <input type="button" value="复制链接" class="btn btn-primary"
+                                                   id="btnCopyUrl">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -247,11 +308,11 @@
                                 {#                                {{ item }}#}
                                 <tr>
                                     <td style="width: 46px;">
-                                                {% if item.avatar %}
-                                                    <img class="avatar" src="{{ item.avatar }}" alt="">
-                                                {% else %}
-                                                    <div class="avatar">{{ item.creator.0|upper }}</div>
-                                                {% endif %}
+                                        {% if item.avatar %}
+                                            <img class="avatar" src="{{ item.avatar }}" alt="">
+                                        {% else %}
+                                            <div class="avatar">{{ item.creator.0|upper }}</div>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% if item.type == 1 %}
@@ -310,7 +371,7 @@
             </div>
         </div>
     </div>
-{#    <div {% load dashboard %} hidden="hidden"></div>#}
+    {#    <div {% load dashboard %} hidden="hidden"></div>#}
     <input id="echarts_data" value="{{ echarts_data }}" hidden="hidden"/>
     <input id="tasks_count" value="{{ tasks_count }}" hidden="hidden"/>
     <input id="funcs_count" value="{{ funcs_count }}" hidden="hidden"/>
@@ -325,7 +386,7 @@
 {% endblock %}
 
 {% block js %}
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
             integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
@@ -356,7 +417,7 @@
         var status_choices = JSON.parse(document.getElementById("status_choices").value);
         var type_ids = document.getElementById("type_ids").value;
         var all_type_ids = document.getElementById("all_type_ids").value;
-        console.log('all_type_ids ',all_type_ids);
+        console.log('all_type_ids ', all_type_ids);
         if (type_ids) {
             {#if (type_ids.indexOf(",")>-1){#}
             type_ids = type_ids.split(',')
@@ -700,6 +761,35 @@
             alert("暂无")
         }
 
+        var INVITE_URL = "{% url 'invite_url' project_id=request.web.project.id %}";
+
+        $(function () {
+            bindCreateInviteCode();
+        });
+
+               /**
+         *       点击生成邀请链接
+         */
+        function bindCreateInviteCode() {
+            $('#btnGenInviteCode').click(function () {
+                $('.error-msg').empty();
+                $.ajax({
+                    url: INVITE_URL,
+                    type: "POST",
+                    data: $('#inviteForm').serialize(),
+                    dataType: "JSON",
+                    success: function (res) {
+                        if (res.status) {
+                            $('#inviteArea').removeClass('hide').find('#inviteUrl').val(res.data);
+                        } else {
+                            $.each(res.error, function (k, v) {
+                                $('#id_' + k).next('.error-msg').text(v[0]);
+                            })
+                        }
+                    }
+                })
+            })
+        }
 
     </script>
 {% endblock %}

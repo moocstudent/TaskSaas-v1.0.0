@@ -21,3 +21,7 @@ channels==3.0.0
 
 consumers~=0.6.1
 PyMySQL~=1.1.0
+
+django_apscheduler==0.6.2
+apscheduler==3.10.4
+tzlocal==5.2

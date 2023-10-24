@@ -147,24 +147,44 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-history" aria-hidden="true"></i>
-                        信息 {{ info_size }} 条
+                        系统信息 {{ sys_size }} 条
+
                     </div>
                     <div class="panel-body top-10">
                         <table class="table"
                                style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;display: block;overflow-y: scroll;">
                             <tbody>
-                            {% for key,item in top_ten.items %}
+                            {#                            <span class="label label-default"> Label</span>#}
+                            {#                            <span class="label label-default label-success"> Label</span>#}
+                            {#                            <span class="label label-default label-danger"> Label</span>#}
+                            {#                            <span class="label label-default label-primary"> Label</span>#}
+                            {% for key,item in sysinfos.items %}
+
                                 {#                                                                {{ key }}#}
                                 {#                                {{ item }}#}
                                 <tr>
-                                    <td style="width: 46px;">
+
+                                    <td class="col-xs-4">
+                                        <a onclick="status({{ key }})">
+                                            <label class="label label-default {% if item.status == 1 %}label-danger{% else %}label-left{% endif %}"
+                                                   for="">from:<label>{{ item.sender }}</label></label></a>
+
+
                                         {% if item.avatar %}
-                                            <img class="avatar" src="{{ item.avatar }}" alt="">
+                                            {#                                            <img class="avatar" src="{{ item.avatar }}" alt="">#}
                                         {% else %}
-                                            <div class="avatar">{{ item.creator.0|upper }}</div>
+                                            {#                                            <div class="avatar">{{ item.creator.0|upper }}</div>#}
                                         {% endif %}
                                     </td>
-                                    <td>
+                                    <td class="col-xs-8">
+                                        <a onclick="status({{ key }})"><label
+                                                style="color: {% if item.status == 1 %}hotpink{% else %}darkgray{% endif %}">
+                                            {% if item.pure_link %}<a href="{{ item.pure_link }}"
+                                                                      onclick="status({{ key }})"
+                                                                      style="color: {% if item.status == 1 %}dodgerblue;text-decoration: underline dotted{% else %}darkgray{% endif %}"
+                                                                      target="_blank">{{ item.pure_content }}</a>{% else %}
+                                                {{ item.content }}{% endif %}
+                                        </label></a>
                                         {% if item.type == 1 %}
                                             <div>{{ item.creator }}</div>
                                             <label>
@@ -241,9 +261,9 @@
                                 <tr>
 
                                     <td class="col-xs-4">
-                                    <a onclick="status({{ key }})">
-                                        <label class="label label-default {% if item.status == 1 %}label-danger{% else %}label-left{% endif %}"
-                                               for="">from:<label>{{ item.sender }}</label></label></a>
+                                        <a onclick="status({{ key }})">
+                                            <label class="label label-default {% if item.status == 1 %}label-danger{% else %}label-left{% endif %}"
+                                                   for="">from:<label>{{ item.sender }}</label></label></a>
 
 
                                         {% if item.avatar %}
@@ -256,8 +276,11 @@
                                         <a onclick="status({{ key }})"><label
                                                 style="color: {% if item.status == 1 %}hotpink{% else %}darkgray{% endif %}">
                                             {% if item.pure_link %}<a href="{{ item.pure_link }}"
-                                                                      onclick="status({{ key }})" style="color: {% if item.status == 1 %}dodgerblue;text-decoration: underline dotted{% else %}darkgray{% endif %}" target="_blank">{{ item.pure_content }}</a>{% else %}{{ item.content }}{% endif %}
-                                            </label></a>
+                                                                      onclick="status({{ key }})"
+                                                                      style="color: {% if item.status == 1 %}dodgerblue;text-decoration: underline dotted{% else %}darkgray{% endif %}"
+                                                                      target="_blank">{{ item.pure_content }}</a>{% else %}
+                                                {{ item.content }}{% endif %}
+                                        </label></a>
                                         {% if item.type == 1 %}
                                             <div>{{ item.creator }}</div>
                                             <label>

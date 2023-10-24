@@ -7,6 +7,8 @@ import collections
 from web import models
 from django.db.models import Count, Q, F
 
+from web.forms.issues import IssuesInviteModelForm
+
 
 def dashboard(request, project_id):
     print('dashboard pid ',request.web.project.id)
@@ -137,8 +139,9 @@ def dashboard(request, project_id):
         issues_types_dict.append(issues_types[2].title)
     if len(issues_types) > 3:
         issues_types_dict.append(issues_types[3].title)
-
+    invite_form = IssuesInviteModelForm()
     context = {
+        'invite_form':invite_form,
         'status_dict': status_dict,
         'join_user': join_user,
         'top_ten': top_ten_re_sorted,

@@ -242,6 +242,8 @@ class Issues(models.Model):
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
 
+    using_time = models.CharField(verbose_name='用时从创建到已解决到用时format',max_length=30,default=None,null=True,blank=True)
+
     def __str__(self):
         return self.subject
 
