@@ -2,6 +2,7 @@
 import os
 import sys
 
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "TaskSaasAPP.settings")
     try:
@@ -19,5 +20,7 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
+
+    # remind_task.remind_deadline()
 
     execute_from_command_line(sys.argv)

@@ -1,12 +1,4 @@
-import datetime
-
-from django.db.models import Q
-
-from TaskChat import constants
-from TaskChat.consumers import push_message_to_group
-from TaskSaasAPP import date_util
-from utils import encrypt
-from web.models import Issues, InfoLog
+from TaskSaas.task.remind_task import remind_deadline
 
 
 def run():
@@ -31,30 +23,7 @@ try:
     @register_job(scheduler, "cron", hour='0',minute='30', id='deadline_task_job', replace_existing=True)
     def my_job():
         # 这里写你要执行的任务
-        issues_today_deadline = Issues.objects.filter(end_date__exact=datetime.datetime.now())
-        for i in issues_today_deadline:
-            print('deadline task job : >> {}-{}-{}'.format(i.project_id, i.subject, i.end_date))
-            if i.assign:
-                proj_creator = i.project.creator
-                msg = '你被指派的task:' + i.subject + ' 今日截止'
-                push_message_to_group(encrypt.md5(i.assign.username) + '__' + str(i.project_id), msg,
-                                      constants.push_message_key, proj_creator.username)
-                info_log = InfoLog(content=msg, sender=proj_creator, receiver=i.assign, type=1, project_id=i.project,
-                                   pure_link=('/manage/{}/issues/detail/{}/'.format(i.project_id,i.issue_id)), pure_content=msg)
-                info_log.save()
-            if i.attention:
-                attentions = i.attention.all()
-                proj_creator = i.project.creator
-                msg = '你关注的task:' + i.subject + ' 今日截止'
-                for at in attentions:
-                    push_message_to_group(encrypt.md5(at.username) + '__' + str(i.project_id),
-                                          msg,
-                                          constants.push_message_key, proj_creator.username)
-                    info_log = InfoLog(content=msg, sender=proj_creator, receiver=at, type=1,
-                                       project_id=i.project,
-                                       pure_link=('/manage/{}/issues/detail/{}/'.format(i.project_id, i.issue_id)),
-                                       pure_content=msg)
-                    info_log.save()
+        remind_deadline()
 
 except Exception as e:
     print(e)
@@ -62,3 +31,4 @@ except Exception as e:
     scheduler.shutdown()
 # 4.开启定时任务
 scheduler.start()
+

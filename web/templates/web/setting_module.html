@@ -11,70 +11,73 @@
 
 {% block content %}
 
-    <div class="container clearfix" style="margin-top: 20px">
-
-        <div class="col-sm-3">
-            <div class="panel panel-default">
-                <div class="panel-heading" style="background-color: transparent;font-weight: bold">
-                    项目设置
-                </div>
-                <div class="list-group" style="border-radius: 0">
-                    <div>
-                        <a href="{% url 'setting_module' project_id=request.web.project.id %}"
-                           class="list-group-item choices">项目模块</a>
-                        {#                        <a href="#" class="list-group-item">修改密码</a>#}
-                        <a href="{% url 'setting_delete' project_id=request.web.project.id %}"
-                           class="list-group-item">删除项目</a>
+    <div class="layui-container" style="margin-top: 20px">
+        <div class="layui-row">
+            <div class="layui-col-md3" style="float: left">
+                <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: transparent;font-weight: bold">
+                        项目设置
                     </div>
-
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-sm-9">
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    项目模块
-                </div>
-                <div class="panel-body">
-
-                    <form class="form-horizontal" method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label">模块名</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" placeholder="请输入模块名称"
-                                       name="title">
-                                <span class="error-msg">{{ error }}</span>
-                            </div>
+                    <div class="list-group" style="border-radius: 0">
+                        <div>
+                            <a href="{% url 'setting_module' project_id=request.web.project.id %}"
+                               class="list-group-item choices">项目模块</a>
+                            {#                        <a href="#" class="list-group-item">修改密码</a>#}
+                            <a href="{% url 'setting_delete' project_id=request.web.project.id %}"
+                               class="list-group-item">删除项目</a>
                         </div>
 
-                        <div class="form-group">
-                            <div class="col-sm-offset-5 col-sm-5">
-                                <input type="submit" class="btn btn-info" value="新 增">
-                            </div>
-                        </div>
-
-
-                    </form>
-                    <div>
-                        <ul>
-                            {% for item in list %}
-                                <li>{{ item.title }}
-                                    <button onclick="delModule({{ item.id }})">删除</button>
-                                </li>
-                            {% endfor %}
-                        </ul>
                     </div>
 
                 </div>
             </div>
 
-        </div>
 
+            <div class="layui-col-md9" style="float:right">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                        项目模块
+                    </div>
+                    <div class="panel-body">
+
+                        <form class="layui-form" method="post">
+                            {% csrf_token %}
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">模块名</label>
+                                <div class="layui-input-block">
+                                    <input  type="text" class="layui-input" required lay-verify="required"
+                                           placeholder="请输入模块名称"
+                                           name="title">
+                                    <span class="error-msg">{{ error }}</span>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <input lay-submit="" type="submit" class="layui-btn layui-btn-normal" value="新 增">
+                                    </div>
+                            </div>
+
+
+                        </form>
+                        <div style="padding-top: 10%">
+                            <ul id="moduleList">
+                                {% for item in list %}
+                                    <li class="layui-col-xs3">{{ item.title }}
+                                        <button class="layui-btn-primary" onclick="delModule({{ item.id }})">删除
+                                        </button>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 
@@ -94,12 +97,18 @@
                 dataType: "JSON",
                 success: function (res) {
                     if (res.status) {
-                        location.reload()
+                        $("#moduleList").load(location.href + " #moduleList")
                     } else {
                         console.log('err')
                     }
                 }
             })
         }
+
+        layui.use(['layer', 'form'], function (args) {
+            var layer = layui.layer;
+            var form = layui.form;
+        });
+
     </script>
 {% endblock %}

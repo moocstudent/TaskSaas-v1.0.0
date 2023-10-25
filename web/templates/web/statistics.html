@@ -2,10 +2,61 @@
 {% block title %}{% endblock %}
 
 {% block css %}
+    <style>
+        .layui-row div {
+            border: 1px solid #0C1021;
+
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<h1>统计</h1>
+    <div class="layui-container">
+        <h2 class="layui-header">{{ request.web.user.username }}在该项目负责Task</h2>
+
+        <table class="layui-table" lay-even  lay-size="lg">
+            <colgroup>
+                <col width="150">
+                <col width="150">
+                <col width="150">
+                <col width="150">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>主导assign Task</th>
+                <th>关注attention Task</th>
+                <th>解决 Task</th>
+                <th>创建 Task</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ assign_count }} count</td>
+                <td>{{ attention_count }} count</td>
+                <td>{{ resolve_count }} count</td>
+                <td>{{ creation_count }} count</td>
+            </tr>
+            </tbody>
+        </table>
+
+
+        {#        row及column使用#}
+        {#        <hr>#}
+        {#        <div class="layui-row layui-col-md12">#}
+        {#            <div class="layui-col-md2 text-center">主导assign Task</div>#}
+        {#            <div class="layui-col-md2 text-center">关注attention Task</div>#}
+        {#            <div class="layui-col-md2 text-center">解决 Task</div>#}
+        {#            <div class="layui-col-md2 text-center">创建 Task</div>#}
+        {#        </div>#}
+        {#        <div class="layui-row layui-col-md12">#}
+        {#            <div class="layui-col-md2 text-center">{{ assign_count }}</div>#}
+        {#            <div class="layui-col-md2 text-center">{{ attention_count }}</div>#}
+        {#            <div class="layui-col-md2 text-center">{{ resolve_count }}</div>#}
+        {#            <div class="layui-col-md2 text-center">{{ creation_count }}</div>#}
+        {#        </div>#}
+
+
+    </div>
 {% endblock %}
 
 {% block js %}

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'web/layui/css/layui.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'web/plugin/font-awesome/css/font-awesome.min.css' %}">
     <style>
@@ -58,7 +59,7 @@
     </div>
 </nav>
 {% block content %}{% endblock %}
-
+<script src="{% static 'web/layui/layui.js' %}"></script>
 <script src="{% static 'web/js/jquery.min.js' %}"></script>
 <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
 {% block js %}{% endblock %}

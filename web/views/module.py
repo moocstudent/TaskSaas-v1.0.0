@@ -77,5 +77,8 @@ def setting_module(request, project_id):
 def setting_module_del(request,project_id):
     id = request.POST.get('id')
     print(id)
-    models.Module.objects.filter(project_id=project_id,id=id).delete()
-    return JsonResponse({'status':1})
+    delete_module = models.Module.objects.filter(project_id=project_id, id=id)
+    if delete_module:
+        delete_module.delete()
+        return JsonResponse({'status':1})
+    return JsonResponse({'status':0})

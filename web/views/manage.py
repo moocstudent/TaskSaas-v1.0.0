@@ -13,11 +13,22 @@ from TaskSaasAPP.date_util import get_every_day, get_today, get_last_week_since_
 from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
-from web.models import Collect
+from web.models import Collect, Issues, IssuesLog
 
 
 def statistics(request, project_id):
-    return render(request, 'web/statistics.html')
+    the_proj_issues = Issues.objects.filter(project_id=project_id)
+    assign_count = the_proj_issues.filter(assign_id=request.web.user.id).count()
+    attention_count = the_proj_issues.filter(attention__id__in=[request.web.user.id]).count()
+    creation_count = the_proj_issues.filter(creator=request.web.user.id).count()
+    resolve_count = the_proj_issues.filter(status=3,assign_id=request.web.user.id).count()
+    context = {
+        'assign_count':assign_count,
+        'attention_count':attention_count,
+        'resolve_count':resolve_count,
+        'creation_count':creation_count
+    }
+    return render(request, 'web/statistics.html',context)
 
 
 # todo commit具体信息 当点击页面commit message时弹出详情

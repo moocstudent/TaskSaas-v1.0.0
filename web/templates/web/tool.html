@@ -18,88 +18,107 @@
 
 {% block content %}
 
-    <div class="container clearfix" style="margin-top: 20px">
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    随机字符串生成
+    <div class="layui-container" style="margin-top: 20px">
+        <div class="layui-tab">
+            <ul class="layui-tab-title">
+                <li class="layui-this">测试类</li>
+                <li>安全类</li>
+            </ul>
+
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                                随机字符串生成
+                            </div>
+                            <div class="panel-body" style="height: 200px">
+
+                                {#                        {% csrf_token %}#}
+                                <div class="form-group">
+                               <label class="col-sm-4 control-label">给定位数字符串</label>
+                                    <div class="col-sm-5">
+                                        <input id="generate_str_length" type="text"
+                                               oninput="value=value.replace(/[^\d]/g,'')"
+                                               maxlength="4" class="form-control" placeholder="请输入位数"
+                                               name="str_length">
+                                        <span class="error-msg">{{ error }}</span>
+                                    </div>
+                                    <div class="col-sm-3"><a
+                                            href="https://www.cnblogs.com/printN/p/7252490.html"
+                                            target="_blank">MySQL 数据库 varchar 到底可以存多少个汉字，多少个英文呢?
+                                    </a></div>
+
+                                </div>
+                                <div class="form-group" style="padding-top: 35px">
+                                    <div class="col-sm-offset-5 col-sm-5">
+                                        <input id="generateStrBtn" type="button" class="btn btn-info" value="生 成">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="col-md-8">
+                                    <span><input type="input" id="generate_str"></span>
+                                    <button onclick="touch()" id="copyText" type="button" class="success">复制文本
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
-                <div class="panel-body" style="height: 200px">
+                <div class="layui-tab-item">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                                Druid数据库密码加密
+                            </div>
+                            <div class="panel-body" style="height: 200px">
 
-                    {#                        {% csrf_token %}#}
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label">给定位数字符串</label>
-                        <div class="col-sm-5">
-                            <input id="generate_str_length" type="text" oninput="value=value.replace(/[^\d]/g,'')"
-                                   maxlength="4" class="form-control" placeholder="请输入位数"
-                                   name="str_length">
-                            <span class="error-msg">{{ error }}</span>
-                        </div>
-                        <div class="col-sm-3"><a
-                                href="https://www.cnblogs.com/printN/p/7252490.html"
-                                target="_blank">MySQL 数据库 varchar 到底可以存多少个汉字，多少个英文呢?
-                        </a></div>
+                                {#                        {% csrf_token %}#}
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">输入原Druid数据库密码</label>
+                                    <div class="col-sm-5">
+                                        <input id="original_pwd" type="text"
+                                               class="form-control" placeholder="请输入原密码"
+                                               name="original_pwd">
+                                        <span class="error-msg">{{ error }}</span>
+                                    </div>
+                                    <div class="col-sm-3"><a
+                                            href="https://github.com/alibaba/druid/wiki/%E4%BD%BF%E7%94%A8ConfigFilter#21-%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E5%8A%A0%E5%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AF%86%E7%A0%81"
+                                            target="_blank">使用ConfigFilter#21-执行命令加密数据库密码</a></div>
 
-                    </div>
-                    <div class="form-group" style="padding-top: 35px">
-                        <div class="col-sm-offset-5 col-sm-5">
-                            <input id="generateStrBtn" type="button" class="btn btn-info" value="生 成">
+                                </div>
+                                <div class="form-group" style="padding-top: 35px">
+                                    <div class="col-sm-offset-5 col-sm-5">
+                                        <input id="encryptPwdBtn" type="button" class="btn btn-info" value="生 成">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="col-md-8">
+                                    <div class="col-md-6">
+                                        <span><input type="input" id="encrypt_pwd"></span>
+                                        <button onclick="touch1()" id="copyText1" type="button" class="success">复制加密密码
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <span><input type="input" id="public_key"></span>
+                                        <button onclick="touch2()" id="copyText2" type="button" class="success">
+                                            复制PublicKey
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <br>
-                    <div class="col-md-8">
-                        <span><input type="input" id="generate_str"></span>
-                        <button onclick="touch()" id="copyText" type="button" class="success">复制文本
-                        </button>
                     </div>
                 </div>
             </div>
+
+
         </div>
 
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                    Druid数据库密码加密
-                </div>
-                <div class="panel-body" style="height: 200px">
-
-                    {#                        {% csrf_token %}#}
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label">输入原Druid数据库密码</label>
-                        <div class="col-sm-5">
-                            <input id="original_pwd" type="text"
-                                   class="form-control" placeholder="请输入原密码"
-                                   name="original_pwd">
-                            <span class="error-msg">{{ error }}</span>
-                        </div>
-                        <div class="col-sm-3"><a
-                                href="https://github.com/alibaba/druid/wiki/%E4%BD%BF%E7%94%A8ConfigFilter#21-%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E5%8A%A0%E5%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AF%86%E7%A0%81"
-                                target="_blank">使用ConfigFilter#21-执行命令加密数据库密码</a></div>
-
-                    </div>
-                    <div class="form-group" style="padding-top: 35px">
-                        <div class="col-sm-offset-5 col-sm-5">
-                            <input id="encryptPwdBtn" type="button" class="btn btn-info" value="生 成">
-                        </div>
-                    </div>
-                    <br>
-                    <div class="col-md-8">
-                        <div class="col-md-6">
-                            <span><input type="input" id="encrypt_pwd"></span>
-                            <button onclick="touch1()" id="copyText1" type="button" class="success">复制加密密码
-                            </button>
-                        </div>
-                        <div class="col-md-6">
-                            <span><input type="input" id="public_key"></span>
-                            <button onclick="touch2()" id="copyText2" type="button" class="success">复制PublicKey
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </div>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
