@@ -230,6 +230,9 @@ def issues(request, project_id):
                                              log_type=1,
                                             create_datetime=form.instance.create_datetime)
         issues_log.save()
+
+
+
         return JsonResponse({'status': True, })
     print('form is invalid', form.errors)
     return JsonResponse({'status': False, 'error': form.errors})
