@@ -27,11 +27,11 @@ def wiki(request, project_id):
     wiki_id = request.GET.get('wiki_id')
     if not wiki_id or not wiki_id.isdecimal():
         return render(request, 'web/wiki.html')
-
     # 展示具体文章
     wiki_object = models.Wiki.objects.filter(id=wiki_id, project_id=project_id).first()
+    coll = models.Collect.objects.filter(wiki=wiki_object, creator=request.web.user).first()
 
-    return render(request, 'web/wiki.html', {'wiki_object': wiki_object})
+    return render(request, 'web/wiki.html', {'wiki_object': wiki_object,'is_collected':coll})
 
 
 def wiki_add(request, project_id):

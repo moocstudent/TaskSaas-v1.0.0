@@ -279,12 +279,12 @@
                                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                                         {{ item.latest_update_datetime }} 更新
                                     </span>
-                                {% if item.using_time %}
-                                    <span>
+                                    {% if item.using_time %}
+                                        <span>
                                         <i class="fa fa-clock-o" aria-hidden="true"></i>
                                         {{ item.using_time }} 用时
                                     </span>
-                                {% endif %}
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -550,6 +550,7 @@
 
         });
 
+
         /**
          * 点击拷贝链接url
          * */
@@ -557,9 +558,12 @@
             $('#btnCopyUrl').click(function () {
                 var textInput = $('#inviteUrl')[0]; // document.getElementById('inviteUrl')
                 textInput.select();
-
                 document.execCommand("Copy");
-                alert('复制成功');
+                layui.use(function () {
+                    var layer = layui.layer;
+                    // Welcome
+                    layer.msg('复制成功', {icon: 6});
+                });
             })
         }
 

@@ -153,9 +153,17 @@ class Collect(models.Model):
     id = models.BigAutoField(primary_key=True)
     project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
     issues = models.ForeignKey(verbose_name='问题',to="Issues",null=True, on_delete=models.SET_NULL)
+    wiki = models.ForeignKey(verbose_name='Wiki',to="Wiki",null=True, on_delete=models.SET_NULL)
+    file = models.ForeignKey(verbose_name='File',to="FileRepository",null=True, on_delete=models.SET_NULL)
     creator = models.ForeignKey(verbose_name='收藏人',to='UserInfo',null=True,on_delete=models.SET_NULL)
     title = models.CharField(verbose_name='标题', max_length=256)
     link = models.CharField(verbose_name='链接',max_length=256)
+    type_choices = {
+        (1, 'issue'),
+        (2, 'wiki'),
+        (3, 'file')
+    }
+    type = models.SmallIntegerField(verbose_name='类型',default=None, choices=type_choices)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     def __str__(self):
         return self.link

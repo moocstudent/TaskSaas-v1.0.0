@@ -44,6 +44,10 @@ def file(request, project_id):
         else:
             file_object_list = queryset.filter(parent__isnull=True).order_by('-file_type')
 
+        for fobj in file_object_list:
+            coll = models.Collect.objects.filter(file=fobj, creator=request.web.user).first()
+            if coll:
+                fobj.is_collected = True
         form = FileFolderModelForm(request, parent_object)
         context = {
             'form': form,

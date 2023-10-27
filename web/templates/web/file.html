@@ -133,6 +133,11 @@
                                data-target="#alertModal">
                                 <i class="fa fa-trash" aria-hidden="true"></i>
                             </a>
+                            {% if item.is_collected %}
+                                <a style="float:right;color: darkkhaki">[已收藏]</a>
+                            {% else %}<a href="" onclick="collect({{ item.id }})"
+                                         style="float:right">[收藏]</a>{% endif %}
+
                         </td>
 
                     </tr>
@@ -247,6 +252,7 @@
         </table>
 
     </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 
 {% endblock %}
 
@@ -330,12 +336,12 @@
                                 newTr.find('.download').attr('href', res.data.download_url);
                                 $('#rowList').append(newTr);
                                 var percent = 1 * 100 + '%';
-                                $tr.find('.progress-bar').text(percent+'上传完成')
+                                $tr.find('.progress-bar').text(percent + '上传完成')
                                 $tr.find('.progress-bar').css('width', percent)
                                 setTimeout(function () {
-                                $tr.remove();
-                                $("#uploadProgress").addClass("hide")
-                                   }, 2000)
+                                    $tr.remove();
+                                    $("#uploadProgress").addClass("hide")
+                                }, 2000)
                             } else {
                                 $tr.find('.progress-error').text('上传失败！')
                             }
@@ -452,6 +458,26 @@
                         }
                     }
                 })
+            })
+        }
+
+             function collect(pk) {
+            $.ajax({
+                url: "{% url 'file_collect' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'file_pk': pk,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res.status)
+                        {#location.reload();#}
+                    } else {
+
+                    }
+                }
             })
         }
     </script>

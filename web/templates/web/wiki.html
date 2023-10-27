@@ -63,6 +63,12 @@
                            href="{% url 'wiki_delete' project_id=request.web.project.id wiki_id=wiki_object.id %}">
                             <i class="fa fa-trash" aria-hidden="true"></i>删 除
                         </a>
+
+                        {% if is_collected %}
+                            <a type="button" class="layui-btn layui-btn-xs layui-bg-gray">[已收藏]</a>
+                        {% else %}<a type="button" class="layui-btn layui-btn-xs" href=""
+                                     onclick="collect({{ wiki_object.id }})">[收藏]</a>
+                        {% endif %}
                     {% endif %}
                 </div>
 
@@ -94,18 +100,18 @@
 
             </div>
         </div>
-
     </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
     <script src="{% static 'web/plugin/editor-md/editormd.min.js' %}"></script>
     <script src="{% static 'web/plugin/editor-md/lib/marked.min.js' %}"></script>
-{#    <script src="{% static 'web/plugin/editor-md/lib/jquery.flowchart.min.js' %}"></script>#}
+    {#    <script src="{% static 'web/plugin/editor-md/lib/jquery.flowchart.min.js' %}"></script>#}
     <script src="{% static 'web/plugin/editor-md/lib/flowchart.min.js' %}"></script>
     <script src="{% static 'web/plugin/editor-md/lib/prettify.min.js' %}"></script>
     <script src="{% static 'web/plugin/editor-md/lib/raphael.min.js' %}"></script>
-{#    <script src="{% static 'web/plugin/editor-md/lib/sequence-diagram.min.js' %}"></script>#}
+    {#    <script src="{% static 'web/plugin/editor-md/lib/sequence-diagram.min.js' %}"></script>#}
     <script src="{% static 'web/plugin/editor-md/lib/underscore.min.js' %}"></script>
     <script>
         var WIKI_DETAIL_URL = "{% url 'wiki' project_id=request.web.project.id%}";
@@ -141,10 +147,32 @@
             })
         }
 
-        function initPreview(){
+        function initPreview() {
             editormd.markdownToHTML("previewMarkdown", {
                 htmlDecode: "style,script,iframe",
             })
         }
+
+
+        function collect(pk) {
+            $.ajax({
+                url: "{% url 'wiki_collect' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'wiki_pk': pk,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res.status)
+                        {#location.reload();#}
+                    } else {
+
+                    }
+                }
+            })
+        }
+
     </script>
 {% endblock %}

@@ -64,6 +64,8 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^remind_status/$', manage.remind_status, name='remind_status'),
     re_path(r'^collect/$', manage.collect, name='collect'),
     re_path(r'^make_collect/$', collect_api.make_collect, name='make_collect'),
+    re_path(r'^wiki_collect/$', collect_api.wiki_collect, name='wiki_collect'),
+    re_path(r'^file_collect/$', collect_api.file_collect, name='file_collect'),
 
     re_path(r'^wiki/$', wiki.wiki, name='wiki'),
     re_path(r'^wiki/add/$', wiki.wiki_add, name='wiki_add'),

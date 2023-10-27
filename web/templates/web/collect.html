@@ -151,7 +151,7 @@
                                 {#                                {{ item }}#}
                                 <tr>
 
-                                    <td class="col-xs-4">
+                                    <td class="col-md-4">
                                             <label class="label label-default label-primary"
                                                    for="">project: <label>{{ item.project }}</label></label>
 
@@ -162,55 +162,18 @@
                                             {#                                            <div class="avatar">{{ item.creator.0|upper }}</div>#}
                                         {% endif %}
                                     </td>
-                                    <td class="col-xs-8">
+                                <td class="col-md-2">
+                                     <label class="label label-default label-primary"
+                                                   for="">type: <label>{{ item.type }}</label></label>
+
+                                </td>
+                                    <td class="col-md-6">
                                         <label
                                                 style="color: green">
                                             <a href="{{ item.link }}"
                                                style="color:dodgerblue;text-decoration: underline dotted"
                                                target="_blank">{{ item.title }}</a>
                                         </label>
-                                        {% if item.type == 1 %}
-                                            <div>{{ item.creator }}</div>
-                                            <label>
-                                                创建了
-                                                <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                {#                                            给 {{ item.assign.username }}#}
-                                                <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                            </label>
-                                            <label style="width: 300px;">
-                                                创建于:{{ key }}
-                                            </label>
-                                        {% endif %}
-                                        {% if item.type == 2 %}
-                                            <div>{{ item.creator }}</div>
-                                            <label>更新了
-                                                <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                {#                                            给 {{ item.assign.username }}#}
-                                                <label>【{{ item.title }}】</label>
-                                                <label>{{ item.desc }}</label>
-                                            </label>
-                                            <label style="width: 300px;">
-                                                更新于:{{ key }}
-                                            </label>
-                                        {% endif %}
-                                        {% if item.type == 3 %}
-                                            <div>{{ item.creator }}</div>
-                                            <label>回复了 {% if item.reply_to %}{{ item.reply_to }}{% endif %}
-                                                <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
-                                                {#                                            给 {{ item.assign.username }}#}
-                                                <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
-                                                <br>
-                                                >> <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
-                                            </label>
-                                            {#                                            <div>指派#}
-                                            {#                                                给 {{ item.assign }}#}
-                                            {#                                            </div>#}
-                                            <label style="width: 300px;">
-                                                回复于:{{ key }}
-                                            </label>
-
-                                        {% endif %}
-
                                     </td>
 
                                 </tr>

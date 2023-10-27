@@ -375,8 +375,15 @@ def collect(request, project_id):
     collects_set = Collect.objects.filter(creator=request.web.user)
     collects = collections.OrderedDict()
     for coll in collects_set:
-        collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,
+        if coll.type==1:
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,'type':'issue',
                              'link': coll.link, 'id': coll.issues.issue_id,'project':coll.project.name}
+        if coll.type==2:
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,'type':'wiki',
+                             'link': coll.link, 'id': coll.wiki.id, 'project': coll.project.name}
+        if coll.type == 3:
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'file',
+                                 'link': coll.link, 'id': coll.file.id, 'project': coll.project.name}
     context = {
         'collects': collects,
         'coll_size':len(collects)

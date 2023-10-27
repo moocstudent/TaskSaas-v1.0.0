@@ -128,90 +128,90 @@
 
 {% block content %}
     <div class="container-fluid" style="margin-top: 20px">
-    <div class="row">
+        <div class="row">
 
-        <div class="col-md-8">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                    新增问题趋势
-                    <label class="fa! switch">
-                        <input type="checkbox" id="mytaskToggle" onclick="mytaskTrigger()">
-                        <span class="slider round"></span>
-                    </label>
-                    只看与我相关
-                </div>
-                <div class="panel-body">
-                    <div id="chart" style="width:100%;min-height:200px">
-
+            <div class="col-md-8">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                        新增问题趋势
+                        <label class="fa! switch">
+                            <input type="checkbox" id="mytaskToggle" onclick="mytaskTrigger()">
+                            <span class="slider round"></span>
+                        </label>
+                        只看与我相关
                     </div>
-                </div>
-            </div>
+                    <div class="panel-body">
+                        <div id="chart" style="width:100%;min-height:200px">
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-quora" aria-hidden="true"></i>
-                            问题
-                        </div>
-                        <div class="panel-body">
-                            {% for key,item in status_dict.items %}
-                                <div class="col-sm-4 status-count">
-                                    <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
-                                        <div class="count">{{ item.count }}</div>
-                                        <div>{{ item.text }}</div>
-                                    </a>
-                                </div>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-user" aria-hidden="true"></i>
-                            项目成员
-                            <a style="float: right;" class="layui-btn layui-btn-normal layui-btn-xs"
-                               data-toggle="modal" data-target="#inviteModal">邀请成员</a>
-                        </div>
-                        <div class="panel-body user-item">
-                            <div class="col-sm-12 title">创建者</div>
-                            <div class="clearfix" style="margin-bottom: 30px;">
-                                <div class="col-sm-4">
-                                    <div class="layui-row ws-docs-anim">
-                                        {#                                       id {{ request.web.project.creator.id }}#}
-                                        <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-                                            {% if  request.web.project.creator.git_avatar %}
-                                                <img class="avatar"
-                                                     src="{{ request.web.project.creator.git_avatar }}" alt="">
-                                            {% else %}
-                                                {{ request.web.project.creator.username.0|upper }}
-                                            {% endif %}
 
-                                        </div>
-                                    </div>
-                                    <div class="text">{{ request.web.project.creator.username }}</div>
-                                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-quora" aria-hidden="true"></i>
+                                问题
                             </div>
-                            <div class="col-sm-12 title">参与者</div>
-                            <div>
-                                {% for item in join_user %}
-                                    <div class="col-sm-4">
-                                    <div class="layui-row ws-docs-anim">
-                                  <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-
-                                            {#                                        id {{ item.0 }}#}
-                                            {% if item.2 %}
-                                                <img  src="{{ item.2 }}" alt="">
-                                            {% else %}
-                                                <div>{{ item.1.0 |upper }}</div>
-                                            {% endif %}
-                                            <div class="text">{{ item.1 }}</div>
-                                        </div>
-                                    </div>
+                            <div class="panel-body">
+                                {% for key,item in status_dict.items %}
+                                    <div class="col-sm-4 status-count">
+                                        <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
+                                            <div class="count">{{ item.count }}</div>
+                                            <div>{{ item.text }}</div>
+                                        </a>
                                     </div>
                                 {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                                项目成员
+                                <a style="float: right;" class="layui-btn layui-btn-normal layui-btn-xs"
+                                   data-toggle="modal" data-target="#inviteModal">邀请成员</a>
+                            </div>
+                            <div class="panel-body user-item">
+                                <div class="col-sm-12 title">创建者</div>
+                                <div class="clearfix" style="margin-bottom: 30px;">
+                                    <div class="col-sm-4">
+                                        <div class="layui-row ws-docs-anim">
+                                            {#                                       id {{ request.web.project.creator.id }}#}
+                                            <div class="avatar layui-anim" data-anim="layui-anim-rotate">
+                                                {% if  request.web.project.creator.git_avatar %}
+                                                    <img class="avatar"
+                                                         src="{{ request.web.project.creator.git_avatar }}" alt="">
+                                                {% else %}
+                                                    {{ request.web.project.creator.username.0|upper }}
+                                                {% endif %}
+
+                                            </div>
+                                        </div>
+                                        <div class="text">{{ request.web.project.creator.username }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 title">参与者</div>
+                                <div>
+                                    {% for item in join_user %}
+                                        <div class="col-sm-4">
+                                            <div class="layui-row ws-docs-anim">
+                                                <div class="avatar layui-anim" data-anim="layui-anim-rotate">
+
+                                                    {#                                        id {{ item.0 }}#}
+                                                    {% if item.2 %}
+                                                        <img src="{{ item.2 }}" alt="">
+                                                    {% else %}
+                                                        <div>{{ item.1.0 |upper }}</div>
+                                                    {% endif %}
+                                                    <div class="text">{{ item.1 }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
                                 </div>
 
                             </div>
@@ -736,6 +736,27 @@
         }
 
         storageTriggerInit()
+
+        $(function () {
+            bindCopyUrl();
+        });
+
+        /**
+         * 点击拷贝链接url
+         * */
+        function bindCopyUrl() {
+            $('#btnCopyUrl').click(function () {
+                var textInput = $('#inviteUrl')[0]; // document.getElementById('inviteUrl')
+                textInput.select();
+
+                document.execCommand("Copy");
+                   layui.use(function () {
+                    var layer = layui.layer;
+                    // Welcome
+                    layer.msg('复制成功', {icon: 6});
+                });
+            })
+        }
 
         function sendFreshTriggerVal() {
             {#const  pid = {{ request.web.project.id }})#}
