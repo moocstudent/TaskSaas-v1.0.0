@@ -5,7 +5,7 @@ from TaskChat.consumers import push_message_to_group
 from utils import encrypt
 from web.models import Issues, InfoLog
 
-
+# remind the user if the task nearly deadline
 def remind_deadline():
     print('remind_deadline invoked')
     issues_today_deadline = Issues.objects.filter(end_date__exact=datetime.datetime.now())

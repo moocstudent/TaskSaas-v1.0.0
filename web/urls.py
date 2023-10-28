@@ -57,6 +57,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^tool/$', manage.tool, name='tool'),
     re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),
     re_path(r'^tool_encrypt_druid_password/$', tool.encrypt_druid_password, name='tool_encrypt_druid_password'),
+    # re_path(r'^color_picker/$', tool.color_picker, name='color_picker'),
 
     re_path(r'^workbench/$', manage.workbench, name='workbench'),
     re_path(r'^calendar/$', manage.calendar, name='calendar'),

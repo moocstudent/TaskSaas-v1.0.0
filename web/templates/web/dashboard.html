@@ -262,6 +262,12 @@
                 </div>
             </div>
 
+            {#        when deadline occur ,show the tip card in dashboard#}
+            {#        test btn#}
+            {#            <button type="button" class="layui-btn layui-btn-primary" lay-on="test-more-stack">#}
+            {#                <span class="layui-badge-dot"></span> 多窗口模式 + 层叠置顶 + Esc 关闭#}
+            {#            </button>#}
+
             <div class="col-md-4">
 
                 <div class="panel panel-default">
@@ -385,6 +391,7 @@
     <input id="pid" value="{{ request.web.project.id }}" hidden="hidden"/>
     <input id="type_ids" value="{{ type_ids }}" hidden="hidden"/>
     <input id="all_type_ids" value="{{ all_type_ids }}" hidden="hidden"/>
+    <input id="remind_infos" value="{{ remind_infos }}" hidden="hidden"/>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
@@ -420,7 +427,10 @@
         var status_choices = JSON.parse(document.getElementById("status_choices").value);
         var type_ids = document.getElementById("type_ids").value;
         var all_type_ids = document.getElementById("all_type_ids").value;
+        var remind_infos = eval(document.getElementById("remind_infos").value);
         console.log('all_type_ids ', all_type_ids);
+        console.log('remind_infos ', remind_infos);
+        console.log('remind_infos sz ', remind_infos.length);
         if (type_ids) {
             {#if (type_ids.indexOf(",")>-1){#}
             type_ids = type_ids.split(',')
@@ -443,27 +453,6 @@
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
 
-        // 指定图表的配置项和数据
-        {% comment %}   var option = {
-            // title: {
-              // text: 'ECharts 入门示例'
-             //},
-             tooltip: {},
-             legend: {
-               data: ['完成量']
-             },
-             xAxis: {
-               data: ['新建', '处理中', '已解决', '已忽略', '待反馈', '已关闭','重新打开']
-             },
-             yAxis: {},
-             series: [
-               {
-                 name: '完成量',
-                 type: 'bar',
-                 data: echartsData
-               }
-             ]
-           };{% endcomment %}
 
         option = {
             tooltip: {
@@ -750,7 +739,7 @@
                 textInput.select();
 
                 document.execCommand("Copy");
-                   layui.use(function () {
+                layui.use(function () {
                     var layer = layui.layer;
                     // Welcome
                     layer.msg('复制成功', {icon: 6});
@@ -841,5 +830,90 @@
                 }
             });
         });
+
+        layui.use(function () {
+            var layer = layui.layer;
+            var util = layui.util;
+            var form = layui.form;
+            var $ = layui.$;
+
+            if (remind_infos.length > 0) {
+                let is_link = false
+                for (i in remind_infos) {
+                    let ri = remind_infos[i]
+                    let btn = []
+                    let btn2Name = '关闭'
+                    if (ri.link.length > 0) {
+                        btn.push('查看详情')
+                        btn.push(btn2Name)
+                        is_link = true
+                    } else {
+                        btn.push('回复消息')
+                        btn.push(btn2Name)
+                    }
+                    // 事件
+                    //when dashboard receive the deadline news , trigger this deadline card instantly
+                    var that = this;
+                    // 多窗口模式 + 层叠置顶 + Esc 关闭
+                    layer.open({
+                        type: 1,
+                        title: ri.type == 1 ? '系统信息' : ri.type == 2 ? '提醒信息' : '',
+                        area: ['390px', '260px'],
+                        shade: 0,
+                        maxmin: true,
+                        offset: [ // 为了便于演示，此处采用随机坐标
+                            Math.random() * ($(window).height() - 300),
+                            1 * $(window).width() - 400
+                        ],
+                        content: '<div style="padding: 16px;">' +
+                            '，按 ESC 键可关闭。<br>' +
+                            ri.content +
+                            '</div>',
+                        btn: btn,
+                        yes: function () {
+                            {#$(that).click();#}
+                            if (is_link){
+                              window.open(ri.link)
+                                //todo set the msg already readed through ajax
+                            }else{
+                                //todo reply hint msg
+                            }
+                        },
+                        btn2: function () {
+                            layer.close();
+                        },
+                        zIndex: layer.zIndex, // 重点 1 --- 初始设置当前最高层叠顺序，
+                        success: function (layero, index) {
+                            layer.setTop(layero); // 重点 2 --- 保持选中窗口置顶
+
+                            // 记录索引，以便按 esc 键关闭。事件见代码最末尾处。
+                            layer.escIndex = layer.escIndex || [];
+                            layer.escIndex.unshift(index);
+                            // 选中当前层时，将当前层索引放置在首位
+                            layero.on('mousedown', function () {
+                                var _index = layer.escIndex.indexOf(index);
+                                if (_index !== -1) {
+                                    layer.escIndex.splice(_index, 1); //删除原有索引
+                                }
+                                layer.escIndex.unshift(index); //将索引插入到数组首位
+                            });
+                        },
+                        end: function () {
+                            //更新索引
+                            if (typeof layer.escIndex === 'object') {
+                                layer.escIndex.splice(0, 1);
+                            }
+                        }
+                    });
+                }
+            }
+            // 多窗口模式 - esc 键
+            $(document).on('keyup', function (e) {
+                if (e.keyCode === 27) {
+                    layer.close(layer.escIndex ? layer.escIndex[0] : 0);
+                }
+            });
+        });
     </script>
+
 {% endblock %}

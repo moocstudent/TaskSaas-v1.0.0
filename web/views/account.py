@@ -7,6 +7,7 @@ import uuid
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
+from TaskSaas.task.remind_task import remind_deadline
 from web import models
 from web.forms.account import RegisterModelForm, SendSmsForm, LoginSmsForm, LoginForm
 from django.conf import settings
@@ -104,7 +105,8 @@ def login(request):
             # 登陆成功
             request.session['user_id'] = user_object.id
             request.session.set_expiry(60 * 60 * 24 * 14)
-
+            # execution remind deadline task
+            remind_deadline()
             return redirect('index')
         form.add_error('username', '用户名或密码错误')
     return render(request, 'web/login.html', {'form': form})

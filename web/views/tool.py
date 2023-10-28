@@ -38,3 +38,15 @@ def encrypt_druid_password(request,project_id):
 
         # 打印输出和错误
         return JsonResponse({'status': 1, 'public_key':output_public_key,'encrypt_pwd':output_password})
+
+
+# def color_picker(request,project_id):
+#     if request.method == 'POST':
+#         color_code = request.POST.get('color_code')  # 获取带有#的色值
+#         if color_code and color_code.startswith('#'):
+#             red = int(color_code[1:3], 16)  # 提取红色分量
+#             green = int(color_code[3:5], 16)  # 提取绿色分量
+#             blue = int(color_code[5:7], 16)  # 提取蓝色分量
+#             return JsonResponse({'status':1,'color': (red, green, blue)})
+#
+#     return JsonResponse({'status':0})

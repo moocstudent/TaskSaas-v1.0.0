@@ -294,7 +294,7 @@
                 </div>
                 <div class="panel-body comment-area">
 
-                    <div class="comment-list"  style="word-wrap:break-word;word-break:break-all;height: 300px;min-height: 100vh;
+                    <div class="comment-list"  style="word-wrap:break-word;word-break:break-all;height: auto;min-height: 55.3vh;
                     display: block;overflow-y: scroll;">
 
                     </div>
@@ -457,7 +457,7 @@
                 $('#' + nodeDict.parent_id).children('.child').append($item);
             } else {
                 // 根下
-                $('.comment-list').append($item);
+                $('.comment-list').prepend($item);
             }
         }
 

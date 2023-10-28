@@ -1,13 +1,14 @@
+import collections
 import json
 import operator
 
 from django.core.cache import cache
+from django.db.models import Count, Q
 from django.shortcuts import render
-import collections
-from web import models
-from django.db.models import Count, Q, F
 
+from web import models
 from web.forms.issues import IssuesInviteModelForm
+from web.models import InfoLog
 
 
 def dashboard(request, project_id):
@@ -124,8 +125,19 @@ def dashboard(request, project_id):
                                                   'desc': tr.content,'reply_type':tr.reply_type,
                                                   'title':tr.issues.subject,
                                                   'issue_id':tr.issues.issue_id,'id':tr.issues_id}
-
     top_ten_re_sorted = dict(sorted(top_ten_dict.items(), key=operator.itemgetter(0), reverse=True))
+    # select the unread message from infos about current user in this project
+    remind_infos = []
+    remind_infos_set = InfoLog.objects.filter(receiver=request.web.user,status=1,project_id=project_id)
+    for ri in remind_infos_set:
+        content = ri.content
+        link = ''
+        if ri.pure_content:
+            content = ri.pure_content
+        if ri.pure_link:
+            link = ri.pure_link
+        remind_infos.append({'sender':ri.sender.username,'content':content,'link':link,
+                             'type':ri.type})
 
     tasks_count.reverse()
     funcs_count.reverse()
@@ -141,6 +153,7 @@ def dashboard(request, project_id):
         issues_types_dict.append(issues_types[3].title)
     invite_form = IssuesInviteModelForm()
     context = {
+        'remind_infos':remind_infos,
         'invite_form':invite_form,
         'status_dict': status_dict,
         'join_user': join_user,
