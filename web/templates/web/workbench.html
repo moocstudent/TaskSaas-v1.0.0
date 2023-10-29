@@ -421,6 +421,9 @@
                             <span class="slider round"></span>
                         </label>
                         包含我关注的
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-blue"
+                                lay-on="open-chat-room">打开聊天室
+                        </button>
                     </div>
                     <form method="get" action="{% url 'workbench' project_id=request.web.project.id %}">
                         <div class="input-group">
@@ -509,43 +512,7 @@
 
             </div>
 
-            <div class="col-md-7" style="float: left">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (@选择提醒用户 #选择task)
-                    </div>
-                    <div>
-                        <div id="chat-log" class="col-md-10" contenteditable="false"
-                             style="resize:none;height: 300px;background-color: floralwhite;align:top;overflow: auto;"></div>
-                        {#                        <textarea id="chat-log" disabled class="col-md-10"#}
-                        {#                                  style="resize:none;height: 300px;background-color: floralwhite"></textarea>#}
-                        <div class="col-md-2" style="float: right">
-                            online用户:
-                            <div>
-                                <ul id="chatMembers">
 
-                                </ul>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="col-md-4" style="float: right;padding-top: 0%">
-                        <div id="atMembers" style="position: absolute" class="elementList" hidden="hidden">
-                            <ul id="atMembersUl" class="elementList2">
-                            </ul>
-                        </div>
-                        <div id="atTasks" style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden">
-                            <ul id="atTasksUl" class="elementList2Task">
-                            </ul>
-                        </div>
-                        <input id="chat-message-input"
-                               oninput="msginputOnchange(event,this)" {% comment %}oncancel="msginputOnchange(event,this)"{% endcomment %}
-                               type="text"
-                               placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>
-                        <input id="chat-message-submit" onclick="msgSubmit()" type="button" value="Send"/>
-                    </div>
-                </div>
-            </div>
         </div>
         <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
         <input id="days" value="{{ days }}" hidden="hidden"/>
@@ -558,6 +525,7 @@
         <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
         <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
         <input id="all_object_list" value="{{ all_object_list }}" hidden="hidden"/>
+        <input id="user_list"  hidden="hidden"/>
     </div>
 {% endblock %}
 
@@ -1105,17 +1073,128 @@
         {#$('#page_header').text('聊天室');#}
         {#$('#page_header_descript').text('chat room');#}
 
+        function chatRoomSetup() {
+websocketInit()
+             $("#chatMembers").html($("#user_list").val())
+            {#websocketInit()#}
+            document.querySelector('#chat-message-input').focus();
+            document.querySelector('#chat-message-input').onkeyup = function (e) {
+                if (e.keyCode === 13) {  // enter, return
+                    document.querySelector('#chat-message-submit').click();
+                }
+            };
 
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function (e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#chat-message-submit').click();
+            document.querySelector('#chat-message-input').change = function (e) {
+                console.log('msg input change:', e)
             }
-        };
+            document.querySelector('#chat-message-submit').onclick = function (e) {
+                var messageInputDom = document.querySelector('#chat-message-input');
+                var message = messageInputDom.value;
+                if (!message) {
+                    console.log('message can not be empty')
+                    return
+                }
+                console.log('message', message)
+                if (message.startsWith('http')) {
+                    console.log('transfer to _blank a')
+                    message = "<a href=" + message + " target='_blank'" + ">" + message + "</a>"
+                }
+                let stringifyMsg = JSON.stringify({
+                    'message': message,
+                    'type': 'normal'
+                });
+                let atMembersConfirm = []
+                if (atMemberFlag) {
+                    console.log('atMemberFlag', atMemberFlag)
+                    for (m in atMemberNames) {
+                        if (message.indexOf('@' + atMemberNames[m]) > -1) {
+                            console.log('confirm hint user ', atMemberNames[m])
+                            atMembersConfirm.push(atMemberNames[m])
+                        }
+                    }
+                    if (atMembersConfirm.length > 0 && !atTaskFlag) {
+                        //send hint msg
+                        stringifyMsg = JSON.stringify({
+                            'message': message,
+                            'type': 'hint',
+                            'receivers': atMembersConfirm,
+                            'sender': '{{ request.web.user.username }}'
+                        });
+                    }
+                }
 
-        document.querySelector('#chat-message-input').change = function (e) {
-            console.log('msg input change:', e)
+                if (atTaskFlag) {
+                    console.log('atTaskFlag', atTaskFlag)
+                    let atTasksConfirm = []
+                    for (t in atTaskIds) {
+                        if (message.indexOf('#' + atTaskIds[t]) > -1) {
+                            console.log('confirm hint task ', atTaskIds[t])
+                            atTasksConfirm.push(atTaskIds[t])
+                        }
+                    }
+                    if (atTasksConfirm.length > 0) {
+                        let task_message = ''
+                        for (t in atTasksConfirm) {
+                            let taskid = atTasksConfirm[t]
+                            const request_detail_url = "{% url 'issues_detail' project_id=request.web.project.id issues_id=1 %}".replace("detail/1", "detail/" + taskid)
+                            task_message = "<a href=" + request_detail_url + " target='_blank'>" + message + "</a>"
+                            break;
+                        }
+                        //send hint msg
+                        stringifyMsg = JSON.stringify({
+                            'message': task_message,
+                            'type': atMemberFlag ? 'hint' : 'normal',
+                            'receivers': atMemberFlag ? atMembersConfirm : [],
+                            'sender': '{{ request.web.user.username }}'
+                        });
+                    }
+                }
+
+                console.log(stringifyMsg)
+
+                if (isOnlineCurrUser()) {
+                    let send = ws.send(stringifyMsg);
+                    console.log('send', send)
+                    messageInputDom.value = '';
+                    atMemberNames = []
+                    atTaskIds = []
+                    atMemberFlag = false
+                    atTaskFlag = false
+
+                } else {
+                    console.log('reconnect ws...')
+                    createOrConnectWebSocket()
+                    var count = 0
+                    while (!isOnlineCurrUser() && count < 100) {
+                        count++
+                        {#createOrConnectWebSocket()#}
+                        console.log('reconnect ws 3')
+                    }
+                    console.log('ws.send(stringifyMsg)', stringifyMsg)
+                    let send = ws.send(stringifyMsg);
+                    console.log('send', send)
+                    messageInputDom.value = '';
+                    atMemberNames = []
+                    atTaskIds = []
+                    atMemberFlag = false
+                    atTaskFlag = false
+                }
+            };
+
+
+            function chatHisInit() {
+
+                let mychatLog = localStorage.getItem('mychatLog' + project_id)
+                {#console.log('mychatLog>>',mychatLog);#}
+                if (mychatLog && mychatLog != 'undefined') {
+                    document.querySelector('#chat-log').innerHTML += (mychatLog);
+                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                }
+            }
+
+            chatHisInit()
         }
+
 
         function closeInputChooseElements() {
             $("#atMembers").hide()
@@ -1264,6 +1343,7 @@
                     for (let i = 0; i < userlistval.length; i++) {
                         userlist += ` <li>` + userlistval[i] + `</li>`;
                     }
+                    $("#user_list").val(userlist)
                     $("#chatMembers").html(userlist);
                     return
                 } else if (data.type == 'private.message') {
@@ -1353,115 +1433,6 @@
             }
         }
 
-        document.querySelector('#chat-message-submit').onclick = function (e) {
-            var messageInputDom = document.querySelector('#chat-message-input');
-            var message = messageInputDom.value;
-            if (!message) {
-                console.log('message can not be empty')
-                return
-            }
-            console.log('message', message)
-            if (message.startsWith('http')) {
-                console.log('transfer to _blank a')
-                message = "<a href=" + message + " target='_blank'" + ">" + message + "</a>"
-            }
-            let stringifyMsg = JSON.stringify({
-                'message': message,
-                'type': 'normal'
-            });
-            let atMembersConfirm = []
-            if (atMemberFlag) {
-                console.log('atMemberFlag', atMemberFlag)
-                for (m in atMemberNames) {
-                    if (message.indexOf('@' + atMemberNames[m]) > -1) {
-                        console.log('confirm hint user ', atMemberNames[m])
-                        atMembersConfirm.push(atMemberNames[m])
-                    }
-                }
-                if (atMembersConfirm.length > 0 && !atTaskFlag) {
-                    //send hint msg
-                    stringifyMsg = JSON.stringify({
-                        'message': message,
-                        'type': 'hint',
-                        'receivers': atMembersConfirm,
-                        'sender': '{{ request.web.user.username }}'
-                    });
-                }
-            }
-
-            if (atTaskFlag) {
-                console.log('atTaskFlag', atTaskFlag)
-                let atTasksConfirm = []
-                for (t in atTaskIds) {
-                    if (message.indexOf('#' + atTaskIds[t]) > -1) {
-                        console.log('confirm hint task ', atTaskIds[t])
-                        atTasksConfirm.push(atTaskIds[t])
-                    }
-                }
-                if (atTasksConfirm.length > 0) {
-                    let task_message = ''
-                    for (t in atTasksConfirm) {
-                        let taskid = atTasksConfirm[t]
-                        const request_detail_url = "{% url 'issues_detail' project_id=request.web.project.id issues_id=1 %}".replace("detail/1", "detail/" + taskid)
-                        task_message = "<a href=" + request_detail_url + " target='_blank'>" + message + "</a>"
-                        break;
-                    }
-                    //send hint msg
-                    stringifyMsg = JSON.stringify({
-                        'message': task_message,
-                        'type': atMemberFlag ? 'hint' : 'normal',
-                        'receivers': atMemberFlag ? atMembersConfirm : [],
-                        'sender': '{{ request.web.user.username }}'
-                    });
-                }
-            }
-
-            console.log(stringifyMsg)
-
-            if (isOnlineCurrUser()) {
-                let send = ws.send(stringifyMsg);
-                console.log('send', send)
-                messageInputDom.value = '';
-                atMemberNames = []
-                atTaskIds = []
-                atMemberFlag = false
-                atTaskFlag = false
-
-            } else {
-                console.log('reconnect ws...')
-                createOrConnectWebSocket()
-                var count = 0
-                while (!isOnlineCurrUser() && count < 100) {
-                    count++
-                    {#createOrConnectWebSocket()#}
-                    console.log('reconnect ws 3')
-                }
-                console.log('ws.send(stringifyMsg)', stringifyMsg)
-                let send = ws.send(stringifyMsg);
-                console.log('send', send)
-                messageInputDom.value = '';
-                atMemberNames = []
-                atTaskIds = []
-                atMemberFlag = false
-                atTaskFlag = false
-            }
-        };
-
-        function chatHisInit() {
-            {% comment %}       let chatLog = document.querySelector('#chat-log').value
-                   console.log(chatLog.length);
-                   if (chatLog || chatLog.length>0){
-                       return
-                   }{% endcomment %}
-            let mychatLog = localStorage.getItem('mychatLog' + project_id)
-            {#console.log('mychatLog>>',mychatLog);#}
-            if (mychatLog && mychatLog != 'undefined') {
-                document.querySelector('#chat-log').innerHTML += (mychatLog);
-                document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
-            }
-        }
-
-        chatHisInit()
 
         function getDayPlainTag(dayTrigger) {
             switch (dayTrigger) {
@@ -1478,6 +1449,77 @@
             }
         }
 
+        layui.use(function () {
+            var layer = layui.layer;
+            var util = layui.util;
+            var $ = layui.$;
+            // 事件
+            util.on('lay-on', {
+                'test-offset-t': function () {
+                    layer.open({
+                        type: 1,
+                        offset: 't',
+                        anim: 'slideDown', // 从上往下
+                        area: ['100%', '160px'],
+                        shade: 0.1,
+                        shadeClose: true,
+                        id: 'ID-demo-layer-direction-t',
+                        content: '<div style="padding: 16px;">任意 HTML 内容</div>'
+                    });
+                },
+                'test-offset-r': function () {
+                    layer.open({
+                        type: 1,
+                        offset: 'r',
+                        anim: 'slideLeft', // 从右往左
+                        area: ['320px', '100%'],
+                        shade: 0.1,
+                        shadeClose: true,
+                        id: 'ID-demo-layer-direction-r',
+                        content: '<div style="padding: 16px;">任意 HTML 内容</div>'
+                    });
+                },
+                'open-chat-room': function () {
+                    layer.open({
+                        title: '项目聊天室',
+                        type: 1,
+                        offset: 'b',
+                        anim: 'slideUp', // 从下往上
+                        area: ['100%', '460px'],
+                        shade: 0.1,
+                        shadeClose: true,
+                        id: 'ID-demo-layer-direction-b',
+                        {#content: '<div style="padding: 16px;">任意 HTML 内容</div><div></div>',#}
+                        content: '<div class="col-md-7" style="float: left">' +
+                            '<div class="panel panel-default"><div class="panel-heading">' +
+                            '<i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (@选择提醒用户#选择task)</div><div><div id="chat-log" class="col-md-10" contenteditable="false" style="resize:none;height: 300px;background-color: floralwhite;align:top;overflow: auto;">' +
+                            '</div>' +
+                            '<div class="col-md-2" style="float: right">online用户: <div>' +
+                            '<ul id="chatMembers"></ul></div></div></div>' +
+                            '<div class="col-md-4" style="float: right;padding-top: 0%">' +
+                            '<div id="atMembers" style="position: absolute" class="elementList" hidden="hidden">' +
+                            '<ul id="atMembersUl" class="elementList2"></ul></div>' +
+                            '<div id="atTasks" style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden"><ul id="atTasksUl" class="elementList2Task"></ul></div>' +
+                            '<input id="chat-message-input" oninput="msginputOnchange(event,this)" type="text" placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>' +
+                            '<input id="chat-message-submit" onclick="msgSubmit()" type="button" value="Send"/></div></div></div>',
+
+                    });
+                    chatRoomSetup()
+                },
+                'test-offset-l': function () {
+                    layer.open({
+                        type: 1,
+                        offset: 'l',
+                        anim: 'slideRight', // 从左往右
+                        area: ['320px', '100%'],
+                        shade: 0.1,
+                        shadeClose: true,
+                        id: 'ID-demo-layer-direction-l',
+                        content: '<div style="padding: 16px;">任意 HTML 内容</div>'
+                    });
+                }
+            });
+        });
     </script>
 
 

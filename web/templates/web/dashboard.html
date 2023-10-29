@@ -845,6 +845,7 @@
                     let btn2Name = '关闭'
                     if (ri.link.length > 0) {
                         btn.push('查看详情')
+                        btn.push('回复消息')
                         btn.push(btn2Name)
                         is_link = true
                     } else {
@@ -872,10 +873,11 @@
                         btn: btn,
                         yes: function () {
                             {#$(that).click();#}
-                            if (is_link){
-                              window.open(ri.link)
-                                //todo set the msg already readed through ajax
-                            }else{
+                            if (is_link) {
+                                window.open(ri.link)
+                                //set the msg already readed through ajax
+                                status(ri.id)
+                            } else {
                                 //todo reply hint msg
                             }
                         },
@@ -914,6 +916,28 @@
                 }
             });
         });
+
+        function status(key) {
+            $.ajax({
+                url: "{% url 'remind_status' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "id": key,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        location.reload();
+                        {#$("#badge").load(location.href + " #badge")#}
+                    } else {
+
+                    }
+                }
+
+            })
+
+        }
     </script>
 
 {% endblock %}

@@ -136,7 +136,7 @@ def dashboard(request, project_id):
             content = ri.pure_content
         if ri.pure_link:
             link = ri.pure_link
-        remind_infos.append({'sender':ri.sender.username,'content':content,'link':link,
+        remind_infos.append({'id':ri.id,'sender':ri.sender.username,'content':content,'link':link,
                              'type':ri.type})
 
     tasks_count.reverse()
