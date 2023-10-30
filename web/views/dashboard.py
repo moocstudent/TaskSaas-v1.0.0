@@ -92,6 +92,7 @@ def dashboard(request, project_id):
         # echarts_data[d['count']]
     join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username','user__git_avatar')
 
+    print('join_user ',join_user)
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
     if trigger == 'on':

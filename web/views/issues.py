@@ -260,7 +260,7 @@ def issues_record(request, project_id, issues_pk):
     """初始化操作记录"""
     print(request.web.project)
     if request.method == 'GET':
-        reply_list = models.IssuesReply.objects.filter(issues=issues_pk, issues__project=request.web.project).order_by('-create_datetime')
+        reply_list = models.IssuesReply.objects.filter(issues=issues_pk, issues__project=request.web.project).order_by('create_datetime')
         print(reply_list)
         # 将queryset转换为json格式
         data_list = []

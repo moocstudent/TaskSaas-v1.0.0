@@ -114,12 +114,13 @@
                 <div class="panel-heading edit-heading">
                     <div>
                         <i class="fa fa-edit" aria-hidden="true"></i> 更新问题 {% if id %}#{{ id }}{% endif %}
-                    {% if issues_object.using_time %}
-                        <span style="text-align: center">已完成,用时:{{ issues_object.using_time }}</span>
-                    {% endif %}
-                    {% if is_collected %}
-                        <a  style="float:right;color: darkkhaki">[已收藏]</a>
-                    {% else %}<a href="" onclick="collect({{ id }},{{ issues_pk }})" style="float:right">[收藏]</a>{% endif %}
+                        {% if issues_object.using_time %}
+                            <span style="text-align: center">已完成,用时:{{ issues_object.using_time }}</span>
+                        {% endif %}
+                        {% if is_collected %}
+                            <a style="float:right;color: darkkhaki">[已收藏]</a>
+                        {% else %}<a href="" onclick="collect({{ id }},{{ issues_pk }})"
+                                     style="float:right">[收藏]</a>{% endif %}
 
                     </div>
 
@@ -294,9 +295,8 @@
                 </div>
                 <div class="panel-body comment-area">
 
-                    <div class="comment-list"  style="word-wrap:break-word;word-break:break-all;height: auto;min-height: 55.3vh;
+                    <div class="comment-list" style="word-wrap:break-word;word-break:break-all;height: 100px;min-height: 55.3vh;
                     display: block;overflow-y: scroll;">
-
                     </div>
 
                     <hr/>
@@ -429,8 +429,10 @@
                 type: 'GET',
                 dataType: 'JSON',
                 success: function (res) {
+                    console.log('initIssuesRecord res.data ',res.data)
                     if (res.status) {
                         $.each(res.data, function (index, item) {
+                            console.log('initIssuesRecord item ',item)
                             createRecordNode(item);
                         });
                     }
@@ -451,11 +453,14 @@
             $item.find('.type').html(nodeDict.reply_type_text);
             $item.find('.date').html(nodeDict.datetime);
             $item.attr({id: nodeDict.id, username: nodeDict.creator});
-
+            console.log("$item:",$item)
+            console.log('nodeDict',nodeDict)
             if (nodeDict.parent_id) {
+                console.log('nodeDict.parent_id')
                 // 挂在谁下
                 $('#' + nodeDict.parent_id).children('.child').append($item);
             } else {
+                console.log('else')
                 // 根下
                 $('.comment-list').prepend($item);
             }
@@ -664,12 +669,12 @@
             }
         });
 
-        function collect(issue_id,pk){
+        function collect(issue_id, pk) {
             $.ajax({
                 url: "{% url 'make_collect' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
-                    'issue_pk':pk,
+                    'issue_pk': pk,
                     'issue_id': issue_id,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
