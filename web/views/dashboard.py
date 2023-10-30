@@ -91,7 +91,6 @@ def dashboard(request, project_id):
         # print('count',d['count'])
         # echarts_data[d['count']]
     join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username','user__git_avatar')
-
     print('join_user ',join_user)
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
@@ -119,7 +118,6 @@ def dashboard(request, project_id):
         reply_to = None
         if tr.reply_id:
             reply_to = tr.reply.creator.username
-            print('reply_to',reply_to)
         top_ten_dict[tr.create_datetime] = {'type': 3, 'is_reply':1,
                                                   'creator':tr.creator.username,'assign': '','reply_to':reply_to,
                                                 'avatar': tr.creator.git_avatar,
@@ -138,7 +136,7 @@ def dashboard(request, project_id):
         if ri.pure_link:
             link = ri.pure_link
         remind_infos.append({'id':ri.id,'sender':ri.sender.username,'content':content,'link':link,
-                             'type':ri.type})
+                             'type':ri.type,'project_id':project_id})
 
     tasks_count.reverse()
     funcs_count.reverse()

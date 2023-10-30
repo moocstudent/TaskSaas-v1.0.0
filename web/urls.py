@@ -93,6 +93,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
 
     re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
+    re_path(r'^send_private_hint_msg/$', consumers.send_private_hint_msg, name='send_private_hint_msg'),
 
 ], None)),
 

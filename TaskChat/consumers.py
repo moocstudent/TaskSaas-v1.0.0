@@ -275,6 +275,8 @@ def push_message_to_group(group_name, message, type=None,sender=None):
         }
     )
 
+
+
 pattern = r'<a\s+href="([^"]*)">(.*?)</a>'
 
 def save_msg_to_db_impl(msg,sender,receiver,type,project_id):
@@ -315,3 +317,21 @@ def extract_links_and_text(text):
         links_and_text.append((link, text))
 
     return links_and_text
+
+
+
+def send_private_hint_msg(request,project_id):
+    try:
+        sender = request.web.user.username
+        receiver = request.POST.get("receiver")
+        message = request.POST.get("message")
+        if message:
+            message = ('来自'+sender+'的回复信息:')+message
+        save_msg_to_db_impl(message,request.web.user.username,receiver,2,project_id)
+        #fixme The receiver maybe not connection
+        push_message_to_group(encrypt.md5(receiver) + '__' + str(project_id), message, constants.private_message_key,
+                              request.web.user.username)
+    except:
+        return JsonResponse({'status':0})
+    return JsonResponse({'status': 1})
+
