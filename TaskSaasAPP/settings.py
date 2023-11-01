@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',  # channels应用
     'TaskChat',
+    'TaskChatGLM',
     'TaskSaas.apps.TasksaasConfig',
     'web.apps.WebConfig',
     'django_apscheduler',

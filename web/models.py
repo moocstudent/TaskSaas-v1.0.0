@@ -367,3 +367,15 @@ class ProjectInvite(models.Model):
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, related_name='create_invite',
                                 on_delete=models.SET_NULL)
+
+
+class ConfigSetting(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
+    config_choices = (
+        ('spider','taskSpider开启task网络爬虫'),
+    )
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    user = models.ForeignKey(verbose_name='谁的配置', to='UserInfo', null=True, related_name='whos_conf',
+                                on_delete=models.SET_NULL)
+

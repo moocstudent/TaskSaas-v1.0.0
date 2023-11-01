@@ -83,6 +83,8 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
 
     re_path(r'^setting/$', setting.setting, name='setting'),
     re_path(r'^setting/delete/$', setting.setting_delete, name='setting_delete'),
+    re_path(r'^setting/common/$', setting.setting_common, name='setting_common'),
+    re_path(r'^setting/common_spider/$', setting.setting_common_spider, name='setting_common_spider'),
     re_path(r'^setting/module/$', module.setting_module, name='setting_module'),
     re_path(r'^setting/module_del/$', module.setting_module_del, name='setting_module_del'),
 

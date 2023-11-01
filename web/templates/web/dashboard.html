@@ -1053,6 +1053,7 @@
                     layer.prompt({title: '请输入文本', formType: 2}, function (value, index, elem) {
                         if (value === '') return elem.focus();
                         layer.msg('获得：' + util.escape(value)); // 显示 value
+                        const position = 'dashboard';
                         // 关闭 prompt
                         var wsUrl = 'ws://' + window.location.host + '/chat/ws/' + project_id + '/' + user_id + '/' + username
                         if (!ws) {

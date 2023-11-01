@@ -50,6 +50,7 @@ class yChatConsumer(WebsocketConsumer):
         self.room_group_name = 'matrix' + self.project_id
         self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
         self.username = self.scope["url_route"]["kwargs"]["username"]
+        # self.position = self.scope["url_route"]["kwargs"]["position"]
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
@@ -88,7 +89,7 @@ class yChatConsumer(WebsocketConsumer):
             self.channel_name,
         )
         async_to_sync(self.channel_layer.group_discard)(
-            encrypt.md5(self.username) + self.project_id,
+            encrypt.md5(self.username) + '__' + self.project_id,
             self.channel_name
         )
         the_room_users = hash_map.get(self.room_group_name)
@@ -119,7 +120,6 @@ class yChatConsumer(WebsocketConsumer):
             {
                 'type': chat_message_key,
                 'message': username + ': ' + message,
-
             }
         )
 
@@ -280,6 +280,8 @@ def push_message_to_group(group_name, message, type=None,sender=None):
 pattern = r'<a\s+href="([^"]*)">(.*?)</a>'
 
 def save_msg_to_db_impl(msg,sender,receiver,type,project_id):
+    print('save_msg_to_db_impl')
+
     user = models.UserInfo.objects.filter(username=sender).first()
     receiver_ = models.UserInfo.objects.filter(username=receiver).first()
     project = models.Project.objects.filter(id=project_id).first()
@@ -321,6 +323,7 @@ def extract_links_and_text(text):
 
 
 def send_private_hint_msg(request,project_id):
+    print('send_private_hint_msg')
     try:
         sender = request.web.user.username
         receiver = request.POST.get("receiver")

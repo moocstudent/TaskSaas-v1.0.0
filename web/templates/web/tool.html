@@ -18,6 +18,9 @@
             height: 50px;
             border: 1px solid black;
         }
+
+        .layui-input:focus,.layui-textarea:focus{border-color:deepskyblue!important;}
+        .layui-btn {background-color: deepskyblue;color: white}
     </style>
 {% endblock %}
 
@@ -125,20 +128,28 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <i class="fa fa-address-card-o" aria-hidden="true"></i>
-                                输入#色值看颜色
+                                选择颜色获取色值
                             </div>
                             <div class="panel-body" style="height: 200px">
 
                                 {#                        {% csrf_token %}#}
                                 <div class="form-group">
+
                                     <label class="col-sm-4 control-label">输入#色值看颜色</label>
                                     <div class="col-sm-5">
-                                        <input id="color_pick" type="text"
-                                               class="form-control" placeholder="请输入6位色值"
-                                               name="color_code">
-                                        <span class="error-msg">{{ error }}</span>
+                                        <form class="layui-form" action="">
+                                            <div class="layui-form-item">
+                                                <div class="layui-input-inline" style="width: 120px;">
+                                                    <input type="text" name="color" value="" placeholder="请选择颜色"
+                                                           class="layui-input layui-border-blue" id="ID-colorpicker-demo-form-color">
+                                                </div>
+                                                <div class="layui-inline" style="left: -11px;">
+                                                    <div id="ID-colorpicker-demo-form"></div>
+                                                </div>
+                                            </div>
+                                        </form>
                                     </div>
-                                         <div class="col-sm-3"><a
+                                    <div class="col-sm-3"><a
                                             href="https://blog.csdn.net/xiaoyafang123/article/details/117286015"
                                             target="_blank">颜色的前世今生11·RGB显色系统详解
                                     </a></div>
@@ -155,13 +166,13 @@
                                 <br>
                                 <div class="form-group" style="padding-top: 35px">
                                     <div class="col-sm-offset-5 col-sm-5">
-                                        <input id="colorLook" type="button" class="btn btn-info" value="查 看">
+                                        <input id="colorCopy" type="button" class="btn btn-info" value="复 制">
                                     </div>
                                 </div>
                                 <br>
-                                 <div class="col-md-8">
-                                <div id="color_label" hidden="hidden" class="color-label" for=""></div>
-                                 </div>
+                                <div class="col-md-8">
+                                    <div id="color_label" hidden="hidden" class="color-label" for=""></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -206,26 +217,27 @@
             })
         }
 
-        $("#colorLook").click(colorLook)
+        $("#colorCopy").click(colorCopy)
 
-        function colorLook() {
-            let color_code = $("#color_pick").val()
-            if (color_code.startsWith("#")) {
+        function colorCopy() {
+            // 获取文本框的值
+            var colorInput = document.getElementById("ID-colorpicker-demo-form-color");
+            if (colorInput.value.startsWith("#")) {
             } else {
-                color_code = "#" + color_code
-            }
-            if (color_code.length == 7) {
-            } else {
-                layer.msg('错误的位数，一般为6位，如FFFFFF', {icon: 2})
-                $("#color_pick").val("")
-                $("#color_label").hide()
+                layer.msg('错误的色值，生成后请不要更改input')
                 return
             }
-            $("#color_label").show()
-            $("#color_label").css('background-color', color_code)
+            // 选择文本
+            colorInput.select();
+            // 复制文本到剪贴板
+            document.execCommand("copy");
+            // 取消文本选择
+            window.getSelection().removeAllRanges();
+            // 提示用户已复制
+            layer.alert("已复制到剪贴板，" + colorInput.value);
         }
 
-        {% comment %}function colorLook() {
+        {% comment %}function colorCopy() {
             let color_code = $("#color_pick").val()
             if (color_code.startsWith("#")){
             }else{
@@ -330,6 +342,19 @@
             // 提示用户已复制
             alert("已复制到剪贴板，文本长度：" + public_key.value.length);
         }
+
+        layui.use(function () {
+            var colorpicker = layui.colorpicker;
+            var $ = layui.$;
+            // 渲染
+            colorpicker.render({
+                elem: '#ID-colorpicker-demo-form',
+                color: '#1c97f5',
+                done: function (color) {
+                    $('#ID-colorpicker-demo-form-color').val(color);
+                }
+            });
+        });
 
 
     </script>

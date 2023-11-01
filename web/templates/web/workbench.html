@@ -621,10 +621,6 @@
         }
 
 
-        function msgSubmit() {
-            alert('【功能暂不可用】正在紧锣密鼓开发中')
-        }
-
         let userlist_online = []
 
         {#调整为当天，近七天，近一月，近三个月相关数据展示#}
@@ -1132,6 +1128,7 @@
                             atTasksConfirm.push(atTaskIds[t])
                         }
                     }
+
                     if (atTasksConfirm.length > 0) {
                         let task_message = ''
                         for (t in atTasksConfirm) {
@@ -1141,6 +1138,8 @@
                             break;
                         }
                         //send hint msg
+                        console.log('atMembersConfirm',atMembersConfirm)
+                         console.log('atTasksConfirm ',atTasksConfirm)
                         stringifyMsg = JSON.stringify({
                             'message': task_message,
                             'type': atMemberFlag ? 'hint' : 'normal',
@@ -1160,7 +1159,6 @@
                     atTaskIds = []
                     atMemberFlag = false
                     atTaskFlag = false
-
                 } else {
                     console.log('reconnect ws...')
                     createOrConnectWebSocket()
@@ -1302,6 +1300,7 @@
 
         var interval_timer = null;//计时器
         var timer_count = 0;
+        const position = 'workbench';
         var wsUrl = 'ws://' + window.location.host + '/chat/ws/' + project_id + '/' + user_id + '/' + username
         var ws;
 
@@ -1455,30 +1454,6 @@
             var $ = layui.$;
             // 事件
             util.on('lay-on', {
-                'test-offset-t': function () {
-                    layer.open({
-                        type: 1,
-                        offset: 't',
-                        anim: 'slideDown', // 从上往下
-                        area: ['100%', '160px'],
-                        shade: 0.1,
-                        shadeClose: true,
-                        id: 'ID-demo-layer-direction-t',
-                        content: '<div style="padding: 16px;">任意 HTML 内容</div>'
-                    });
-                },
-                'test-offset-r': function () {
-                    layer.open({
-                        type: 1,
-                        offset: 'r',
-                        anim: 'slideLeft', // 从右往左
-                        area: ['320px', '100%'],
-                        shade: 0.1,
-                        shadeClose: true,
-                        id: 'ID-demo-layer-direction-r',
-                        content: '<div style="padding: 16px;">任意 HTML 内容</div>'
-                    });
-                },
                 'open-chat-room': function () {
                     layer.open({
                         title: '项目聊天室',
@@ -1501,7 +1476,7 @@
                             '<ul id="atMembersUl" class="elementList2"></ul></div>' +
                             '<div id="atTasks" style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden"><ul id="atTasksUl" class="elementList2Task"></ul></div>' +
                             '<input id="chat-message-input" oninput="msginputOnchange(event,this)" type="text" placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>' +
-                            '<input id="chat-message-submit" onclick="msgSubmit()" type="button" value="Send"/></div></div></div>',
+                            '<input id="chat-message-submit"  type="button" value="Send"/></div></div></div>',
 
                     });
                     chatRoomSetup()

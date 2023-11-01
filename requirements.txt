@@ -25,3 +25,14 @@ PyMySQL~=1.1.0
 django_apscheduler==0.6.2
 apscheduler==3.10.4
 tzlocal==5.2
+
+!pip install transformers==4.27.1
+!pip install sentencepiece
+!pip install cpm_kernels
+!pip install gradio
+!pip install mdtex2html
+pip3 install torch torchvision
+
+if macos
+https://github.com/THUDM/ChatGLM-6B/issues/6
+

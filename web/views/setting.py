@@ -13,6 +13,11 @@ def setting(request,project_id):
 def sys_setting(request):
     return HttpResponse('主题颜色 / 密码 / 布局偏好 (现在并没有功能实现)')
 
+def setting_common_spider(request,project_id):
+    status = request.POST.get('status')
+
+def setting_common(request,project_id):
+    return render(request,'web/setting_common.html')
 
 def setting_delete(request, project_id):
     """删除项目"""

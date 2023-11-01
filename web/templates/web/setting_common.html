@@ -1,0 +1,114 @@
+{% extends 'layout/manage.html' %}
+{% block title %}{% endblock %}
+
+{% block css %}
+    <style>
+        .list-group .choices {
+            border-left: 2px solid #f90 !important;
+        }
+
+        .layui-form-onswitch {
+            border-color: deepskyblue;
+            background-color: deepskyblue;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container clearfix" style="margin-top: 20px">
+
+        <div class="col-sm-3">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: transparent;font-weight: bold">
+                    项目设置
+                </div>
+                <div class="list-group" style="border-radius: 0">
+                    <div>
+                        <a href="{% url 'setting_common' project_id=request.web.project.id %}"
+                           class="list-group-item choices">通用设置</a>
+
+                        <a href="{% url 'setting_module' project_id=request.web.project.id %}"
+                           class="list-group-item">项目模块</a>
+
+                        <a href="{% url 'setting_delete' project_id=request.web.project.id %}"
+                           class="list-group-item">删除项目</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-9">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                    通用设置
+                </div>
+                <div class="panel-body">
+
+
+                    <div class="layui-form">
+                        <div class="layui-form-item" pane>
+                            <label class="layui-form-label">开启TaskSpider</label>
+                            <div class="layui-input-block">
+                                <input id="taskSpiderCheckInput"
+                                       type="checkbox" checked name="open" lay-skin="switch" lay-filter="switchSpider"
+                                       title="开关">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        layui.use(function () {
+            var form = layui.form;
+            var layer = layui.layer;
+            // checkbox 事件
+            // 指定开关事件
+            form.on('switch(switchSpider)', function (data) {
+                layer.msg((this.checked ? '开启了taskSpider' : '关闭了taskSpider'), {
+                    offset: '6px'
+                });
+                taskSpiderStatus(this.checked)
+                {#layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是 ON|OFF', data.othis)#}
+            });
+        });
+
+
+        function taskSpiderStatus(isChecked) {
+            $.ajax({
+                url: "{% url 'setting_common_spider' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "status": isChecked,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        layer.msg('更改状态成功', {icon: 6})
+                        location.reload();
+                        {#$("#badge").load(location.href + " #badge")#}
+                    } else {
+                        layer.msg('更改状态异常', {icon: 5})
+                    }
+                }
+
+            })
+
+        }
+
+    </script>
+{% endblock %}
