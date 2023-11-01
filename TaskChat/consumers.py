@@ -58,7 +58,6 @@ class yChatConsumer(WebsocketConsumer):
         )
 
         print('self.room_group_name', self.room_group_name)
-
         async_to_sync(self.channel_layer.group_add)(
             encrypt.md5(self.username) +'__'+ self.project_id,
             self.channel_name
