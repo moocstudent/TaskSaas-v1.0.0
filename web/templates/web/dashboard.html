@@ -206,9 +206,9 @@
                                    data-toggle="modal" data-target="#inviteModal">邀请成员</a>
                             </div>
                             <div class="panel-body user-item">
-                                <div class="col-sm-12 title">创建者</div>
+                                <div class="layui-col-sm12 layui-col-sm-offset1 title">创建者</div>
                                 <div class="clearfix" style="margin-bottom: 30px;">
-                                    <div class="col-sm-4">
+                                    <div class="layui-col-sm4 layui-col-sm-offset1">
                                         <div class="layui-row ws-docs-anim">
                                             {#                                       id {{ request.web.project.creator.id }}#}
                                             <div class="avatar layui-anim" data-anim="layui-anim-rotate">
@@ -224,16 +224,16 @@
                                         <div class="text">{{ request.web.project.creator.username }}</div>
                                     </div>
                                 </div>
-                                <div class="col-sm-12 title">参与者</div>
+                                <div class="layui-col-sm12 layui-col-sm-offset1 title">参与者</div>
                                 <div>
                                     {% for item in join_user %}
-                                        <div class="col-sm-4">
+                                        <div class="layui-col-sm4 layui-col-sm-offset1">
                                             <div class="layui-row ws-docs-anim">
                                                 <div class="avatar layui-anim" data-anim="layui-anim-rotate">
                                                     {% if item.2 %}
-                                                        <img src="{{ item.2 }}" alt="">
+                                                        <img class="avatar" src="{{ item.2 }}" alt="">
                                                     {% else %}
-                                                        <div>{{ item.1.0 |upper }}</div>
+                                                        {{ item.1.0 |upper }}
                                                     {% endif %}
                                                 </div>
                                             </div>

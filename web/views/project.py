@@ -1,11 +1,14 @@
+import json
 import time
 
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
+from TaskSaas.serializers.project_serializer import ProjectSerializer
 from web import models
 from web.forms.project import ProjectModelForm
 from utils.tencent.cos import create_bucket
+from web.models import UserInfo
 
 
 def project_list(request):
@@ -94,3 +97,43 @@ def project_unstar(request, project_type, project_id):
         return redirect('project_list')
 
     return HttpResponse('请求错误')
+
+
+def project_list_json(request):
+    if request.method == 'GET':
+        user_id = request.GET.get("user_id")
+        """
+        project-list页面展示
+        从数据库获取两部分数据
+        创建的：是否星标
+        参与的：是否星标
+        """
+        project_dict = {'star': [], 'my': [], 'join': []}
+        user = UserInfo.objects.filter(id=user_id).first()
+        if not user:
+            return JsonResponse({'status':0})
+        my_project_list = models.Project.objects.filter(creator=user)
+
+        if my_project_list:
+            for my_item in (list(my_project_list)):
+                if my_item.star:
+                    project_dict['star'].append({'value': (ProjectSerializer(my_item).data), 'type': 'my'})
+                else:
+                    project_dict['my'].append(ProjectSerializer(my_item).data)
+
+            join_project_list = models.ProjectUser.objects.filter(user=user)
+            for join_item in (list(join_project_list)):
+                if join_item.star:
+                    project_dict['star'].append({'value': (ProjectSerializer(join_item.project).data), 'type': 'join'})
+                else:
+                    project_dict['join'].append(ProjectSerializer(join_item.project).data)
+        else:
+            print('project list is empty')
+            join_project_list = models.ProjectUser.objects.filter(user=user)
+            for join_item in (list(join_project_list)):
+                if join_item.star:
+                    project_dict['star'].append({'value': (ProjectSerializer(join_item.project).data), 'type': 'join'})
+                else:
+                    project_dict['join'].append(ProjectSerializer(join_item.project).data)
+        return JsonResponse({'status': 1,'project_list':project_dict})
+    return JsonResponse({'status':0})

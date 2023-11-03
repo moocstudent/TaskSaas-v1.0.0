@@ -7,14 +7,24 @@ from web.views import account, home, project, manage, issues, cache, setting, fi
     sentry
 from web.views.upload import FileUploadView
 from TaskSaasAPP import scheduler
+from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView,TokenVerifyView
 
 urlpatterns = [
     # scheduler.run(),
+
+    path('token_login', TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path('token_refresh', TokenRefreshView.as_view(), name="token_refresh"),
+    path('token_verify', TokenVerifyView.as_view(), name="token_verify"),
 
     re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': 'web/static'}, name='static'),
     re_path(r'^register/', account.register, name='register'),
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
     re_path(r'^login/', account.login, name='login'),
+    re_path(r'^do_login/', account.do_login, name='do_login'),
+    re_path(r'^get_token/', account.get_token, name='get_token'),
+
+
+
     re_path(r'^logout/', account.logout, name='logout'),
     re_path(r'^image/code/', account.image_code, name='image_code'),
     re_path(r'^send/sms/', account.send_sms, name='send_sms'),
@@ -29,6 +39,9 @@ urlpatterns = [
     # re_path(r'^issues_status_cache_set/', cache.issues_status_cache_set, name='issues_status_cache'),
     # 项目列表
     re_path(r'^project/list/', project.project_list, name='project_list'),
+    # 项目列表json response
+    re_path(r'^project_list/', project.project_list_json, name='project_list_json'),
+
     re_path(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
     re_path(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar,
             name='project_unstar'),
