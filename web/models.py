@@ -15,6 +15,7 @@ class UserInfo(models.Model):
     git_username = models.CharField(verbose_name="Git用户名", max_length=100, default='',
                                     db_index=True)  # db_index=True 索引
     email = models.EmailField(verbose_name="邮箱", max_length=100)
+    # git 头像或者其他设置的头像
     git_avatar = models.CharField(verbose_name="Git头像", default='', max_length=300)
     mobile_phone = models.CharField(verbose_name="手机号码", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=100)

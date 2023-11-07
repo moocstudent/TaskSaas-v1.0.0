@@ -8,6 +8,7 @@ import uuid
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 
 from TaskSaas.task.remind_task import remind_deadline
 from utils import encrypt
@@ -116,35 +117,31 @@ def get_token(request):
 
 
 # @csrf_exempt
+@api_view(['POST'])
 def do_login(request):
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    print('username', username)
     """
     用户名密码登陆
     :param request:
     :return:
     """
-    if request.method == 'GET':
-        return JsonResponse({"status":1})
-        # form = LoginForm(request)
-        # return render(request, 'web/login.html', {'form': form})
-    elif request.method == 'POST':
-        print(request.POST)
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        print('username',username)
-        user_object = models.UserInfo.objects.filter(Q(email=username) | Q(username=username)) \
-            .filter(password=encrypt.md5(password)).first()
-        print('user_obj',user_object)
-        if user_object:
-            # 登陆成功
-            request.session['user_id'] = user_object.id
-            request.session.set_expiry(60 * 60 * 24 * 14)
-            # execution remind deadline task
-            remind_deadline()
-            return JsonResponse({'status':1,'token':user_object.id,'token_expiry':60 * 60 * 24 * 14})
-    return JsonResponse({'status': 0})
-    # return render(request, 'web/login.html', {'form': form})
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    print('username',username)
+    user_object = models.UserInfo.objects.filter(Q(email=username) | Q(username=username)) \
+        .filter(password=encrypt.md5(password)).first()
+    print('user_obj',user_object)
+    if user_object:
+        # 登陆成功
+        request.session['user_id'] = user_object.id
+        request.session.set_expiry(60 * 60 * 24 * 14)
+        # execution remind deadline task
+        remind_deadline()
+        return JsonResponse({'status':1,'token':user_object.id,'token_expiry':60 * 60 * 24 * 14})
 
-@csrf_exempt
+# @csrf_exempt
 def login(request):
     """
     用户名密码登陆
@@ -156,7 +153,6 @@ def login(request):
         return render(request, 'web/login.html', {'form': form})
     form = LoginForm(request, data=request.POST)
 
-    print('form',form)
     if form.is_valid():
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']

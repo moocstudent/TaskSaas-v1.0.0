@@ -13,7 +13,7 @@ from TaskSaasAPP.date_util import get_every_day, get_today, get_last_week_since_
 from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
-from web.models import Collect, Issues, IssuesLog
+from web.models import Collect, Issues, IssuesLog, UserInfo
 
 
 def statistics(request, project_id):
@@ -21,14 +21,14 @@ def statistics(request, project_id):
     assign_count = the_proj_issues.filter(assign_id=request.web.user.id).count()
     attention_count = the_proj_issues.filter(attention__id__in=[request.web.user.id]).count()
     creation_count = the_proj_issues.filter(creator=request.web.user.id).count()
-    resolve_count = the_proj_issues.filter(status=3,assign_id=request.web.user.id).count()
+    resolve_count = the_proj_issues.filter(status=3, assign_id=request.web.user.id).count()
     context = {
-        'assign_count':assign_count,
-        'attention_count':attention_count,
-        'resolve_count':resolve_count,
-        'creation_count':creation_count
+        'assign_count': assign_count,
+        'attention_count': attention_count,
+        'resolve_count': resolve_count,
+        'creation_count': creation_count
     }
-    return render(request, 'web/statistics.html',context)
+    return render(request, 'web/statistics.html', context)
 
 
 # todo commit具体信息 当点击页面commit message时弹出详情
@@ -213,20 +213,33 @@ def workbench(request, project_id):
     return render(request, 'web/workbench.html', context)
 
 
+def workbench_tasks_json(request):
+    print('workbench tasks json')
+    project_id = request.POST.get('project_id')
+
+
 # deprecated
 def workbench_json(request):
     print('workbench_json')
-    project_id = request.POST.get('project_id')
+    project_id = request.GET.get('project_id')
+    user_id = request.GET.get('user_id')
+    if not project_id or not user_id:
+        print('用户id或项目id不能为空')
+        return JsonResponse({"status": 0, "msg": '用户id或项目id不能为空'})
+    user = UserInfo.objects.filter(id=user_id).first()
+    if not user:
+        print('用户找不到')
+        return JsonResponse({"status": 0, "msg": '用户找不到'})
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+    legendTriggrer = cache.get('myechartlegendTrigger' + str(user_id) + '_' + str(project_id),
                                '1257')
-    my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=request.web.user)
-                                                                             | Q(attention=request.web.user)
-                                                                             | Q(creator=request.web.user))
+    my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (Q(assign=user)
+                                                                             | Q(attention=user)
+                                                                             | Q(creator=user))
                                                  & Q(status__in=(list(legendTriggrer)))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',))
-    day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
+    day_trigger = cache.get('mydayTrigger' + str(user_id) + '_' + str(project_id), 'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
     print('total size', len(my_issues_set))
@@ -300,7 +313,7 @@ def workbench_json(request):
         'wait_counts': wait_counts,
         'reopen_counts': reopen_counts,
     }
-    return HttpResponse(1)
+    return JsonResponse({'status': 1, 'data': context})
 
 
 def filter_by_day(my_issues_set, day_trigger):
@@ -346,18 +359,54 @@ def remind(request, project_id):
                         'pure_link': re.pure_link, 'pure_content': re.pure_content}
     for ss in reminds_sys:
         sysinfos[ss.id] = {'sender': ss.sender.username, 'receiver': ss.receiver.username,
-                        'create_time': ss.create_datetime, 'content': ss.content, 'status': ss.status,
-                        'pure_link': ss.pure_link, 'pure_content': ss.pure_content}
+                           'create_time': ss.create_datetime, 'content': ss.content, 'status': ss.status,
+                           'pure_link': ss.pure_link, 'pure_content': ss.pure_content}
 
     context = {
         'info_size': 10,
         'hint_size': len(reminds_hint),
         'sys_size': len(reminds_sys),
         'hints': hints,
-        'sysinfos':sysinfos
+        'sysinfos': sysinfos
     }
     # raise Exception
     return render(request, 'web/remind.html', context=context)
+
+
+def remind_json(request):
+    user_id = request.GET.get("user_id")
+    # project_id = request.GET.get("project_id")
+    if not user_id:
+        return JsonResponse({"status": 0, "msg": "用户id不能为空"})
+    user = UserInfo.objects.filter(id=user_id).first()
+    reminds = models.InfoLog.objects.filter(receiver=user).order_by('status', '-create_datetime')
+    unread_count = reminds.filter(status=1).count()
+    reminds_hint = reminds.filter(type=2)
+    reminds_sys = reminds.filter(type=1)
+    hints = []
+    sysinfos = []
+    projinfos = []
+    for re in reminds_hint:
+        hints.append({'sender': re.sender.username, 'receiver': re.receiver.username,
+                        'sender_profile_photo': re.sender.git_avatar,
+                        'create_time': re.create_datetime, 'content': re.content, 'status': re.status,
+                        'pure_link': re.pure_link, 'pure_content': re.pure_content})
+    for ss in reminds_sys:
+        sysinfos.append({'sender': ss.sender.username, 'receiver': ss.receiver.username,
+                           'sender_profile_photo': ss.sender.git_avatar,
+                           'create_time': ss.create_datetime, 'content': ss.content, 'status': ss.status,
+                           'pure_link': ss.pure_link, 'pure_content': ss.pure_content})
+    context = {
+        'info_size': 10,
+        'unread_count':unread_count,
+        'hint_size': len(reminds_hint),
+        'sys_size': len(reminds_sys),
+        'hints': hints,
+        'sysinfos': sysinfos,
+        'projinfos': projinfos
+    }
+    # raise Exception
+    return JsonResponse({"status": 1, "results": context})
 
 
 # 标记已读
@@ -375,17 +424,17 @@ def collect(request, project_id):
     collects_set = Collect.objects.filter(creator=request.web.user)
     collects = collections.OrderedDict()
     for coll in collects_set:
-        if coll.type==1:
-            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,'type':'issue',
-                             'link': coll.link, 'id': coll.issues.issue_id,'project':coll.project.name}
-        if coll.type==2:
-            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title,'type':'wiki',
-                             'link': coll.link, 'id': coll.wiki.id, 'project': coll.project.name}
+        if coll.type == 1:
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'issue',
+                                 'link': coll.link, 'id': coll.issues.issue_id, 'project': coll.project.name}
+        if coll.type == 2:
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'wiki',
+                                 'link': coll.link, 'id': coll.wiki.id, 'project': coll.project.name}
         if coll.type == 3:
             collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'file',
                                  'link': coll.link, 'id': coll.file.id, 'project': coll.project.name}
     context = {
         'collects': collects,
-        'coll_size':len(collects)
+        'coll_size': len(collects)
     }
     return render(request, 'web/collect.html', context)

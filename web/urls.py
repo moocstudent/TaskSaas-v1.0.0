@@ -41,12 +41,15 @@ urlpatterns = [
     re_path(r'^project/list/', project.project_list, name='project_list'),
     # 项目列表json response
     re_path(r'^project_list/', project.project_list_json, name='project_list_json'),
+    # dashboard json response
+    re_path(r'^dashboard_json/$', dashboard.dashboard_json, name='dashboard_json'),
 
     re_path(r'^project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_star, name='project_star'),
     re_path(r'^project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/$', project.project_unstar,
             name='project_unstar'),
 
     re_path(r'^workbench_json/$', manage.workbench_json, name='workbench_json'),
+    re_path(r'^remind_json/$', manage.remind_json, name='remind_json'),
     # 项目管理
     # 路由分发
     re_path(r'^sys_setting/$', setting.sys_setting, name='sys_setting'),
@@ -75,6 +78,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^workbench/$', manage.workbench, name='workbench'),
     re_path(r'^calendar/$', manage.calendar, name='calendar'),
     re_path(r'^remind/$', manage.remind, name='remind'),
+
     re_path(r'^remind_status/$', manage.remind_status, name='remind_status'),
     re_path(r'^collect/$', manage.collect, name='collect'),
     re_path(r'^make_collect/$', collect_api.make_collect, name='make_collect'),
@@ -108,6 +112,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
 
     re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
+
     re_path(r'^send_private_hint_msg/$', consumers.send_private_hint_msg, name='send_private_hint_msg'),
 
 ], None)),

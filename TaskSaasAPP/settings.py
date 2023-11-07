@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_apscheduler',
     'rest_framework',  # django restframework
     'rest_framework_simplejwt',
+    'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -58,7 +59,10 @@ REST_FRAMEWORK = {
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ]
     # DEFAULT_PERMISSION_CLASSES设置默认的权限类，通过认证后赋予用户的权限
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
     # DEFAULT_AUTHENTICATION_CLASSES设置默认的认证类，这里用token，也可以设置session或自定义的认证
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # 进行token认证
@@ -80,7 +84,6 @@ AUTH_USER_MODEL = 'TaskSaas.UserInfo'
 # 自定义认证后端
 AUTHENTICATION_BACKENDS = ('TaskSaasAPP.token_util.CustomBackend',)
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -90,7 +93,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'web.middleware.auth.AuthMiddleWare',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 CHANNEL_LAYERS = {
     "default": {
@@ -215,6 +221,7 @@ WHITE_REGEX_URL_LIST = [
     '/send/sms/',
     '/login/sms/',
     '/login/',
+    '/do_login/',
     '/image/code/',
     '/index/',
 ]
