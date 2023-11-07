@@ -1,23 +1,26 @@
-import json
-import time
-
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 from TaskSaas.serializers.project_serializer import ProjectSerializer
+from TaskSaasAPP import user_util
 from web import models
 from web.forms.project import ProjectModelForm
-from utils.tencent.cos import create_bucket
 from web.models import UserInfo
 
 
 def project_list(request):
+    user = None
+    if request.web.user:
+        user = request.web.user
+
     """
     项目列表
     :param request:
     :return:
     """
     if request.method == 'GET':
+        if not user:
+            user = UserInfo.objects.filter(id=request.GET.get('user_id')).first()
         """
         project-list页面展示
         从数据库获取两部分数据
@@ -25,8 +28,7 @@ def project_list(request):
         参与的：是否星标
         """
         project_dict = {'star': [], 'my': [], 'join': []}
-
-        my_project_list = models.Project.objects.filter(creator=request.web.user)
+        my_project_list = models.Project.objects.filter(creator=user)
         if my_project_list:
             for my_item in my_project_list:
                 if my_item.star:
@@ -34,7 +36,7 @@ def project_list(request):
                 else:
                     project_dict['my'].append(my_item)
 
-            join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
+            join_project_list = models.ProjectUser.objects.filter(user=user)
             for join_item in join_project_list:
                 if join_item.star:
                     project_dict['star'].append({'value': join_item.project, 'type': 'join'})
@@ -42,16 +44,19 @@ def project_list(request):
                     project_dict['join'].append(join_item.project)
         else:
             print('project list is empty')
-            join_project_list = models.ProjectUser.objects.filter(user=request.web.user)
+            join_project_list = models.ProjectUser.objects.filter(user=user)
             for join_item in join_project_list:
                 if join_item.star:
                     project_dict['star'].append({'value': join_item.project, 'type': 'join'})
                 else:
                     project_dict['join'].append(join_item.project)
-        form = ProjectModelForm(request)
+        form = ProjectModelForm(request,user=user)
         return render(request, 'web/project_list.html', {'form': form, 'project_dict': project_dict})
 
-    form = ProjectModelForm(request, data=request.POST)
+    if not user:
+        user = UserInfo.objects.filter(id=request.POST.get('user_id')).first()
+
+    form = ProjectModelForm(request, data=request.POST,user=user)
     if form.is_valid():
         name = form.cleaned_data['name']
         # 为项目创建一个桶&区域
@@ -62,9 +67,9 @@ def project_list(request):
         # # 验证通过:项目名，颜色，描述+creater+COSbucketname+COSregion
         # form.instance.region = region
         # form.instance.bucket = bucket
-        form.instance.creator = request.web.user
+        form.instance.creator = user
         instance = form.save()
-
+        user_util.compute_forward_score(user=user, forward_score=2.00)
         # 创建项目时初始化问题类型
         issues_type_object = []
         for item in models.IssuesType.PROJECT_INIT_LIST:

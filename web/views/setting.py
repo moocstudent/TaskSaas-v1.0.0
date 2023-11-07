@@ -2,6 +2,7 @@ from django.contrib.auth import base_user
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from TaskSaasAPP import user_util
 from utils import encrypt
 from utils.tencent.cos import delete_bucket
 from web import models
@@ -49,6 +50,7 @@ def setting_delete(request, project_id):
     if str(project_id) == str(request.web.project.id):
          # 删除项目
         models.Project.objects.filter(id=request.web.project.id).delete()
+        user_util.compute_forward_score(user=request.web.user,forward_score=-2.00)
     else:
         return render(request, 'web/setting_delete.html', {'error': "项目错误"})
 

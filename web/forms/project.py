@@ -9,9 +9,10 @@ from web.forms.widgets import ColorRadioSelect
 class ProjectModelForm(BootStrapForm, forms.ModelForm):
     bootstrap_class_exclude = ['color']
 
-    def __init__(self, request, *args, **kwargs):
+    def __init__(self, request,user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
+        self.user=user
 
     class Meta:
         model = models.Project
@@ -29,7 +30,7 @@ class ProjectModelForm(BootStrapForm, forms.ModelForm):
         name = self.cleaned_data['name']
         # 1/当前用户是否已创建此项目
 
-        exists = models.Project.objects.filter(name=name, creator=self.request.web.user).exists()
+        exists = models.Project.objects.filter(name=name, creator=self.user).exists()
         if exists:
             raise ValidationError('项目名已存在！')
 
