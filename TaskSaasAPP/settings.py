@@ -221,6 +221,7 @@ WHITE_REGEX_URL_LIST = [
     '/send/sms/',
     '/login/sms/',
     '/login/',
+    '/fileupload/',
     '/do_login/',
     '/image/code/',
     '/index/',

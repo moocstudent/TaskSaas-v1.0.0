@@ -2,18 +2,17 @@ import collections
 import json
 
 import requests
-from channels.auth import login
 from django.core.cache import cache
-from django.db.models import Q, Count, Max, Min
+from django.db.models import Q, Min
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 from TaskSaasAPP import date_util
-from TaskSaasAPP.date_util import get_every_day, get_today, get_last_week_since_today
+from TaskSaasAPP.date_util import get_every_day
 from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
-from web.models import Collect, Issues, IssuesLog, UserInfo
+from web.models import Collect, Issues, UserInfo
 
 
 def statistics(request, project_id):

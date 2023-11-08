@@ -2,20 +2,17 @@ import json
 import os.path
 from datetime import datetime
 
-import requests
-
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 from django.urls import reverse
-
 from django.views.decorators.csrf import csrf_exempt
 
 from TaskSaasAPP import settings
 from TaskSaasAPP.file_util import get_file_type
+from utils.tencent.cos import credential
 from web import models
-from web.forms.file import FileFolderModelForm, FileModelForm, UploadFileForm
-from utils.tencent.cos import delete_file, delete_file_list, credential
-from web.models import FileRepository
+from web.forms.file import FileFolderModelForm, FileModelForm
+from web.models import FileRepository, UserInfo
 
 
 def file(request, project_id):
@@ -168,12 +165,55 @@ def cos_credential(request, project_id):
 
 
 
+def uploadfile_common(request):
+    upload_file = request.FILES['file']
+    print('upload_file',upload_file)
+    openid = request.POST.get('openid')
+    user_id = request.POST.get('user_id')
+    print('openid',openid)
+    print('post body ',request.POST)
+    if not user_id:
+        # select user by openid ,if not exist then return false
+        return JsonResponse({'status':False,'msg':'用户id未传送'})
+    user = UserInfo.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({'status':False,'msg':'不存在的用户'})
+    if upload_file:
+        fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'
+        ab_upload_path = os.path.join(settings.STATICFILES_DIRS[0]+'/uploads',fix+upload_file.name)
+        f = open(ab_upload_path, 'wb')
+        for i in upload_file.chunks():
+            f.write(i)
+        f.close()
+        file_url = "http://localhost:3000/static/uploads/"+fix+upload_file.name
+        file_path = "/static/uploads/"+fix+upload_file.name
+        file_repository = FileRepository(name=upload_file.name, file=ab_upload_path,file_path=file_path,file_url=file_url,
+                                         ab_file_path=ab_upload_path,
+                                         file_size=upload_file.size,file_type=1,file_mime_type=get_file_type(upload_file),
+                                         update_user=user)
+        file_repository.save()
+    # 项目的已使用空间更新
+    # request.web.project.user_space += data_dict['file_size']
+    # request.web.project.save()
 
-@csrf_exempt
+        result = {
+            'id': file_repository.id,
+            'name': file_repository.name,
+            'file_size': file_repository.file_size,
+            'username': file_repository.update_user.username,
+            'datetime': file_repository.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
+            'file_type': file_repository.get_file_type_display(),
+            'download_url': reverse('file_download',
+                                    kwargs={'file_id': file_repository.id})
+        }
+        return JsonResponse({'status': True, 'data': result})
+
+# @csrf_exempt
 def upload_file(request,project_id):
     upload_file = request.FILES['file']
     parent_id = request.POST.get('parent_id')
     print('upload_file',upload_file)
+    print(request.POST)
 
     if upload_file:
         fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'

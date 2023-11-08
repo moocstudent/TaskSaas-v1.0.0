@@ -60,6 +60,8 @@ urlpatterns = [
     re_path(r'^sentry_evt/', sentry.sentry_evt, name='sentry_evt'),
     re_path(r'^sentry_setup/', sentry.sentry_setup, name='sentry_setup'),
 
+    re_path(r'^fileupload/$', file.uploadfile_common, name='fileupload'),
+
 re_path(r'^manage/(?P<project_id>\d+)/', include([
 
     re_path(r'^cache_set/', cache.cache_set, name='cache'),
