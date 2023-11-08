@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
+from TaskSaasAPP import user_util
+from TaskSaasAPP.random_util import create_random_decimal
 from TaskSaasAPP.type_util import isint
 from utils.encrypt import uid
 from utils.pagination import Pagination
@@ -224,6 +226,7 @@ def issues(request, project_id):
             form.instance.desc = form.instance.subject
         # 保存
         form.save()
+        user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(1.00,2.00))
         change_record = "{} 创建问题 {}".format(request.web.user.username, form.instance.subject)
         issues_log = IssuesLog(issues=form.instance, creator=request.web.user,
                                             record=change_record,
@@ -341,7 +344,7 @@ def issues_change(request, project_id, issues_pk):
                 return JsonResponse({'status': False, 'error': '您选择的值不能为空！'})
             setattr(issues_object, name, None)
             issues_object.save()
-
+            user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
             # 记录
             change_record = "{} 更新为空".format(field_object.verbose_name)
             issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
@@ -352,6 +355,7 @@ def issues_change(request, project_id, issues_pk):
         else:
             setattr(issues_object, name, value)
             issues_object.save()
+            user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
             # 记录
             change_record = "{} 更新为 {}".format(field_object.verbose_name, value)
             issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
@@ -368,6 +372,7 @@ def issues_change(request, project_id, issues_pk):
                 return JsonResponse({'status': False, 'error': '您选择的值不能为空！'})
             setattr(issues_object, name, None)
             issues_object.save()
+            user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
             # 记录
             change_record = "{} 更新为空 ".format(field_object.verbose_name)
             issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
@@ -395,7 +400,7 @@ def issues_change(request, project_id, issues_pk):
                 instance = field_object.remote_field.model.objects.filter(id=value, project_id=project_id).first()
                 if not instance:
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
-
+            user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
             change_record = "{} 更新为 {}".format(field_object.verbose_name, str(instance))
             setattr(issues_object, name, instance)
             issues_object.save()
@@ -417,6 +422,7 @@ def issues_change(request, project_id, issues_pk):
 
         setattr(issues_object, name, value)
         issues_object.save()
+        user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
         change_record = "{} 更新为 {}".format(field_object.verbose_name, seleted_text)
         issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
                                record=change_record,
@@ -431,10 +437,13 @@ def issues_change(request, project_id, issues_pk):
                                                  ((using_time_delta.seconds%3600)//60),using_time_delta.seconds%60)
                 issues_object.using_time = using_time_str
                 issues_object.save()
+                user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
             else:
                 if issues_object.using_time:
                     issues_object.using_time = None
                     issues_object.save()
+                    user_util.compute_forward_score(user=request.web.user,
+                                                    forward_score=create_random_decimal(0.01, 0.06))
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
 
     # M2M字段
@@ -451,6 +460,8 @@ def issues_change(request, project_id, issues_pk):
             issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
                                    record=change_record,
                                    create_datetime=issues_object.latest_update_datetime)
+            user_util.compute_forward_score(user=request.web.user,
+                                            forward_score=create_random_decimal(0.01, 0.03))
             issues_log.save()
         else:
             # values=[1,2,3,4] 参与者/创建者
@@ -470,6 +481,8 @@ def issues_change(request, project_id, issues_pk):
 
             issues_object.attention.set(value)
             issues_object.save()
+            user_util.compute_forward_score(user=request.web.user,
+                                            forward_score=create_random_decimal(0.01, 0.06))
             change_record = "{} 更新为 {}".format(field_object.verbose_name, ",".join(username_list))
             issues_log = IssuesLog(issues=issues_object, creator=request.web.user,
                                    record=change_record,
@@ -547,4 +560,6 @@ def invite_join(request, code):
     #     invite_object.save()
 
     models.ProjectUser.objects.create(user=request.web.user, project=invite_object.project)
+    user_util.compute_forward_score(user=request.web.user,
+                                        forward_score=create_random_decimal(3.00, 3.00))
     return render(request, 'web/invite_join.html', {'project': invite_object.project})

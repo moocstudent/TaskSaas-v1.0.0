@@ -1,23 +1,19 @@
 '''
 用户账号相关功能：注册/短信/登陆/注销
 '''
-import datetime
 import json
-import uuid
 
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 
 from TaskSaas.task.remind_task import remind_deadline
+from TaskSaasAPP.string_format_util import format_error_msg
 from utils import encrypt
 from web import models
 from web.forms.account import RegisterModelForm, SendSmsForm, LoginSmsForm, LoginForm
-from django.conf import settings
-from io import BytesIO
-from utils.image_code import check_code
-from django.db.models import Q
+from web.models import UserInfo
 
 
 def register(request):
@@ -47,9 +43,12 @@ def register(request):
         #     price=0,
         #     start_datetime=datetime.datetime.now(),
         # )
-        return JsonResponse({'status': True, 'data': '/login/'})
+        user_object = UserInfo.objects.filter(username=form.cleaned_data['username']).first()
+        request.session['user_id'] = user_object.id
+        request.session.set_expiry(60 * 60 * 24 * 14)
 
-    return JsonResponse({'status': False, 'error': form.errors})
+        return JsonResponse({'status': True, 'token':user_object.id,'data': '/login/'})
+    return JsonResponse({'status': False, 'error': format_error_msg(form.errors)})
 
 
 def send_sms(request):

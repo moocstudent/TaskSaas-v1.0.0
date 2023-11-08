@@ -381,6 +381,16 @@ def remind_json(request):
     reminds = models.InfoLog.objects.filter(receiver=user).order_by('status', '-create_datetime')
     unread_count = reminds.filter(status=1).count()
     reminds_hint = reminds.filter(type=2)
+    reminds_hint_total = (reminds_hint.count())
+    page_object = Pagination(
+        current_page=request.GET.get('page'),
+        all_count=reminds_hint.count(),
+        base_url=request.path_info,
+        query_params=request.GET,
+        per_page=5
+    )
+    reminds_hint = reminds_hint[page_object.start:page_object.end]
+    print('reminds_hint ', len(reminds_hint))
     reminds_sys = reminds.filter(type=1)
     hints = []
     sysinfos = []
@@ -398,9 +408,12 @@ def remind_json(request):
     context = {
         'info_size': 10,
         'unread_count':unread_count,
-        'hint_size': len(reminds_hint),
+        'hint_size': reminds_hint_total,
         'sys_size': len(reminds_sys),
+        'proj_size': len(projinfos),
         'hints': hints,
+        'hints_page_total':page_object.pager_count,
+        'hints_current_page':page_object.current_page,
         'sysinfos': sysinfos,
         'projinfos': projinfos
     }

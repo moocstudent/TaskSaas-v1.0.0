@@ -225,6 +225,10 @@ WHITE_REGEX_URL_LIST = [
     '/do_login/',
     '/image/code/',
     '/index/',
+    # 相关json请求先放入白名单，todo 改善token验证方式
+    '/remind_json/',
+    '/project_list/',
+    '/dashboard_json/',
 ]
 
 # COS文件存储相关ID/KEY

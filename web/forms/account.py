@@ -47,7 +47,7 @@ class RegisterModelForm(BootStrapForm, forms.ModelForm):
         email = self.cleaned_data['email']
         exists = models.UserInfo.objects.filter(email=email).exists()
         if exists:
-            raise ValidationError('用户名已存在')
+            raise ValidationError('邮箱已存在')
         return email
 
     def clean_password(self):

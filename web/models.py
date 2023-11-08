@@ -25,6 +25,8 @@ class UserInfo(models.Model):
     git_password = models.CharField(verbose_name="Git密码", default='', max_length=100)
     wechat_openid = models.CharField(verbose_name="微信小程序获取的用户openid", default='', max_length=100)
     wechat_unionid = models.CharField(verbose_name="微信小程序获取的用户unionid", default='', max_length=100)
+    wechat_nickname = models.CharField(verbose_name="微信昵称", default='', max_length=100)
+    wechat_avatar = models.CharField(verbose_name="微信头像url地址", default='', max_length=150)
     # max_digits 表示整数部分有至多几位，decimal_places表示小数点后最多几位
     forward_score = models.DecimalField(verbose_name="进取分数",default=0.00,max_digits=9,decimal_places=2)
 
