@@ -192,3 +192,6 @@ def image_code(request):
 def logout(request):
     request.session.flush()
     return redirect('index')
+
+
+

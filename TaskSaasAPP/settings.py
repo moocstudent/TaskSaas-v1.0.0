@@ -229,6 +229,8 @@ WHITE_REGEX_URL_LIST = [
     '/remind_json/',
     '/project_list/',
     '/dashboard_json/',
+    '/get_user_by_openid/',
+    '/bind_user_with_openid/',
 ]
 
 # COS文件存储相关ID/KEY

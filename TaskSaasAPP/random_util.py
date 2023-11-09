@@ -15,4 +15,4 @@ def create_random_decimal(start,end):
     raise '请输入符合end > start的数字'
 
 
-print(create_random_decimal(1.00, 100.00))
+# print(create_random_decimal(1.00, 100.00))
