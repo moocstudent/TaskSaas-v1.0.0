@@ -34,7 +34,7 @@ class RegisterModelForm(BootStrapForm, forms.ModelForm):
 
     class Meta:
         model = models.UserInfo
-        fields = ['username', 'email', 'password', 'confirm_password' ]
+        fields = ['username', 'email', 'password', 'confirm_password' ,'wechat_openid']
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -42,6 +42,10 @@ class RegisterModelForm(BootStrapForm, forms.ModelForm):
         if exists:
             raise ValidationError('用户名已存在')
         return username
+
+    def clean_wechat_openid(self):
+        wechat_openid = self.cleaned_data['wechat_openid']
+        return wechat_openid
 
     def clean_email(self):
         email = self.cleaned_data['email']
