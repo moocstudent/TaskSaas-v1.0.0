@@ -558,6 +558,8 @@ def invite_join(request, code):
     #         return render(request, 'web/invite_join.html', {'error': '邀请成员数量已用完！'})
     #     use_count += 1
     #     invite_object.save()
+    invite_object.project.join_count = invite_object.project.join_count+1
+    invite_object.project.save()
 
     models.ProjectUser.objects.create(user=request.web.user, project=invite_object.project)
     user_util.compute_forward_score(user=request.web.user,

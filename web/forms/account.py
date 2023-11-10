@@ -34,7 +34,7 @@ class RegisterModelForm(BootStrapForm, forms.ModelForm):
 
     class Meta:
         model = models.UserInfo
-        fields = ['username', 'email', 'password', 'confirm_password' ,'wechat_openid']
+        fields = ['username', 'email', 'password', 'confirm_password' ]
 
     def clean_username(self):
         username = self.cleaned_data['username']

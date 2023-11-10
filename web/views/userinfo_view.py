@@ -27,3 +27,18 @@ def bind_user_with_openid(request):
     user.save()
 
     return JsonResponse({'status':1})
+
+
+def do_profile(request):
+    wechat_avatar = request.POST.get('wechat_avatar')
+    wechat_nickname = request.POST.get('wechat_nickname')
+    user_id = request.POST.get('user_id')
+    user = UserInfo.objects.filter(id=user_id).first()
+    print('wechat_nickname' ,wechat_nickname)
+    if user:
+        user.wechat_avatar = wechat_avatar
+        user.wechat_nickname = wechat_nickname
+        user.save()
+        return JsonResponse({'status':1})
+    else:
+        return JsonResponse({'status':0,'msg':'无此用户'})

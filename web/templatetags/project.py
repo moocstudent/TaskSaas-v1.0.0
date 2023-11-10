@@ -21,6 +21,16 @@ def all_project_list(request):
 
     return {'my': my_project, 'join': join_project, 'request': request}
 
+@register.inclusion_tag('inclusion/all_glory_list.html')
+def all_glory_list(request):
+    # 1.获取创建的所有项目
+    glorys = models.Glory.objects.all()
+
+    # 2.获取参与的所有项目
+    # join_project = models.ProjectUser.objects.filter(user=request.web.user)
+
+    return {'my': glorys, 'join': None, 'request': request}
+
 
 @register.inclusion_tag('inclusion/workbench_task_list.html')
 def workbench_task_list(request):

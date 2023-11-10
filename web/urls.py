@@ -4,7 +4,7 @@ from django.urls import re_path, include, path
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api, collect_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
-    sentry, userinfo_view
+    sentry, userinfo_view, glory
 from web.views.upload import FileUploadView
 from TaskSaasAPP import scheduler
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView,TokenVerifyView
@@ -21,6 +21,7 @@ urlpatterns = [
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
     re_path(r'^login/', account.login, name='login'),
     re_path(r'^do_login/', account.do_login, name='do_login'),
+    re_path(r'^do_profile/', userinfo_view.do_profile, name='do_profile'),
     re_path(r'^get_token/', account.get_token, name='get_token'),
     re_path(r'^get_user_by_openid/', userinfo_view.get_user_by_openid, name='get_user_by_openid'),
     re_path(r'^bind_user_with_openid/', userinfo_view.bind_user_with_openid, name='bind_user_with_openid'),
@@ -43,6 +44,8 @@ urlpatterns = [
     re_path(r'^project/list/', project.project_list, name='project_list'),
     # 项目列表json response
     re_path(r'^project_list/', project.project_list_json, name='project_list_json'),
+
+    re_path(r'^glory_list/', glory.GloryAPI.as_view(), name='glory_list'),
     # dashboard json response
     re_path(r'^dashboard_json/$', dashboard.dashboard_json, name='dashboard_json'),
 

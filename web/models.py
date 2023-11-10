@@ -1,10 +1,4 @@
-import datetime
-
-from django.conf.global_settings import STATIC_ROOT
 from django.db import models
-from django.utils import timezone
-
-from TaskSaasAPP.settings import STATIC_URL
 
 
 # Create your models here.
@@ -29,6 +23,12 @@ class UserInfo(models.Model):
     wechat_avatar = models.CharField(verbose_name="微信头像url地址", default='', max_length=150)
     # max_digits 表示整数部分有至多几位，decimal_places表示小数点后最多几位
     forward_score = models.DecimalField(verbose_name="进取分数",default=0.00,max_digits=9,decimal_places=2)
+
+    glory_wearing = models.ForeignKey(verbose_name="佩戴的荣誉", null=True, blank=True, to="Glory",
+                                on_delete=models.SET_NULL)
+
+    avatar_frame_wearing = models.ForeignKey(verbose_name="佩戴的头像框", null=True, blank=True, to="AvatarFrame",
+                                on_delete=models.SET_NULL)
 
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True,null=True)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True,null=True)
@@ -182,6 +182,33 @@ class Collect(models.Model):
     def __str__(self):
         return self.link
 
+
+class Glory(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(verbose_name='荣誉名称', max_length=256)
+    desc = models.TextField(verbose_name='荣誉介绍', null=True, blank=True)
+    COLOR_CHOICES = {
+        (1, '#56b8eb'),
+        (2, '#f28033'),
+        (3, '#ebc656'),
+        (4, '#a2d148'),
+        (5, '#20bFA4'),
+        (6, '#7461c2'),
+        (7, '#20bfa3'),
+        (7, '#998899'),
+    }
+    color = models.SmallIntegerField(verbose_name='颜色', choices=COLOR_CHOICES, default=1)
+    pic_url = models.CharField(verbose_name="荣誉图片地址",max_length=256,null=True)
+    required_score = models.DecimalField(verbose_name="需要的至少的forward_score分数，不扣分",default=0.00,max_digits=9,decimal_places=2)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+
+class AvatarFrame(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(verbose_name='荣誉名称', max_length=256)
+    desc = models.TextField(verbose_name='荣誉介绍', null=True, blank=True)
+    pic_url = models.CharField(verbose_name="荣誉图片地址",max_length=256,null=True)
+    cost_score = models.DecimalField(verbose_name="需要花费的forward_score分数，花费后直接扣掉",default=0.00,max_digits=9,decimal_places=2)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
 def upload_to(filename):
     return '/'.join(['uploads', filename])

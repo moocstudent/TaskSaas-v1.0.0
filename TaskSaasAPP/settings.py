@@ -231,6 +231,7 @@ WHITE_REGEX_URL_LIST = [
     '/dashboard_json/',
     '/get_user_by_openid/',
     '/bind_user_with_openid/',
+    '/do_profile/',
 ]
 
 # COS文件存储相关ID/KEY

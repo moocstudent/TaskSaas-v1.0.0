@@ -185,7 +185,8 @@ def uploadfile_common(request):
         for i in upload_file.chunks():
             f.write(i)
         f.close()
-        file_url = "http://localhost:3000/static/uploads/"+fix+upload_file.name
+        ip_port = request.get_host()
+        file_url =  'http://'+ip_port+"/static/uploads/"+fix+upload_file.name
         file_path = "/static/uploads/"+fix+upload_file.name
         file_repository = FileRepository(name=upload_file.name, file=ab_upload_path,file_path=file_path,file_url=file_url,
                                          ab_file_path=ab_upload_path,
@@ -196,17 +197,18 @@ def uploadfile_common(request):
     # request.web.project.user_space += data_dict['file_size']
     # request.web.project.save()
 
-        result = {
+        results = {
             'id': file_repository.id,
             'name': file_repository.name,
             'file_size': file_repository.file_size,
             'username': file_repository.update_user.username,
             'datetime': file_repository.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
             'file_type': file_repository.get_file_type_display(),
-            'download_url': reverse('file_download',
-                                    kwargs={'file_id': file_repository.id})
+            'file_url': file_url
         }
-        return JsonResponse({'status': True, 'data': result})
+        print('file_url ',file_url)
+        return JsonResponse({'status': 1,"results": results })
+
 
 # @csrf_exempt
 def upload_file(request,project_id):

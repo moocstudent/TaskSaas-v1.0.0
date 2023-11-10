@@ -30,9 +30,11 @@ def register(request):
 
     if form.is_valid():
         # 验证通过，写入数据库(密码转换成密文)
-        instance = form.save()
-
         # policy_object = models.PricePolicy.objects.filter(category=1, title='个人免费版').first()
+        instance = form.save()
+        if request.POST.get('wechat_openid'):
+            instance.wechat_openid = request.POST.get('wechat_openid')
+            instance.save()
         # # 创建交易记录
         # models.Transaction.objects.create(
         #     status=2,

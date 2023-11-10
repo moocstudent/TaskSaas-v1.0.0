@@ -12,13 +12,14 @@ class Web(object):
         self.user = None,
         self.price_policy = None
         self.project = None
-
+        self.glory_wearing = None
+        self.avatar_frame_wearing = None
 
 class AuthMiddleWare(MiddlewareMixin):
 
     def process_request(self, request):
         """ 如果用户已登录，则request中赋值 """
-
+        print('process_request ')
         request.web = Web()
 
         user_id = request.session.get('user_id', 0)
@@ -67,6 +68,8 @@ class AuthMiddleWare(MiddlewareMixin):
         """
 
     def process_view(self, request, view, args, kwargs):
+
+        print('process_view')
         # 判断URL是否以manage开头，如果是则判断项目ID是否是我的or我参与的
         if not request.path_info.startswith("/manage/"):
             return
