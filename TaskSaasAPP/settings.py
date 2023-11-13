@@ -232,6 +232,9 @@ WHITE_REGEX_URL_LIST = [
     '/get_user_by_openid/',
     '/bind_user_with_openid/',
     '/do_profile/',
+    '/wechat_entry_api/',
+    '/MP_verify_O7ZsD2KZoE5w9Usg.txt/',
+    '/MP_verify_O7ZsD2KZoE5w9Usg.txt',
 ]
 
 # COS文件存储相关ID/KEY

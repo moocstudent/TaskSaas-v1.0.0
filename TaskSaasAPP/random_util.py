@@ -10,7 +10,7 @@ def create_random_decimal(start,end):
     '''
     if end >= start:
         number = random.uniform(start,end)
-        print('获取start-end之间的小数')
+        print('获取start:{}-end:{}之间的小数',start,end)
         return format(number, '.2f')
     raise BaseException('请输入符合end >= start的数字')
 

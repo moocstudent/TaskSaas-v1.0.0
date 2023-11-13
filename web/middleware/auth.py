@@ -1,5 +1,6 @@
 import datetime
 
+from django.http import FileResponse
 from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
@@ -21,6 +22,12 @@ class AuthMiddleWare(MiddlewareMixin):
         """ 如果用户已登录，则request中赋值 """
         print('process_request ')
         request.web = Web()
+
+        print('request.path_info ',request.path_info )
+        if "/MP_verify" in request.path_info:
+            file = open('/Users/tanghuijuan/PycharmProjects/TaskSaas/web/static/MP_verify_O7ZsD2KZoE5w9Usg.txt', 'rb')  # 打开文件
+            response = FileResponse(file)  # 创建FileResponse对象
+            return response
 
         user_id = request.session.get('user_id', 0)
         user_object = models.UserInfo.objects.filter(id=user_id).first()

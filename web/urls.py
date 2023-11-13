@@ -2,7 +2,7 @@ from django.conf.urls import static
 from django.urls import re_path, include, path
 
 from TaskChat import chat_views, consumers
-from TaskSaas.api import oauth_callback_api, user_api, collect_api
+from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry, userinfo_view, glory
 from web.views.upload import FileUploadView
@@ -12,6 +12,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView,
 urlpatterns = [
     # scheduler.run(),
 
+    re_path(r'^MP_verify_O7ZsD2KZoE5w9Usg.txt/', wx_api.wx_verify_txt, name='wx_verify_txt'),
+    re_path(r'^wechat_entry_api/', wx_api.wx_entry_api, name='wechat_entry_api'),
+    re_path(r'^wechat_callback_api/', wx_api.wx_callback_api, name='wechat_callback_api'),
+
     path('token_login', TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path('token_refresh', TokenRefreshView.as_view(), name="token_refresh"),
     path('token_verify', TokenVerifyView.as_view(), name="token_verify"),
@@ -20,6 +24,7 @@ urlpatterns = [
     re_path(r'^register/', account.register, name='register'),
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
     re_path(r'^login/', account.login, name='login'),
+
     re_path(r'^do_login/', account.do_login, name='do_login'),
     re_path(r'^do_profile/', userinfo_view.do_profile, name='do_profile'),
     re_path(r'^get_token/', account.get_token, name='get_token'),

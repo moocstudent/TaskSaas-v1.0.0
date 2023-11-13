@@ -226,6 +226,7 @@ def issues(request, project_id):
             form.instance.desc = form.instance.subject
         # 保存
         form.save()
+        print('问题描述：',form.instance.desc)
         user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(1.00,2.00))
         change_record = "{} 创建问题 {}".format(request.web.user.username, form.instance.subject)
         issues_log = IssuesLog(issues=form.instance, creator=request.web.user,
@@ -233,9 +234,6 @@ def issues(request, project_id):
                                              log_type=1,
                                             create_datetime=form.instance.create_datetime)
         issues_log.save()
-
-
-
         return JsonResponse({'status': True, })
     print('form is invalid', form.errors)
     return JsonResponse({'status': False, 'error': form.errors})
