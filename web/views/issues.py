@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_exempt
 
+from TaskSaas.serializers.issue_serializer import IssuesSerializer
 from TaskSaasAPP import user_util
 from TaskSaasAPP.random_util import create_random_decimal
 from TaskSaasAPP.type_util import isint
@@ -16,7 +17,7 @@ from utils.encrypt import uid
 from utils.pagination import Pagination
 from web import models
 from web.forms.issues import IssuesModelForm, IssuesReplyModelForm, IssuesInviteModelForm
-from web.models import IssuesLog
+from web.models import IssuesLog, UserInfo, Project
 
 
 class CheckFilter(object):
@@ -567,8 +568,10 @@ def invite_join(request, code):
 
 def do_issue_list(request):
     user_id = request.GET.get("user_id")
+    user = UserInfo.objects.filter(id=user_id).filter()
     project_id = request.GET.get("project_id")
     print('project_id',project_id)
+    project = Project.objects.filter(id=project_id).first()
     q = request.GET.get('q')
     print('q>',q)
     if request.method == 'GET':
@@ -610,12 +613,12 @@ def do_issue_list(request):
             else:
                 qq = Q(subject__icontains=q)
             queryset=queryset.filter(qq)
-        trigger = cache.get('mytaskTrigger' + str(request.web.user.id) + '_' + str(project_id), 'off')
+        trigger = cache.get('mytaskTrigger' + str(user_id) + '_' + str(project_id), 'off')
         if trigger == 'on':
             print("trigger == 'on':")
-            print(request.web.user)
-            queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
-                                       | Q(creator=request.web.user)).distinct()
+            print(user)
+            queryset = queryset.filter(Q(assign=user) | Q(attention=user)
+                                       | Q(creator=user)).distinct()
         print('issues_filter size aft filter ', len(queryset))
         page_object = Pagination(
             current_page=request.GET.get('page'),
@@ -625,18 +628,15 @@ def do_issue_list(request):
         )
         issues_object_list = queryset[page_object.start:page_object.end]
         # form = IssuesModelForm(request)
-        project_total_user = [(request.web.project.creator_id, request.web.project.creator.username)]
+        project_total_user = [(project.creator_id, project.creator.username)]
         join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
         project_total_user.extend(join_user)
-
-        issues_object_list_json = serializers.serialize("json",issues_object_list)
-
-
+        issues_object_list_json = IssuesSerializer(issues_object_list,many=True)
         # invite_form = IssuesInviteModelForm()
         context = {
             # 'form': form,
             # 'invite_form': invite_form,
-            'issue_list': issues_object_list,
+            'issue_list': issues_object_list_json.data,
             # 'page_html': page_object.page_html(),
             # 'filter_list': [
             #     {'title': '问题类型', 'filter': CheckFilter('issues_type', models.IssuesType.objects.filter(
@@ -647,4 +647,4 @@ def do_issue_list(request):
             #     {'title': '关注者', 'filter': SelectFilter('attention', project_total_user, request)},
             # ]
         }
-        return JsonResponse(serializers.serialize({'status':1,'results':context}))
+        return JsonResponse({'status':1,'results':context})
