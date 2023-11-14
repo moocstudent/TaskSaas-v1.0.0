@@ -28,10 +28,10 @@ class AuthMiddleWare(MiddlewareMixin):
             file = open('/Users/tanghuijuan/PycharmProjects/TaskSaas/web/static/MP_verify_O7ZsD2KZoE5w9Usg.txt', 'rb')  # 打开文件
             response = FileResponse(file)  # 创建FileResponse对象
             return response
-
-        user_id = request.session.get('user_id', 0)
+        user_id = request.session.get('user_id')
         user_object = models.UserInfo.objects.filter(id=user_id).first()
         request.web.user = user_object
+        print('request session get user : ',request.web.user)
 
         # 白名单：没有登录都可以访问的URL
         """
@@ -39,6 +39,9 @@ class AuthMiddleWare(MiddlewareMixin):
         2. 检查URL是否在白名单中，如果再则可以继续向后访问，如果不在则进行判断是否已登录
         """
         if request.path_info in settings.WHITE_REGEX_URL_LIST:
+            return
+
+        if request.path_info in settings.GREY_REGEX_URL_LIST:
             return
 
         # 检查用户是否已登录，已登录继续往后走；未登录则返回登录页面。
@@ -76,13 +79,32 @@ class AuthMiddleWare(MiddlewareMixin):
 
     def process_view(self, request, view, args, kwargs):
 
-        print('process_view')
+        print('process_view' , request.path_info)
+
+        # project_id 是我创建or我参与的
+
+        project_id = request.GET.get('project_id')
+        print('project_id at process_view ', project_id)
+        if project_id:
+            project_object = models.Project.objects.filter(id=project_id).first()
+            if project_object:
+                print('project_object at process_view ', project_object)
+                # 是自己创建的项目，pass
+                request.web.project = project_object
+                return
+
+        if request.path_info in settings.GREY_REGEX_URL_LIST:
+            return
         # 判断URL是否以manage开头，如果是则判断项目ID是否是我的or我参与的
         if not request.path_info.startswith("/manage/"):
             return
 
         # project_id 是我创建or我参与的
-        project_id = kwargs.get('project_id')
+        # project_id = kwargs.get('project_id')
+        # if not project_id:
+        #     project_id = request.GET.get('project_id')
+
+
 
         # 是否自己创建
         project_object = models.Project.objects.filter(creator=request.web.user, id=project_id).first()

@@ -218,25 +218,30 @@ CACHES = {
 # 登录白名单：无需登录就能访问的页面
 WHITE_REGEX_URL_LIST = [
     '/register/',
-    '/send/sms/',
-    '/login/sms/',
+    # '/send/sms/',
+    # '/login/sms/',
     '/login/',
-    '/fileupload/',
+    # '/fileupload/',
     '/do_login/',
-    '/image/code/',
-    '/index/',
-    # 相关json请求先放入白名单，todo 改善token验证方式
-    '/remind_json/',
-    '/project_list/',
-    '/dashboard_json/',
-    '/get_user_by_openid/',
-    '/bind_user_with_openid/',
-    '/do_profile/',
+    # '/image/code/',
+    # '/index/',
+    # # 相关json请求先放入白名单，todo 改善token验证方式
+    # '/remind_json/',
+    # '/project_list/',
+    # '/dashboard_json/',
+    # '/get_user_by_openid/',
+    # '/bind_user_with_openid/',
+    # '/do_profile/',
     '/wechat_entry_api/',
     '/MP_verify_O7ZsD2KZoE5w9Usg.txt/',
     '/MP_verify_O7ZsD2KZoE5w9Usg.txt',
 ]
 
+SESSION_COOKIE_SAMESITE = 'None'
+
+GREY_REGEX_URL_LIST = [
+    # '/do_issue_list/'
+]
 # COS文件存储相关ID/KEY
 SECRET_ID = '替换为用户的 secretId'  # 替换为用户的 secretId
 SECRET_KEY = '替换为用户的 secretKey'  # 替换为用户的 secretKey

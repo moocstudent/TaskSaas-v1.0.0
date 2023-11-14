@@ -1,13 +1,12 @@
 from django.conf.urls import static
 from django.urls import re_path, include, path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry, userinfo_view, glory
 from web.views.upload import FileUploadView
-from TaskSaasAPP import scheduler
-from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView,TokenVerifyView
 
 urlpatterns = [
     # scheduler.run(),
@@ -49,6 +48,7 @@ urlpatterns = [
     re_path(r'^project/list/', project.project_list, name='project_list'),
     # 项目列表json response
     re_path(r'^project_list/', project.project_list_json, name='project_list_json'),
+    re_path(r'^do_issue_list/', issues.do_issue_list, name='do_issue_list'),
 
     re_path(r'^glory_list/', glory.GloryAPI.as_view(), name='glory_list'),
     # dashboard json response

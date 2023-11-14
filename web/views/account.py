@@ -138,6 +138,7 @@ def do_login(request):
         # 登陆成功
         request.session['user_id'] = user_object.id
         request.session.set_expiry(60 * 60 * 24 * 14)
+        print('user id in session ',request.session.get('user_id',0))
         # execution remind deadline task
         remind_deadline()
         return JsonResponse({'status':1,'token':user_object.id,'token_expiry':60 * 60 * 24 * 14})

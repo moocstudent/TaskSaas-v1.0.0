@@ -1,6 +1,6 @@
 import datetime
 import json
-
+from django.core import serializers
 from django.core.cache import cache
 from django.db.models import Q, Max
 from django.http import JsonResponse
@@ -563,3 +563,88 @@ def invite_join(request, code):
     user_util.compute_forward_score(user=request.web.user,
                                         forward_score=create_random_decimal(3.00, 3.00))
     return render(request, 'web/invite_join.html', {'project': invite_object.project})
+
+
+def do_issue_list(request):
+    user_id = request.GET.get("user_id")
+    project_id = request.GET.get("project_id")
+    print('project_id',project_id)
+    q = request.GET.get('q')
+    print('q>',q)
+    if request.method == 'GET':
+        allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
+        # 筛选条件(根据用户通过GET传过来的参数实现)
+        # ?status=1&status=2&issues_type=1
+        condition = {}
+        for name in allow_filter_name:
+            print('name>>>>>>', name)
+            value_list = request.GET.getlist(name)
+            print('request value_list', value_list)
+            request_object = request.GET.get(name)
+            if name == 'issues_type' and request_object:
+                issues_type_ids = request_object.split(',')
+                if issues_type_ids:
+                    print('request value_str', issues_type_ids)
+                    if len(value_list) > len(issues_type_ids):
+                        print('BIG')
+                        condition['{}__in'.format(name)] = value_list
+                    else:
+                        condition['{}__in'.format(name)] = issues_type_ids
+                    continue
+            value_list = request.GET.getlist(name)
+            if not value_list:
+                continue
+            condition['{}__in'.format(name)] = value_list
+        """
+        condition={
+        "status__in":[1,2]
+        "issues_type__in":[1,]
+        }
+        """
+        # 分页获取数据
+        queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
+        if q:
+            qq = None
+            if isint(q):
+                qq = Q(issue_id=q) | Q(subject__icontains=q)
+            else:
+                qq = Q(subject__icontains=q)
+            queryset=queryset.filter(qq)
+        trigger = cache.get('mytaskTrigger' + str(request.web.user.id) + '_' + str(project_id), 'off')
+        if trigger == 'on':
+            print("trigger == 'on':")
+            print(request.web.user)
+            queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
+                                       | Q(creator=request.web.user)).distinct()
+        print('issues_filter size aft filter ', len(queryset))
+        page_object = Pagination(
+            current_page=request.GET.get('page'),
+            all_count=queryset.count(),
+            base_url=request.path_info,
+            query_params=request.GET,
+        )
+        issues_object_list = queryset[page_object.start:page_object.end]
+        # form = IssuesModelForm(request)
+        project_total_user = [(request.web.project.creator_id, request.web.project.creator.username)]
+        join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
+        project_total_user.extend(join_user)
+
+        issues_object_list_json = serializers.serialize("json",issues_object_list)
+
+
+        # invite_form = IssuesInviteModelForm()
+        context = {
+            # 'form': form,
+            # 'invite_form': invite_form,
+            'issue_list': issues_object_list,
+            # 'page_html': page_object.page_html(),
+            # 'filter_list': [
+            #     {'title': '问题类型', 'filter': CheckFilter('issues_type', models.IssuesType.objects.filter(
+            #         project_id=project_id).values_list('id', 'title'), request)},
+            #     {'title': '状态', 'filter': CheckFilter('status', models.Issues.status_choices, request)},
+            #     {'title': '优先级', 'filter': CheckFilter('priority', models.Issues.priority_choices, request)},
+            #     {'title': '指派者', 'filter': SelectFilter('assign', project_total_user, request)},
+            #     {'title': '关注者', 'filter': SelectFilter('attention', project_total_user, request)},
+            # ]
+        }
+        return JsonResponse(serializers.serialize({'status':1,'results':context}))

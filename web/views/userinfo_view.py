@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+from TaskSaas.task.remind_task import remind_deadline
 from web.models import UserInfo
 
 
@@ -9,7 +10,12 @@ def get_user_by_openid(request):
     user = UserInfo.objects.filter(wechat_openid=openid).first()
     print('user:',user)
     if user:
-        return JsonResponse({'status':1,'userinfo':{'id':user.id,'username':user.username,
+        # 登陆成功
+        request.session['user_id'] = user.id
+        request.session.set_expiry(60 * 60 * 24 * 14)
+        # execution remind deadline task
+        remind_deadline()
+        return JsonResponse({'status':1,'token_expiry':60 * 60 * 24 * 14,'userinfo':{'id':user.id,'username':user.username,
                                                     'wechat_avatar':user.wechat_avatar,
                                                     'wechat_nickname':user.wechat_nickname}})
     else:
