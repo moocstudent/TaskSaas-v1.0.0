@@ -100,7 +100,7 @@ class AuthMiddleWare(MiddlewareMixin):
             return
 
         # project_id 是我创建or我参与的
-        # project_id = kwargs.get('project_id')
+        project_id = kwargs.get('project_id')
         # if not project_id:
         #     project_id = request.GET.get('project_id')
 
