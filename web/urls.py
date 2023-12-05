@@ -51,6 +51,7 @@ urlpatterns = [
     re_path(r'^do_issue_list/', issues.do_issue_list, name='do_issue_list'),
 
     re_path(r'^glory_list/', glory.GloryAPI.as_view(), name='glory_list'),
+    re_path(r'^glory_detail/(?P<glory_id>\d+)', glory.glory_detail, name='glory_detail'),
     # dashboard json response
     re_path(r'^dashboard_json/$', dashboard.dashboard_json, name='dashboard_json'),
 
@@ -85,6 +86,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^tool/$', manage.tool, name='tool'),
     re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),
     re_path(r'^tool_encrypt_druid_password/$', tool.encrypt_druid_password, name='tool_encrypt_druid_password'),
+    re_path(r'^resolve_mask_of_ipv4/$', tool.resolve_mask_of_ipv4, name='resolve_mask_of_ipv4'),
     # re_path(r'^color_picker/$', tool.color_picker, name='color_picker'),
 
     re_path(r'^workbench/$', manage.workbench, name='workbench'),

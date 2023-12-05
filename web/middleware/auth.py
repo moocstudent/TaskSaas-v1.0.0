@@ -29,6 +29,7 @@ class AuthMiddleWare(MiddlewareMixin):
             response = FileResponse(file)  # 创建FileResponse对象
             return response
         user_id = request.session.get('user_id')
+        print('user_id in process_request',user_id)
         user_object = models.UserInfo.objects.filter(id=user_id).first()
         request.web.user = user_object
         print('request session get user : ',request.web.user)

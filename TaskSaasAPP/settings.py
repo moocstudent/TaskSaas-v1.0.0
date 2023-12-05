@@ -237,7 +237,7 @@ WHITE_REGEX_URL_LIST = [
     '/MP_verify_O7ZsD2KZoE5w9Usg.txt',
 ]
 
-SESSION_COOKIE_SAMESITE = 'None'
+# SESSION_COOKIE_SAMESITE = 'None'
 
 GREY_REGEX_URL_LIST = [
     '/do_issue_list/'

@@ -128,15 +128,49 @@
 
 {% block content %}
     <div class="container-fluid" style="margin-top: 20px">
-        <div class="row">
 
+        <div class="col-md-8">
+            <div id="chart" style="width:115%;min-width:700px;min-height:400px">
 
+            </div>
         </div>
+      <div class="col-md-4"></div>
     </div>
 {% endblock %}
 
 {% block js %}
     <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById("chart"));
 
+        function getVirtualData(year) {
+            const date = +echarts.time.parse(year + '-01-01');
+            const end = +echarts.time.parse(year + '-12-31');
+            const dayTime = 3600 * 24 * 1000;
+            const data = [];
+            for (let time = date; time <= end; time += dayTime) {
+                data.push([
+                    echarts.time.format(time, '{yyyy}-{MM}-{dd}', false),
+                    Math.floor(Math.random() * 10000)
+                ]);
+            }
+            return data;
+        }
+
+        option = {
+            visualMap: {
+                show: false,
+                min: 0,
+                max: 10000
+            },
+            calendar: {
+                range: '2023'
+            },
+            series: {
+                type: 'heatmap',
+                coordinateSystem: 'calendar',
+                data: getVirtualData('2023')
+            }
+        };
+        myChart.setOption(option);
     </script>
 {% endblock %}

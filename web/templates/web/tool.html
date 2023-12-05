@@ -32,6 +32,7 @@
                 <li class="layui-this">测试类</li>
                 <li>安全类</li>
                 <li>设计类</li>
+                <li>网络类</li>
             </ul>
 
             <div class="layui-tab-content">
@@ -177,6 +178,54 @@
                         </div>
                     </div>
                 </div>
+
+
+                <div class="layui-tab-item">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                                查看IPv4支持地址数
+                            </div>
+                            <div class="panel-body" style="height: 200px">
+
+                                {#                        {% csrf_token %}#}
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">输入ipv4地址(192.168.0.1/24)</label>
+                                    <div class="col-sm-5">
+                                        <input id="ipv4" type="text"
+                                               class="form-control" placeholder="请输入ipv4+子掩网码"
+                                               name="ipv4">
+                                        <span class="error-msg">{{ error }}</span>
+                                    </div>
+                                    <div class="col-sm-3"><a
+                                            href="https://www.zhihu.com/question/57425335/answer/2504979101"
+                                            target="_blank">ipv4是什么</a></div>
+
+                                </div>
+                                <div class="form-group" style="padding-top: 35px">
+                                    <div class="col-sm-offset-5 col-sm-5">
+                                        <input id="ipv4Check" type="button" class="btn btn-info" value="查 看">
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="col-md-8">
+                                    <div class="col-md-6">
+                                        <span><input type="input" id="ipv4SupportSize"></span>
+{#                                        <button onclick="touch1()" id="copyText1" type="button" class="success">复制加密密码#}
+{#                                        </button>#}
+                                    </div>
+{#                                    <div class="col-md-6">#}
+{#                                        <span><input type="input" id="public_key"></span>#}
+{#                                        <button onclick="touch2()" id="copyText2" type="button" class="success">#}
+{#                                            复制PublicKey#}
+{#                                        </button>#}
+{#                                    </div>#}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -263,6 +312,31 @@
             })
         }{% endcomment %}
 
+        $("#ipv4Check").click(ipv4Check)
+
+        function ipv4Check(){
+           $.ajax({
+                url: "{% url 'resolve_mask_of_ipv4' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'ipv4': $("#ipv4").val(),
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        {#reloadWorkBenchJson()#}
+                        $("#ipv4SupportSize").show()
+                        document.getElementById("ipv4SupportSize").value = (res.support_ip_size);
+                        {#$("#tasklist").load(issues_object_list=[])#}
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
         function encryptPwd() {
             original_pwd = $("#original_pwd").val()
             console.log('original_pwd', original_pwd)
@@ -300,6 +374,7 @@
         $("#encrypt_pwd").hide()
         $("#public_key").hide()
         $("#color_label").hide()
+        $("#ipv4SupportSize").hide()
 
         $("#generateStrBtn").click(generateStr)
         $("#encryptPwdBtn").click(encryptPwd)

@@ -40,6 +40,13 @@ def encrypt_druid_password(request,project_id):
         return JsonResponse({'status': 1, 'public_key':output_public_key,'encrypt_pwd':output_password})
 
 
+#查看ipv4的子掩网码支持的地址数
+def resolve_mask_of_ipv4(request,project_id):
+    ipv4 = request.POST.get("ipv4")
+    mask = ipv4.split("/")[1]
+    support_ip_size = 2**(abs(32-int(mask)))-2
+    return JsonResponse({'status':1,'support_ip_size':support_ip_size})
+
 # def color_picker(request,project_id):
 #     if request.method == 'POST':
 #         color_code = request.POST.get('color_code')  # 获取带有#的色值
@@ -50,3 +57,9 @@ def encrypt_druid_password(request,project_id):
 #             return JsonResponse({'status':1,'color': (red, green, blue)})
 #
 #     return JsonResponse({'status':0})
+# def test_ip():
+#     mask = '127.0.0.1/24'.split("/")[1]
+#     support_ip_size = 2**(abs(32-int(mask)))-2
+#     print(support_ip_size)
+#
+# test_ip()

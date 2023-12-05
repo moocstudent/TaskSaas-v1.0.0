@@ -128,11 +128,11 @@
             <div class="panel-body">
                 {% for item in glorys %}
                     <div class="item">
-                        <a href="#" class="title"
+                              <a href="{% url 'glory_detail' glory_id=item.id %}" class="title" target="_blank"
                            style="background-color: {{ item.get_color_display }};"> {{ item.name }}</a>
                         <div class="info">
                             <div>
-{#                                <a href="{% url 'project_unstar' project_type=item.type glory_id=item.value.id %}">#}
+                                {#                                <a href="{% url 'project_unstar' project_type=item.type glory_id=item.value.id %}">#}
                                 <a href="#">
                                     <i class="fa fa-star" aria-hidden="true" style="color: #f0ad4e"></i>
                                 </a>
@@ -154,13 +154,13 @@
             <div class="panel-body">
                 {% for item in glorys %}
                     <div class="item">
-                        <a href="#" class="title"
+                        <a href="{% url 'glory_detail' glory_id=item.id %}" class="title" target="_blank"
                            style="background-color: {{ item.get_color_display }};"> {{ item.name }}</a>
                         <div class="info">
                             <div>
-{#                                <a href="{% url 'project_star' project_type='my' glory_id=item.id %}">#}
-{#                                    <i class="fa fa-star" aria-hidden="true" style="color: #d5d5d5"></i>#}
-{#                                </a>#}
+                                {#                                <a href="{% url 'project_star' project_type='my' glory_id=item.id %}">#}
+                                {#                                    <i class="fa fa-star" aria-hidden="true" style="color: #d5d5d5"></i>#}
+                                {#                                </a>#}
                                 <span>{{ item.creator.username }}</span>
                             </div>
 
@@ -179,14 +179,13 @@
             <div class="panel-body">
                 {% for item in glorys %}
                     <div class="item">
-{#                        <a href="{% url 'dashboard' glory_id=item.id %}" class="title"#}
-                        <a href="#" class="title"
+                        <a href="{% url 'glory_detail' glory_id=item.id %}" class="title" target="_blank"
                            style="background-color: {{ item.get_color_display }};"> {{ item.name }}</a>
                         <div class="info">
                             <div>
-{#                                <a href="{% url 'project_star' project_type='join' glory_id=item.id %}">#}
-{#                                    <i class="fa fa-star" aria-hidden="true" style="color: #d5d5d5"></i>#}
-{#                                </a>#}
+                                {#                                <a href="{% url 'project_star' project_type='join' glory_id=item.id %}">#}
+                                {#                                    <i class="fa fa-star" aria-hidden="true" style="color: #d5d5d5"></i>#}
+                                {#                                </a>#}
                                 <span>{{ item.creator.username }}</span>
                             </div>
 
@@ -200,7 +199,7 @@
             </div>
         </div>
     </div>
-{#        <div {% load p %} hidden="hidden"></div>#}
+    {#        <div {% load p %} hidden="hidden"></div>#}
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
@@ -237,9 +236,9 @@
         }
 
 
-        layui.use(['layer'],function(args){
-           var layer = layui.layer;
-           layer.msg('TaskSaas')
+        layui.use(['layer'], function (args) {
+            var layer = layui.layer;
+            layer.msg('TaskSaas')
         });
 
 

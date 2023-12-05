@@ -1,6 +1,7 @@
 '''
 用户账号相关功能：注册/短信/登陆/注销
 '''
+import asyncio
 import json
 
 from django.db.models import Q
@@ -143,7 +144,6 @@ def do_login(request):
         remind_deadline()
         return JsonResponse({'status':1,'token':user_object.id,'token_expiry':60 * 60 * 24 * 14})
 
-# @csrf_exempt
 def login(request):
     """
     用户名密码登陆
@@ -169,7 +169,6 @@ def login(request):
             request.session.set_expiry(60 * 60 * 24 * 14)
             # execution remind deadline task
             remind_deadline()
-            print('hello')
             return redirect('index')
         form.add_error('username', '用户名或密码错误')
     return render(request, 'web/login.html', {'form': form})
