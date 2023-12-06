@@ -3,7 +3,7 @@ from django.urls import re_path, include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from TaskChat import chat_views, consumers
-from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api
+from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry, userinfo_view, glory
 from web.views.upload import FileUploadView
@@ -92,6 +92,11 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^workbench/$', manage.workbench, name='workbench'),
     re_path(r'^calendar/$', manage.calendar, name='calendar'),
     re_path(r'^remind/$', manage.remind, name='remind'),
+
+    # 导出工作内容
+    re_path(r'^calendar_time_range_export_works/$', calendar.calendar_time_range_export_works, name='calendar_time_range_export_works'),
+    # 导出任务列表
+    re_path(r'^calendar_time_range_export_tasks/$', calendar.calendar_time_range_export_tasks, name='calendar_time_range_export_tasks'),
 
     re_path(r'^remind_status/$', manage.remind_status, name='remind_status'),
     re_path(r'^collect/$', manage.collect, name='collect'),

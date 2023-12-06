@@ -136,6 +136,7 @@
         </div>
         <div class="col-md-4"></div>
     </div>
+    <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -183,7 +184,7 @@
             legend: {
                 top: '30',
                 left: '100',
-                data: ['dates', 'checkdates','suns'],
+                data: ['dates', 'checkdates'],
                 textStyle: {
                     color: '#909'
                 }
@@ -383,29 +384,33 @@
                         color: "#000"
                     },
                 },
-                {
+                {% comment %}{
                     name: 'suns',
                     type: 'effectScatter',
                     coordinateSystem: 'calendar',
-                    data: getVirtualData('2016'),
+                    {#data: getVirtualData('2016'),#}
+                    data: [getVirtualData('2016')[1]],
                     symbol:'circle',
                     {#symbolSize: 1,#}
-                   {% comment %} symbolSize: function (val) {
-                        return val[1];
-                    },{% endcomment %}
+                    symbolSize: function (val) {
+                        return val[1]/2;
+                    },
                     showEffectOn: 'emphasis',
                     effectType : 'ripple',
                     rippleEffect: {
                         brushType: 'stroke',
-                         scale : 1.2
+                         scale : 1.2,
+                        number:1
                     },
                     itemStyle: {
                         color: '#f4e925',
                         shadowBlur: 1,
                         shadowColor: '#333'
                     },
-                    zlevel: 23
-                }]
+                    zlevel: 19,
+                    z:19
+                }{% endcomment %}
+            ]
         };
         myChart.setOption(option);
         myChart.on("click", function (params) {
@@ -467,6 +472,52 @@
             that.chart.on("click", function (e) {
                 alert(e.data[0])
             });
+        }
+
+        //导出工作列表
+        function exportWorksByTimeRange(graphData) {
+            $.ajax({
+                url: "{% url 'calendar_time_range_export_works' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "time_range": graphData,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        console.log("reload")
+                        location.reload();
+                    } else {
+
+                    }
+                }
+
+            })
+        }
+
+        //导出任务列表
+        function exportTasksByTimeRange(graphData) {
+            $.ajax({
+                url: "{% url 'calendar_time_range_export_tasks' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "time_range": graphData,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        console.log("reload")
+                        location.reload();
+                    } else {
+
+                    }
+                }
+
+            })
         }
     </script>
 {% endblock %}
