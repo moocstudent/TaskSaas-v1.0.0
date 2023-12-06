@@ -156,12 +156,19 @@
             return data;
         }
 
+        let graphData = [
+            {#['2016-02-04', 200],#}
+            {#['2016-02-09', 279],#}
+
+        ];
+
+
         option = {
             color: ["#c0c1cc", "#c9bbcf", "#b8a8bd", "#aca7c8", "#a09ad1", "#d2b48c", "#373715", "#755dff", "#b78d82"],
             title: {
                 top: 30,
                 left: 'center',
-                text: '每日工作时长'
+                text: '工作时长日历'
             },
             aria: {
                 // 下面几行可以不写，因为 label.enabled 默认 true
@@ -174,20 +181,15 @@
                 }
             },
             legend: {
-                formatter: function (name) {
-                    return 'Legend ' + name;
-                },
-                data: [{
-                    name: '系列1',
-                    // 强制设置图形为圆。
-                    icon: 'circle',
-                    // 设置文本为红色
-                    textStyle: {
-                        color: 'red'
-                    }
-                }]
+                top: '30',
+                left: '100',
+                data: ['dates', 'checkdates','suns'],
+                textStyle: {
+                    color: '#909'
+                }
             },
             tooltip: {
+                show: true,
                 {#formatter: '{b0}{c0}<br />'#}
                 formatter: function (params, ticket, callback) {
                     {#                   {% comment %} $.get('detail?name=' + params.name, function (content) {#}
@@ -214,6 +216,7 @@
                 min: 0,
                 max: 24,
                 type: 'piecewise',
+                splitNumber: 4,
                 orient: 'horizontal',
                 left: 'center',
                 top: 65,
@@ -232,7 +235,8 @@
                 {% comment %} formatter: function (value) {
                      return '>>> ' + value
                  },{% endcomment %}
-                hoverLink: true
+                hoverLink: true,
+                orient: 'horizontal'
             },
             calendar: {
                 top: 120,
@@ -264,27 +268,205 @@
                 splitLine: {
                     show: true,
                     lineStyle: {
-                        color: 'orange',
+                        width: 5,
+                        color: 'white',
                         type: 'solid'
                     }
                 },
 
             },
-            series: {
-                type: 'heatmap',
-                coordinateSystem: 'calendar',
-                data: getVirtualData('2016'),
-                emphasis: {
+            series: [
+                {
+                    name: 'checkdates',
+                    type: 'graph',
+                    {% comment %}   labelLayout(params) {
+                           return {
+                               x: params.rect.x + 10,
+                               y: params.rect.y + params.rect.height / 2,
+                               verticalAlign: 'middle',
+                               align: 'left'
+                           }
+                       },{% endcomment %}
+                    {% comment %}    labelLayout(params) {
+                            return {
+                                fontSize: Math.max(params.rect.width / 10, 5)
+                            };
+                        },{% endcomment %}
+                    emphasis: {
+                        scale: true,
+                        focus: 'self'
+                    },
+                    label: {
+                        show: true,
+                        position: 'top',
+                        formatter: '{b}: {@score}'
+                        , distance: 2,
+                        fontSize: 2
+                    },
+                    {#cursor: 'pointer',#}
+                    edgeSymbol: ['circle', 'arrow'],
+                    edgeLabel: {
+                        show: true,
+                        formatter: function (params) {
+                            if (graphData.length == 2) {
+                                return graphData[0][0] + '——>' + graphData[1][0];
+                            } else if (graphData.length == 1) {
+                                return ''
+                            } else {
+                                return ''
+                            }
+
+                        },
+                        color: 'black',
+                        textBorderColor: 'yellow',
+                        borderWidth: 1,
+                        borderRadius: 2,
+                        borderType: 'dotted',
+                        borderColor: 'red',
+                        align: 'center',
+                        verticalAlign: 'bottom',
+                        lineHeight: 12,
+                        backgroundColor: 'white'
+                        {#formatter: '{b}: {@score}'#}
+                    },
+                    {% comment %}categories: {
+                        symbol: 'roundRect'
+                    },{% endcomment %}
+                    autoCurveness: true,
+                    coordinateSystem: 'calendar',
+                    links: null,
+                    symbolSize: 8,
+                    edgeSymbolSize: 8,
+                    calendarIndex: 0,
                     itemStyle: {
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)'
-                    }
+                        scale: false,
+                        opacity: 0.2,
+                        color: 'white',
+                        shadowBlur: 1,
+                        shadowOffsetX: 1,
+                        shadowOffsetY: 1,
+                        {#shadowColor: 'black',#}
+                        {#borderCap: 'square',#}
+                        {#borderJoin: 'miter',#}
+                        {#borderMiterLimit: 2#}
+                    },
+                    lineStyle: {
+                        color: 'red',
+                        width: 1,
+                        opacity: 0.85,
+                        {#type: 'dashed',#}
+                        {#cap: 'square',#}
+                        {#join: 'miter',#}
+                        {#miterLimt: 1,#}
+                    },
+                    data: null,
+                    z: 24
                 },
-              {% comment %}  label: {
-                    show: true
-                },{% endcomment %}
-            }
+                {
+                    name: 'dates',
+                    type: 'heatmap',
+                    coordinateSystem: 'calendar',
+                    //get work calendar date from DB
+                    data: getVirtualData('2016'),
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 0.2,
+                            shadowColor: 'rgba(1, 1, 0, 0.5)'
+                        }
+                    },
+                    label: {
+                        show: true,
+                        formatter: function (params) {
+                            var d = new Date(params.value[0]);
+                            return d.getDate();
+                        },
+                        color: "#000"
+                    },
+                },
+                {
+                    name: 'suns',
+                    type: 'effectScatter',
+                    coordinateSystem: 'calendar',
+                    data: getVirtualData('2016'),
+                    symbol:'circle',
+                    {#symbolSize: 1,#}
+                   {% comment %} symbolSize: function (val) {
+                        return val[1];
+                    },{% endcomment %}
+                    showEffectOn: 'emphasis',
+                    effectType : 'ripple',
+                    rippleEffect: {
+                        brushType: 'stroke',
+                         scale : 1.2
+                    },
+                    itemStyle: {
+                        color: '#f4e925',
+                        shadowBlur: 1,
+                        shadowColor: '#333'
+                    },
+                    zlevel: 23
+                }]
         };
         myChart.setOption(option);
+        myChart.on("click", function (params) {
+            option.tooltip.show = false
+            let seriesIndex = params.seriesIndex;
+            let dataIndex = params.dataIndex;
+
+            {% comment %}  myChart.dispatchAction({
+                  type: "downplay" //取消高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要指定某个数据可以再指定dataIndex或者name。
+              });
+              myChart.dispatchAction({
+                  type: "highlight", //高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要再指定某个数据可以再指定dataIndex或者name。         //取消高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要指定某个数据可以再指定dataIndex或者name。
+                  seriesIndex: seriesIndex, // 可选，系列 index，可以是一个数组指定多个系列
+                  dataIndex: dataIndex // 可选，数据的 index
+              });{% endcomment %}
+            console.log('click calendar ', params);
+            if (params.data && params.value) {
+                console.log('click ')
+                console.log('params.name ', params.name)
+                console.log('params.value ', params.value)
+                let calendarCell = params.value
+                console.log('option:', option)
+                graphData.push(calendarCell)
+                console.log('graphData', graphData)
+                if (graphData.length == 1) {
+                    option.series[0].links = null
+                    option.series[0].data = null
+                    myChart.setOption(option)
+                }
+                if (graphData.length > 1) {
+                    graphData.sort()
+                    let links = graphData.map(function (item, idx) {
+                        return {
+                            source: idx,
+                            target: idx + 1,
+                            value: 1,
+                            {% comment %}  lineStyle: {
+                                  cap: 'square'
+                              }{% endcomment %}
+                        };
+                    });
+                    links.pop();
+                    option.series[0].links = links
+                    option.series[0].data = graphData
+                    myChart.setOption(option)
+                    graphData = []
+                }
+                console.log('params.value[0] ', params.value[0])
+                {#console.log('params.seriesName ', params.seriesName)#}
+
+
+                {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
+                {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
+            }
+        });
+
+        function getCheckDate(params) {
+            let that = this;
+            that.chart.on("click", function (e) {
+                alert(e.data[0])
+            });
+        }
     </script>
 {% endblock %}
