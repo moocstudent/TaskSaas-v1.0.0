@@ -134,7 +134,7 @@
 
             </div>
         </div>
-      <div class="col-md-4"></div>
+        <div class="col-md-4"></div>
     </div>
 {% endblock %}
 
@@ -144,31 +144,145 @@
 
         function getVirtualData(year) {
             const date = +echarts.time.parse(year + '-01-01');
-            const end = +echarts.time.parse(year + '-12-31');
+            const end = +echarts.time.parse(+year + 1 + '-01-01');
             const dayTime = 3600 * 24 * 1000;
             const data = [];
-            for (let time = date; time <= end; time += dayTime) {
+            for (let time = date; time < end; time += dayTime) {
                 data.push([
                     echarts.time.format(time, '{yyyy}-{MM}-{dd}', false),
-                    Math.floor(Math.random() * 10000)
+                    Math.floor(Math.random() * 24)
                 ]);
             }
             return data;
         }
 
         option = {
+            color: ["#c0c1cc", "#c9bbcf", "#b8a8bd", "#aca7c8", "#a09ad1", "#d2b48c", "#373715", "#755dff", "#b78d82"],
+            title: {
+                top: 30,
+                left: 'center',
+                text: '每日工作时长'
+            },
+            aria: {
+                // 下面几行可以不写，因为 label.enabled 默认 true
+                // label: {
+                //     enabled: true
+                // },
+                enabled: true,
+                data: {
+                    maxCount: 4,
+                }
+            },
+            legend: {
+                formatter: function (name) {
+                    return 'Legend ' + name;
+                },
+                data: [{
+                    name: '系列1',
+                    // 强制设置图形为圆。
+                    icon: 'circle',
+                    // 设置文本为红色
+                    textStyle: {
+                        color: 'red'
+                    }
+                }]
+            },
+            tooltip: {
+                {#formatter: '{b0}{c0}<br />'#}
+                formatter: function (params, ticket, callback) {
+                    {#                   {% comment %} $.get('detail?name=' + params.name, function (content) {#}
+                    {#                        callback(ticket, (content));#}
+                    {#                    });{% endcomment %}#}
+                    {#                    alert('params'+params)#}
+                    {#                    alert('ticket'+ticket)#}
+                    {#                    alert('callback'+callback)#}
+                    {#                    alert(JSON.stringify(params))#}
+                    let data0_date = JSON.parse(JSON.stringify(params.data))[0]
+                    let data1_val = JSON.parse(JSON.stringify(params.data))[1]
+                    let color = JSON.parse(JSON.stringify(params.color))
+                    {#alert(color)#}
+                    {#alert(value)#}
+                    return '<div style="height:120px;width:220px;text-align: center">' +
+                        '<label style="color:' + `${color}` + '">' + '*' + '</label> <br>' +
+                        '时间:' + data0_date +
+                        '<br>' +
+                        '数据量:' + data1_val +
+                        '</div>'
+                }
+            },
             visualMap: {
-                show: false,
                 min: 0,
-                max: 10000
+                max: 24,
+                type: 'piecewise',
+                orient: 'horizontal',
+                left: 'center',
+                top: 65,
+                itemWidth: 25,
+                itemHeight: 20,
+                inRange: {
+                    color: ['#b2d9f7', '#60b6f8', '#0d93f9', '#1864e7'],
+                    symbolSize: [0, 100]
+                },
+                controller: {
+                    inRange: {
+                        symbolSize: [0, 100]
+                    }
+                },
+                {#textStyle: #}
+                {% comment %} formatter: function (value) {
+                     return '>>> ' + value
+                 },{% endcomment %}
+                hoverLink: true
             },
             calendar: {
-                range: '2023'
+                top: 120,
+                left: 30,
+                right: 30,
+                cellSize: 20,
+                range: '2016',
+                itemStyle: {
+                    borderType: 'dashed',
+                    borderWidth: 1,
+                },
+                dayLabel: {
+                    firstDay: 1,// 从周一开始
+                    nameMap: 'ZH',
+                    fontWeight: 'bold',
+                    textShadowColor: '#123123',
+                    textShadowBlur: 123,
+                    textShadowOffsetY: 12,
+                    textShadowOffsetX: 12,
+                },
+                monthLabel: {
+                    nameMap: 'ZH',
+                    formatter: '{yyyy}-{MM}'
+                },
+                yearLabel: {
+                    position: 'bottom',
+                    {#formatter: '{start}-{end}',#}
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: 'orange',
+                        type: 'solid'
+                    }
+                },
+
             },
             series: {
                 type: 'heatmap',
                 coordinateSystem: 'calendar',
-                data: getVirtualData('2023')
+                data: getVirtualData('2016'),
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+              {% comment %}  label: {
+                    show: true
+                },{% endcomment %}
             }
         };
         myChart.setOption(option);
