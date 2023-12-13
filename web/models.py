@@ -131,6 +131,19 @@ class Project(models.Model):
     region = models.CharField(verbose_name='COS区域', max_length=32)
 
 
+class WorkRecord(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    content = models.TextField(verbose_name="主要工作内容",null=True,blank=True)
+    project = models.ForeignKey(verbose_name="项目",to="Project",null=True,on_delete=models.SET_NULL)
+    user = models.ForeignKey(verbose_name='用户', to='UserInfo', null=True, related_name='work',
+                             on_delete=models.SET_NULL)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    calendar_day = models.CharField(verbose_name="日期时间",max_length=10)
+    calendar_day_date = models.DateField(verbose_name="日期时间date",null=False,blank=False,default=None)
+    update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now_add=True)
+
+
+
 class ProjectUser(models.Model):
     id = models.BigAutoField(primary_key=True)
     """

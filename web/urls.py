@@ -134,6 +134,18 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
 
     re_path(r'^send_private_hint_msg/$', consumers.send_private_hint_msg, name='send_private_hint_msg'),
 
+    # work_record
+    re_path(r'^add_work_record/$', manage.work_record, name='add_work_record'),
+    re_path(r'^work_record_update/$',  manage.work_record_update, name='work_record_update'),
+    re_path(r'^find_work_record/$',  manage.find_work_record, name='find_work_record'),
+    re_path(r'^work_record_list/$',  manage.work_record_list, name='work_record_list'),
+
+
+
+
+
+
+
 ], None)),
 
 re_path(r'^chat/', include([

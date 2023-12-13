@@ -142,18 +142,89 @@
 {% block js %}
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById("chart"));
+        let dayListDirect = '[]'
+        let dayList = (localStorage.getItem("dayList" +{{ request.web.project.id}})) || dayListDirect
+
+        function getCalendarList() {
+            $.ajax({
+                url: "{% url 'work_record_list' project_id=request.web.project.id %}",
+                type: "GET",
+                data: {
+                    "year": "2023",
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                {#dataType: "JSON",#}
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        console.log("reload")
+                        {#location.reload();#}
+                        console.log('res data : ', JSON.stringify((res.data)))
+                        console.log('res data : ', JSON.stringify(res.data))
+                        localStorage.setItem("dayList" +{{ request.web.project.id}}, JSON.stringify(res.data))
+                        dayListDirect = JSON.stringify(res.data)
+                    } else {
+                        localStorage.setItem("dayList" +{{ request.web.project.id}}, '[]')
+                    }
+                }
+
+            })
+        }
+
+        getCalendarList()
+
+        var vdata = getVirtualData("2023")
 
         function getVirtualData(year) {
+            getCalendarList()
+            console.log('dayList', dayList)
+            {#console.log('dayList p.length', JSON.parse(dayList).length)#}
+            {#getCalendarList()#}
+            let dayListN = JSON.parse(dayList)
+            {#let dayListN = []#}
+            console.log('dayListN:', dayListN)
+            if (dayListN == null || dayListN == undefined) {
+                dayListN = []
+            }
+            console.log('getVirtualData dayList', dayListN)
             const date = +echarts.time.parse(year + '-01-01');
             const end = +echarts.time.parse(+year + 1 + '-01-01');
             const dayTime = 3600 * 24 * 1000;
             const data = [];
-            for (let time = date; time < end; time += dayTime) {
-                data.push([
-                    echarts.time.format(time, '{yyyy}-{MM}-{dd}', false),
-                    Math.floor(Math.random() * 24)
-                ]);
+            var cday = 0
+            for (let time = date; time < end; time += dayTime) {//every day
+                let showDate = echarts.time.format(time, '{yyyy}-{MM}-{dd}', false)//every day formatter
+                let pushAlready = false;
+                for (; cday < dayListN.length;) { //dayListN is ordered list maybe shorter than outter for loop dates
+                    let day = (dayListN[cday].calendar_day)
+                    console.log('day:<<<<', day)
+                    if (day === showDate) {//if date equals then push to data and set pushAlready 2 true and increase cday++ (judgement next day) and
+                        // then break this loop
+                        console.log('day:' + day + ',showDate:' + showDate)
+                        data.push([
+                            showDate
+                            ,
+                            24
+                        ]);
+                        pushAlready = true
+                        cday++
+                        break;
+                    } else {
+                        break;
+                        //else break this loop,(waiting for the next date from outter loop)
+
+                    }
+                }
+                if (!pushAlready) {
+                    data.push([
+                        showDate
+                        ,
+                        0
+                    ]);
+                }
+
             }
+            console.log("data>>", data)
             return data;
         }
 
@@ -165,11 +236,11 @@
 
 
         option = {
-            color: ["#c0c1cc", "#c9bbcf", "#b8a8bd", "#aca7c8", "#a09ad1", "#d2b48c", "#373715", "#755dff", "#b78d82"],
+            {#color: ["#c0c1cc", "#c9bbcf", "#b8a8bd", "#aca7c8", "#a09ad1", "#d2b48c", "#373715", "#755dff", "#b78d82"],#}
             title: {
                 top: 30,
                 left: 'center',
-                text: '工作时长日历'
+                text: '工作日历'
             },
             aria: {
                 // 下面几行可以不写，因为 label.enabled 默认 true
@@ -181,25 +252,18 @@
                     maxCount: 4,
                 }
             },
-            legend: {
-                top: '30',
-                left: '100',
-                data: ['dates', 'checkdates'],
-                textStyle: {
-                    color: '#909'
-                }
-            },
+            {% comment %} legend: {
+                 top: '30',
+                 left: '100',
+                 data: ['dates', 'checkdates'],
+                 textStyle: {
+                     color: '#909'
+                 }
+             },{% endcomment %}
             tooltip: {
                 show: true,
                 {#formatter: '{b0}{c0}<br />'#}
                 formatter: function (params, ticket, callback) {
-                    {#                   {% comment %} $.get('detail?name=' + params.name, function (content) {#}
-                    {#                        callback(ticket, (content));#}
-                    {#                    });{% endcomment %}#}
-                    {#                    alert('params'+params)#}
-                    {#                    alert('ticket'+ticket)#}
-                    {#                    alert('callback'+callback)#}
-                    {#                    alert(JSON.stringify(params))#}
                     let data0_date = JSON.parse(JSON.stringify(params.data))[0]
                     let data1_val = JSON.parse(JSON.stringify(params.data))[1]
                     let color = JSON.parse(JSON.stringify(params.color))
@@ -217,7 +281,7 @@
                 min: 0,
                 max: 24,
                 type: 'piecewise',
-                splitNumber: 4,
+                splitNumber: 2,
                 orient: 'horizontal',
                 left: 'center',
                 top: 65,
@@ -237,14 +301,13 @@
                      return '>>> ' + value
                  },{% endcomment %}
                 hoverLink: true,
-                orient: 'horizontal'
             },
             calendar: {
                 top: 120,
                 left: 30,
                 right: 30,
                 cellSize: 20,
-                range: '2016',
+                range: '2023',
                 itemStyle: {
                     borderType: 'dashed',
                     borderWidth: 1,
@@ -280,19 +343,6 @@
                 {
                     name: 'checkdates',
                     type: 'graph',
-                    {% comment %}   labelLayout(params) {
-                           return {
-                               x: params.rect.x + 10,
-                               y: params.rect.y + params.rect.height / 2,
-                               verticalAlign: 'middle',
-                               align: 'left'
-                           }
-                       },{% endcomment %}
-                    {% comment %}    labelLayout(params) {
-                            return {
-                                fontSize: Math.max(params.rect.width / 10, 5)
-                            };
-                        },{% endcomment %}
                     emphasis: {
                         scale: true,
                         focus: 'self'
@@ -316,7 +366,6 @@
                             } else {
                                 return ''
                             }
-
                         },
                         color: 'black',
                         textBorderColor: 'yellow',
@@ -368,7 +417,7 @@
                     type: 'heatmap',
                     coordinateSystem: 'calendar',
                     //get work calendar date from DB
-                    data: getVirtualData('2016'),
+                    data: getVirtualData("2023"),
                     emphasis: {
                         itemStyle: {
                             shadowBlur: 0.2,
@@ -384,48 +433,22 @@
                         color: "#000"
                     },
                 },
-                {% comment %}{
-                    name: 'suns',
-                    type: 'effectScatter',
-                    coordinateSystem: 'calendar',
-                    {#data: getVirtualData('2016'),#}
-                    data: [getVirtualData('2016')[1]],
-                    symbol:'circle',
-                    {#symbolSize: 1,#}
-                    symbolSize: function (val) {
-                        return val[1]/2;
-                    },
-                    showEffectOn: 'emphasis',
-                    effectType : 'ripple',
-                    rippleEffect: {
-                        brushType: 'stroke',
-                         scale : 1.2,
-                        number:1
-                    },
-                    itemStyle: {
-                        color: '#f4e925',
-                        shadowBlur: 1,
-                        shadowColor: '#333'
-                    },
-                    zlevel: 19,
-                    z:19
-                }{% endcomment %}
             ]
         };
         myChart.setOption(option);
+        //click calendar element event
         myChart.on("click", function (params) {
             option.tooltip.show = false
             let seriesIndex = params.seriesIndex;
             let dataIndex = params.dataIndex;
-
             {% comment %}  myChart.dispatchAction({
                   type: "downplay" //取消高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要指定某个数据可以再指定dataIndex或者name。
-              });
-              myChart.dispatchAction({
-                  type: "highlight", //高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要再指定某个数据可以再指定dataIndex或者name。         //取消高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要指定某个数据可以再指定dataIndex或者name。
-                  seriesIndex: seriesIndex, // 可选，系列 index，可以是一个数组指定多个系列
-                  dataIndex: dataIndex // 可选，数据的 index
               });{% endcomment %}
+            {% comment %} myChart.dispatchEvent({
+                 type: "highlight", //高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要再指定某个数据可以再指定dataIndex或者name。         //取消高亮指定的数据图形。通过seriesName或者seriesIndex指定系列。如果要指定某个数据可以再指定dataIndex或者name。
+                 seriesIndex: seriesIndex, // 可选，系列 index，可以是一个数组指定多个系列
+                 dataIndex: dataIndex // 可选，数据的 index
+             });{% endcomment %}
             console.log('click calendar ', params);
             if (params.data && params.value) {
                 console.log('click ')
@@ -435,12 +458,19 @@
                 console.log('option:', option)
                 graphData.push(calendarCell)
                 console.log('graphData', graphData)
-                if (graphData.length == 1) {
+                if (graphData.length === 1) {
                     option.series[0].links = null
                     option.series[0].data = null
                     myChart.setOption(option)
                 }
                 if (graphData.length > 1) {
+                    console.log('graphData[0]', graphData[0])
+                    console.log('graphData[1]', graphData[1])
+                    console.log('graphData[0][0]===graphData[1][0]', graphData[0][0] === graphData[1][0])
+                    if (graphData[0][0] == graphData[1][0]) {
+                        graphData.pop()
+                        return;
+                    }
                     graphData.sort()
                     let links = graphData.map(function (item, idx) {
                         return {
@@ -456,7 +486,24 @@
                     option.series[0].links = links
                     option.series[0].data = graphData
                     myChart.setOption(option)
-                    graphData = []
+                    let confirm = layer.confirm('导出工作记录？', {
+                        btn: ['确定', '关闭'] //按钮
+                    }, function () {
+                        // 导出excel
+                        exportWorksByTimeRange(graphData)
+                        {#graphData = []#}
+                        layer.msg('正在导出')
+                        layer.close(confirm)
+                        graphData = []
+                        option.series[0].links = null
+                        option.series[0].data = []
+                        myChart.setOption(option)
+                    }, function () {
+                        graphData = []
+                        option.series[0].links = null
+                        option.series[0].data = []
+                        myChart.setOption(option)
+                    });
                 }
                 console.log('params.value[0] ', params.value[0])
                 {#console.log('params.seriesName ', params.seriesName)#}
@@ -476,8 +523,15 @@
 
         //导出工作列表
         function exportWorksByTimeRange(graphData) {
+            window.location.href = "{% url 'calendar_time_range_export_works' project_id=request.web.project.id %}?begin_time=" + graphData[0][0]
+                + '&end_time=' + graphData[1][0] + '&csrfmiddlewaretoken=' + $("#csrf_token").val()
+
+        }
+
+        //导出任务列表
+        function exportTasksByTimeRange(graphData) {
             $.ajax({
-                url: "{% url 'calendar_time_range_export_works' project_id=request.web.project.id %}",
+                url: "{% url 'calendar_time_range_export_tasks' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "time_range": graphData,
@@ -497,20 +551,166 @@
             })
         }
 
-        //导出任务列表
-        function exportTasksByTimeRange(graphData) {
+        let thisCalEditDataId = null;
+        myChart.on("dblclick", function (params) {
+            console.log('params dbclick ', params)
+            console.log('params dbclick value ', params.value)
+            console.log('params dbclick data ', params.data)
+            if (params.data && params.value && params.value[0]) {
+                option.series[0].links = null
+                option.series[0].data = null
+                myChart.setOption(option)
+                layui.use(function () {
+                    var util = layui.util;
+                    var layer = layui.layer;
+                    let prompt = layer.prompt({
+                                title: '请输入或更新' + params.value[0] + '工作记录',
+                                formType: 2,
+                                area: ['680px', '420px'],
+                                shade: false,
+                                btn2: function () {
+                                    graphData = []
+                                    option.series[0].links = null
+                                    option.series[0].data = []
+                                    myChart.setOption(option)
+                                }
+                            }
+                            , function (value, index, elem) {
+                                console.log('prompt elem :', elem)
+                                console.log('prompt index :', index)
+                                if (value === '') return elem.focus();
+                                layer.msg('获得：' + util.escape(value)); // 显示 value
+                                //send calendayDayContent to save
+                                if (thisCalEditDataId) {
+                                    updateCalendarContent(thisCalEditDataId, document.querySelector(".layui-layer-input").value)
+                                } else {
+                                    sendCalendarDayContent(params.value[0], util.escape(value));
+                                }
+                                getCalendarList()
+                                vdata = getVirtualData("2023")
+                                setTimeout(function () {
+                                    // 关闭 prompt
+                                    layer.close(index);
+                                    window.location.reload()
+                                }, 1500);
+                            }
+                        )
+                    ;
+                    layer.style(prompt, {
+                        width: '800px',
+                        height: '600px',
+                        top: '10px',
+                    });
+                    //getCalendarDayContentByCalendarDay and current user and current proejct
+                    $.ajax({
+                        url: "{% url 'find_work_record' project_id=request.web.project.id %}",
+                        type: "GET",
+                        data: {
+                            "calendar_day": params.value[0],
+                            "csrfmiddlewaretoken": $("#csrf_token").val()
+                        },
+                        dataType: "JSON",
+                        success: function (res) {
+                            console.log(res);
+                            if (res.status) {
+                                console.log("reload")
+                                {#alert(JSON.stringify(res.record.content))#}
+                                document.querySelector(".layui-layer-input").value = eval(JSON.stringify(res.record.content))
+                                thisCalEditDataId = eval(JSON.stringify(res.record.id))
+                                {#$(".layui-layer-input").html(JSON.stringify(res.record.content))#}
+                                //res.record.id  (to update calendar record)
+                                //res.record.create_time
+                                //res.record.update_time
+                            } else {
+                                console.log("can not get record")
+                                thisCalEditDataId = null;
+                            }
+                        },
+                        error: (err) => {
+                            layer.msg(err)
+                            thisCalEditDataId = null;
+                        }
+
+                    })
+
+                    //when press esc (event27) then close prompt of editor
+                    $(document).keyup(function (event) {
+                        if (event.which == 27) {
+                            //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算
+                            layer.close(prompt);
+                        }
+                    })
+                    // 监听 prompt 关闭事件
+                    {% comment %} document.querySelector(".layui-layer-input").on('closed.layer', function () {
+                         // 执行相应的操作
+                         layer.msg('prompt closed')
+                     });{% endcomment %}
+                })
+            }
+        })
+
+        function sendCalendarDayContent(day, content) {
+            if (!day || !content) {
+                return
+            }
             $.ajax({
-                url: "{% url 'calendar_time_range_export_tasks' project_id=request.web.project.id %}",
+                url: "{% url 'add_work_record' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
-                    "time_range": graphData,
+                    "content": content,
+                    "calendar_day": day,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
-                        console.log("reload")
+                        layer.msg('保存成功')
+                    } else {
+                        layer.msg('保存失败')
+                    }
+                }
+            })
+        }
+
+        function updateCalendarContent(id, content) {
+            if (!id || !content) {
+                return
+            }
+            $.ajax({
+                url: "{% url 'work_record_update' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "id": id,
+                    "content": content, //nginx 真的好学吗 nginx有几个模块1-二进制可执行文件，2-conf配置文件，3-access.log访问日志，4-error.log异常日志
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        layer.msg('更新成功')
+                    } else {
+                        layer.msg('更新失败')
+                    }
+                }
+            })
+        }
+
+        function getCalendarDayContent(day) {
+            $.ajax({
+                url: "{% url 'find_work_record' project_id=request.web.project.id %}",
+                type: "GET",
+                data: {
+                    "calendar_day": day,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                {#dataType: "JSON",#}
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        layer.msg('查询成功')
+                        console.log("record ", res.record)
                         location.reload();
                     } else {
 

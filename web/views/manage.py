@@ -1,5 +1,6 @@
 import collections
 import json
+from datetime import datetime
 
 import requests
 from django.core.cache import cache
@@ -7,12 +8,13 @@ from django.db.models import Q, Min
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
+from TaskSaas.result.result import APIResult
 from TaskSaasAPP import date_util
 from TaskSaasAPP.date_util import get_every_day
 from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
-from web.models import Collect, Issues, UserInfo
+from web.models import Collect, Issues, UserInfo, WorkRecord, Project
 
 
 def statistics(request, project_id):
@@ -28,6 +30,64 @@ def statistics(request, project_id):
         'creation_count': creation_count
     }
     return render(request, 'web/statistics.html', context)
+
+
+def work_record(request,project_id):
+    content = request.POST.get("content")
+    calendar_day = request.POST.get("calendar_day")
+    work_record = WorkRecord()
+    work_record.user= request.web.user
+    work_record.project = request.web.project
+    work_record.content = content
+    work_record.calendar_day = calendar_day
+    calendar_day_date = datetime.strptime(calendar_day, "%Y-%m-%d")
+    work_record.calendar_day_date=calendar_day_date
+    work_record.save()
+    return JsonResponse({'status':1})
+
+def work_record_update(request,project_id):
+    id = request.POST.get("id")
+    content = request.POST.get("content")
+    work_record= WorkRecord.objects.filter(id=id).first()
+    if work_record:
+        if work_record.content == content:
+            return JsonResponse({'status': 1,'msg':'not changed'})
+        else:
+            work_record.id = id
+            work_record.content = content
+            work_record.save()
+            return JsonResponse({'status': 1, 'msg': 'changed'})
+    return JsonResponse({'status': 0, 'msg': 'can not find record'})
+
+def find_work_record(request,project_id):
+    print('find work record')
+    calendar_day = request.GET.get("calendar_day")
+    work_record = WorkRecord.objects.filter(user=request.web.user,project=request.web.project,calendar_day=calendar_day).first()
+    print('work record:',work_record)
+    if work_record:
+        return JsonResponse({'status':1,'record':{'id':work_record.id,'content':work_record.content,
+                                                  'create_time':work_record.create_datetime,'update_time':work_record.update_datetime,
+                                                  'day':work_record.calendar_day}})
+    return JsonResponse({'status': 0, 'record': None})
+
+
+def work_record_list(request,project_id):
+    # all_object_list = (list(my_issues_set.values_list("issue_id", "subject")))
+    # all_object_list = json.dumps(all_object_list)
+    year = request.GET.get("year")
+    print(year)
+    print('project_id at work record list:',project_id)
+    project = None
+    if request.web.project:
+        project = request.web.project
+    else:
+        project = Project.objects.filter(id=project_id).first()
+    work_records = WorkRecord.objects.filter(user=request.web.user, project=project,
+                                               calendar_day__startswith=year).order_by('calendar_day')
+    print('work_records',work_records)
+    api_result = APIResult(work_records.values())
+    return JsonResponse(api_result,safe=False)
+
 
 
 # todo commit具体信息 当点击页面commit message时弹出详情
