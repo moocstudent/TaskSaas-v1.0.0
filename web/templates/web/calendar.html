@@ -557,6 +557,7 @@
             console.log('params dbclick value ', params.value)
             console.log('params dbclick data ', params.data)
             if (params.data && params.value && params.value[0]) {
+
                 option.series[0].links = null
                 option.series[0].data = null
                 myChart.setOption(option)
@@ -564,10 +565,16 @@
                     var util = layui.util;
                     var layer = layui.layer;
                     let prompt = layer.prompt({
+                                id: 'work_content_area',
                                 title: '请输入或更新' + params.value[0] + '工作记录',
                                 formType: 2,
                                 area: ['680px', '420px'],
-                                shade: false,
+                                closeBtn: 1,
+                                maxlength: 5000,
+                                shade: [0.3, '#FFF'],
+                                shadeClose: true,
+                                resize: true,
+                                minStack: true,
                                 btn2: function () {
                                     graphData = []
                                     option.series[0].links = null
@@ -578,13 +585,19 @@
                             , function (value, index, elem) {
                                 console.log('prompt elem :', elem)
                                 console.log('prompt index :', index)
-                                if (value === '') return elem.focus();
+                                {#if (value === '') return elem.focus();#}
                                 layer.msg('获得：' + util.escape(value)); // 显示 value
+
                                 //send calendayDayContent to save
-                                if (thisCalEditDataId) {
+                                if (thisCalEditDataId && document.querySelector(".layui-layer-input").value.length > 0) {
+                                    //更新记录
                                     updateCalendarContent(thisCalEditDataId, document.querySelector(".layui-layer-input").value)
-                                } else {
+                                } else if (!thisCalEditDataId && document.querySelector(".layui-layer-input").value.length > 0) {
+                                    //新增记录
                                     sendCalendarDayContent(params.value[0], util.escape(value));
+                                } else if (thisCalEditDataId && document.querySelector(".layui-layer-input").value.length == 0) {
+                                    //删除该条记录
+                                    delCalendarRecord(thisCalEditDataId,document.querySelector(".layui-layer-input").value)
                                 }
                                 getCalendarList()
                                 vdata = getVirtualData("2023")
@@ -601,6 +614,12 @@
                         height: '600px',
                         top: '10px',
                     });
+
+                    let textArea = document.querySelector(".layui-layer-input")
+                    let bottomBtnArr = document.querySelector(".layui-layer-btn")
+                    let spanMaxLength = document.createElement('span');
+                    spanMaxLength.id = 'maxlengthlabel'
+                    spanMaxLength.style = 'float:left'
                     //getCalendarDayContentByCalendarDay and current user and current proejct
                     $.ajax({
                         url: "{% url 'find_work_record' project_id=request.web.project.id %}",
@@ -615,8 +634,10 @@
                             if (res.status) {
                                 console.log("reload")
                                 {#alert(JSON.stringify(res.record.content))#}
-                                document.querySelector(".layui-layer-input").value = eval(JSON.stringify(res.record.content))
+                                textArea.value = eval(JSON.stringify(res.record.content))
                                 thisCalEditDataId = eval(JSON.stringify(res.record.id))
+                                spanMaxLength.innerHTML = '字数限制 ' + textArea.value.length + "/5000";
+                                bottomBtnArr.appendChild(spanMaxLength)
                                 {#$(".layui-layer-input").html(JSON.stringify(res.record.content))#}
                                 //res.record.id  (to update calendar record)
                                 //res.record.create_time
@@ -632,7 +653,6 @@
                         }
 
                     })
-
                     //when press esc (event27) then close prompt of editor
                     $(document).keyup(function (event) {
                         if (event.which == 27) {
@@ -640,11 +660,12 @@
                             layer.close(prompt);
                         }
                     })
-                    // 监听 prompt 关闭事件
-                    {% comment %} document.querySelector(".layui-layer-input").on('closed.layer', function () {
-                         // 执行相应的操作
-                         layer.msg('prompt closed')
-                     });{% endcomment %}
+                    spanMaxLength.innerHTML = '字数限制 ' + textArea.value.length + "/5000";
+                    bottomBtnArr.appendChild(spanMaxLength)
+                    textArea.addEventListener('input', () => {
+                        document.getElementById("maxlengthlabel").innerHTML = '字数限制 ' + textArea.value.length + "/5000";
+                        bottomBtnArr.appendChild(spanMaxLength)
+                    })
                 })
             }
         })
@@ -692,6 +713,30 @@
                         layer.msg('更新成功')
                     } else {
                         layer.msg('更新失败')
+                    }
+                }
+            })
+        }
+
+        function delCalendarRecord(id, content) {
+            if (!id || content) {
+                return
+            }
+            $.ajax({
+                url: "{% url 'work_record_update' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "id": id,
+                    "content": content,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    console.log(res);
+                    if (res.status) {
+                        layer.msg('删除成功')
+                    } else {
+                        layer.msg('删除失败')
                     }
                 }
             })

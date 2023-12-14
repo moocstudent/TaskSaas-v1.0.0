@@ -50,7 +50,10 @@ def work_record_update(request,project_id):
     content = request.POST.get("content")
     work_record= WorkRecord.objects.filter(id=id).first()
     if work_record:
-        if work_record.content == content:
+        if content == None or len(content)==0:
+            work_record.delete()
+            return JsonResponse({'status': 1, 'msg': 'deleted'})
+        elif work_record.content == content:
             return JsonResponse({'status': 1,'msg':'not changed'})
         else:
             work_record.id = id
