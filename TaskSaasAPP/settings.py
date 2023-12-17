@@ -13,6 +13,7 @@ import datetime
 import os
 import django
 from django.utils.encoding import smart_str
+from elasticsearch_dsl.connections import connections
 
 django.utils.encoding.smart_text = smart_str
 
@@ -32,6 +33,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+connections.configure(
+    default={"hosts":"localhost:9200"},
+)
 # Application definition
 
 INSTALLED_APPS = [
