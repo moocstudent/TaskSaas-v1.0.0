@@ -34,7 +34,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 connections.configure(
-    default={"hosts":"localhost:9200"},
+    default={"hosts": "localhost:9200"},
 )
 # Application definition
 
@@ -191,7 +191,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'None'
 STATIC_URL = '/static/'
 # STATIC_ROOT = 'web/static'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'web/static/')
+    os.path.join(BASE_DIR, 'static')
 ]
 
 # 自己的短信模板相关配置
@@ -221,6 +221,7 @@ CACHES = {
 
 # 登录白名单：无需登录就能访问的页面
 WHITE_REGEX_URL_LIST = [
+    r'^/static/.*',
     '/register/',
     '/send/sms/',
     '/login/sms/',
