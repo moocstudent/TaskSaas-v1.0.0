@@ -136,6 +136,19 @@
             border-radius: 50%;
         }
 
+        .avatar {
+              float: left;
+            margin-right: 10px;
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #304659;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 50%;
+        }
+
         .user-item .text {
             line-height: 30px;
         }
@@ -202,8 +215,17 @@
                             <div class="panel-heading">
                                 <i class="fa fa-user" aria-hidden="true"></i>
                                 项目成员
-                                <a style="float: right;" class="layui-btn layui-btn-normal layui-btn-xs"
-                                   data-toggle="modal" data-target="#inviteModal">邀请成员</a>
+                                <span class="col-md-2" style="float: right;"><a
+                                        class="layui-btn layui-btn-normal layui-btn-xs"
+                                        data-toggle="modal" data-target="#inviteModal">邀请成员</a>
+                                </span>
+
+                                {% if request.web.project.creator == request.web.user %}
+                                <span class="col-md-2" style="float: right;"><a
+                                        class="layui-btn layui-btn-normal layui-btn-xs"
+                                        data-toggle="modal" data-target="#memberManage">成员管理</a>
+                                      </span>
+                                {% endif %}
                             </div>
                             <div class="panel-body user-item">
                                 <div class="layui-col-sm12 layui-col-sm-offset1 title">创建者</div>
@@ -285,6 +307,81 @@
                                 </div>
                             </div>
                         </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade in" id="memberManage" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myMembers">成员管理</h4>
+                        </div>
+                        <div class="modal-body" style="width:300px;padding-right: 40px;word-wrap:break-word;word-break:break-all;display: block;overflow-y: scroll;">
+                            <div class="layui-col-sm12 layui-col-sm-offset1 title" ></div>
+                        <table id="memberTable"
+                               style="word-wrap:break-word;word-break:break-all;min-width:20vh;display: block;overflow-y: scroll;">
+                            <tbody>
+                           {% for item in join_user %}
+                                <tr>
+                                    <td style="min-width:300px;">
+                                       <div class="layui-col-sm3 layui-col-sm-offset1">
+                                        <div class="layui-row ws-docs-anim">
+                                            <div class="avatar layui-anim" data-anim="layui-anim-rotate">
+                                                {% if item.2 %}
+                                                    <img class="avatar" src="{{ item.2 }}" alt="">
+                                                {% else %}
+                                                    {{ item.1.0 |upper }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="text">{{ item.1 }}</div>
+                                        <div class="text" style="min-width: 220px">加入时间:{{ item.3 }}</div>
+                                           <button onclick="removeMember({{ item.0 }})">移除成员</button>
+                                           <hr>
+                                    </div>
+                                    </td>
+
+
+                                </tr>
+
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        </div>
+                        {% comment %} <div class="modal-body" style="padding-right: 40px;">
+                            <form id="inviteForm">
+                                {% csrf_token %}
+                                {% for item in invite_form %}
+                                    <div class="form-group">
+                                        <label for="{{ item.id_for_label }}">{{ item.label }}</label>
+                                        <span>{% if  item.help_text %}（{{ item.help_text }}）{% endif %}</span>
+                                        {{ item }}
+                                        <span class="error-msg"></span>
+                                    </div>
+                                {% endfor %}
+                                <button type="button" class="btn btn-success" id="btnGenInviteCode">生成邀请码</button>
+                            </form>
+                            <div id="inviteArea" class="hide">
+                                <hr/>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-btn">
+                                            <input type="button" value="邀请链接" class="btn btn-default">
+                                        </div>
+                                        <input type="text" class="form-control" id="inviteUrl">
+                                        <div class="input-group-btn">
+                                            <input type="button" value="复制链接" class="btn btn-primary"
+                                                   id="btnCopyUrl">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>{% endcomment %}
 
                     </div>
                 </div>
@@ -942,7 +1039,7 @@
                                 {#let replyPromptLayer = document.getElementById('layui-layer'+index)#}
                                 if (value === '') return elem.focus();
                                 layer.msg('获得：' + util.escape(value)); // 显示 value
-                                sendReplyMsg(ri.sender,util.escape(value))
+                                sendReplyMsg(ri.sender, util.escape(value))
                                 // 关闭 prompt
                                 layer.close(index);
                             });
@@ -1001,7 +1098,7 @@
             });
         });
 
-        function sendReplyMsg(receiver,message){
+        function sendReplyMsg(receiver, message) {
             $.ajax({
                 url: "{% url 'send_private_hint_msg' project_id=request.web.project.id %}",
                 type: "POST",
@@ -1013,12 +1110,12 @@
                 dataType: "JSON",
                 success: function (res) {
                     if (res.status) {
-                        layer.msg('发送成功',{icon:6})
+                        layer.msg('发送成功', {icon: 6})
 
                         {#location.reload();#}
                         {#$("#badge").load(location.href + " #badge")#}
                     } else {
-                         layer.msg('发送异常',{icon:5})
+                        layer.msg('发送异常', {icon: 5})
                     }
                 }
             })
@@ -1388,6 +1485,26 @@
             }
             // 开启定时器
             init_start_timer();
+        }
+
+        function removeMember(remove_user_id) {
+            $.ajax({
+                url: "{% url 'remove_user_from_project' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "remove_user_id": remove_user_id,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        layer.msg('移除了成员')
+                        {#location.reload();#}
+                        $("#memberTable").load(location.href + " #memberTable")
+                    } else {
+                    }
+                }
+            })
         }
 
     </script>

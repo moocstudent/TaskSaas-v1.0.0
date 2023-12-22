@@ -21,7 +21,6 @@ def dashboard(request, project_id):
     status_dict = collections.OrderedDict()
     status_choices = []
     issues_types_dict = []
-
     echarts_data = []
     tasks_count = []
     funcs_count = []
@@ -42,7 +41,6 @@ def dashboard(request, project_id):
         issues_filter=issues_filter.filter(issues_type__title__in=types)
     print('types ',types)
     print('main_legend_trigger ',main_legend_trigger)
-
     issues_types = models.IssuesType.objects.filter(project_id=project_id)
     for i in issues_types.values('id'):
         all_type_ids += str(i['id'])+','
@@ -54,26 +52,8 @@ def dashboard(request, project_id):
     type_ids=type_ids[0:-1]
     print('type_ids ',type_ids)
     # print('issues_types dict',dict(issues_types))
-
-    # keys = []
-    index = 0
-    for key, text in sorted(models.Issues.status_choices):
-        status_dict[key] = {'text': text, 'count': 0}
-        status_choices.append(key)
-        if len(issues_types) > 0:
-            tasks_count.insert(index, issues_filter.filter(issues_type=issues_types[0],
-                                                           status=key).count())
-        if len(issues_types) > 1:
-            funcs_count.insert(index, issues_filter.filter(issues_type=issues_types[1],
-                                                           status=key).count())
-        if len(issues_types) > 2:
-            bugs_count.insert(index, issues_filter.filter(issues_type=issues_types[2],
-                                                          status=key).count())
-        if len(issues_types) > 3:
-            demand_count.insert(index, issues_filter.filter(issues_type=issues_types[3],
-                                                            status=key).count())
-        # keys.index(index,key)
-        index += 1
+    count_insert(issues_filter,status_dict,status_choices,issues_types,tasks_count,
+                 funcs_count,bugs_count,demand_count)
     print('issues size bef ct ', len(issues_filter))
     n = 0
     for i in issues_filter:
@@ -87,12 +67,11 @@ def dashboard(request, project_id):
     for item in issues_data:
         print("item['status'] {} ct:{}".format(item['status'],item['ct']))
         status_dict[item['status']]['count'] = item['ct']
-
     for item in sorted(status_dict.items()):
         echarts_data.insert(item[0] - 1, item[1]['count'])
         # print('count',d['count'])
         # echarts_data[d['count']]
-    join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username','user__git_avatar')
+    join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username','user__git_avatar','create_datetime')
     print('join_user ',join_user)
     # top ten 结合查询 新建了哪些项目？谁分配了工作？谁进行了修改/回复？
     top_ten = models.Issues.objects.filter(project_id=project_id).order_by('-latest_update_datetime','-create_datetime')
@@ -176,6 +155,28 @@ def dashboard(request, project_id):
     request.web.project.creator.git_avatar = project.creator.git_avatar
 
     return render(request, 'web/dashboard.html', context)
+
+#查看python是否也有值传递，即传入的**_count数组不反回也已经在引用内存中变更了
+def count_insert(issues_filter,status_dict,status_choices,issues_types,tasks_count,funcs_count,
+                 bugs_count,demand_count):
+    index = 0
+    for key, text in sorted(models.Issues.status_choices):
+        status_dict[key] = {'text': text, 'count': 0}
+        status_choices.append(key)
+        if len(issues_types) > 0:
+            tasks_count.insert(index, issues_filter.filter(issues_type=issues_types[0],
+                                                           status=key).count())
+        if len(issues_types) > 1:
+            funcs_count.insert(index, issues_filter.filter(issues_type=issues_types[1],
+                                                           status=key).count())
+        if len(issues_types) > 2:
+            bugs_count.insert(index, issues_filter.filter(issues_type=issues_types[2],
+                                                          status=key).count())
+        if len(issues_types) > 3:
+            demand_count.insert(index, issues_filter.filter(issues_type=issues_types[3],
+                                                            status=key).count())
+        # keys.index(index,key)
+        index += 1
 
 
 def dashboard_json(request):

@@ -76,7 +76,7 @@ def calendar_time_range_export_works(request,project_id):
     # 查询所有老师的信息
     queryset = WorkRecord.objects.filter(Q(calendar_day_date__range=(start_date,end_date)),
                                     Q(user=request.web.user),
-                                    Q(project=request.web.project))
+                                    Q(project=request.web.project)).order_by('calendar_day_date')
     # 向Excel表单中写入表头
     colnames = ('日期','内容')
     for index, name in enumerate(colnames):

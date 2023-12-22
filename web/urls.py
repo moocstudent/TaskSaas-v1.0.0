@@ -3,7 +3,7 @@ from django.urls import re_path, include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from TaskChat import chat_views, consumers
-from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar
+from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar, project_user_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry, userinfo_view, glory
 from web.views.upload import FileUploadView
@@ -139,6 +139,11 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^work_record_update/$',  manage.work_record_update, name='work_record_update'),
     re_path(r'^find_work_record/$',  manage.find_work_record, name='find_work_record'),
     re_path(r'^work_record_list/$',  manage.work_record_list, name='work_record_list'),
+
+
+    #remove user from project by invitee
+    re_path(r'^remove_user_from_project/$',  project_user_api.remove_user_from_project, name='remove_user_from_project'),
+
 
 
 
