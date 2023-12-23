@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 
-from web.models import ProjectUser
+from web.models import ProjectUser, Project
 
 
 def remove_user_from_project(request,project_id):
@@ -10,4 +10,7 @@ def remove_user_from_project(request,project_id):
     print('user_will_remove',user_will_remove)
     if user_will_remove:
         user_will_remove.delete()
+        proj = Project.objects.filter(id=request.web.project.id).first()
+        proj.join_count-=1
+        proj.save()
     return JsonResponse({'status':1})
