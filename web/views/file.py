@@ -210,6 +210,54 @@ def uploadfile_common(request):
         print('file_url ',file_url)
         return JsonResponse({'status': 1,"results": results })
 
+def uploadfile_profile(request):
+    upload_file = request.FILES['file']
+    print('upload_file',upload_file)
+    openid = request.POST.get('openid')
+    user_id = request.POST.get('user_id')
+    print('openid',openid)
+    print('post body ',request.POST)
+    if not user_id:
+        print('if not user_id:')
+        # select user by openid ,if not exist then return false
+        # return JsonResponse({'status':False,'msg':'用户id未传送'})
+    user = UserInfo.objects.filter(id=request.web.user.id).first()
+    if not user:
+        return JsonResponse({'status':False,'msg':'不存在的用户'})
+    if upload_file:#/Users/tanghuijuan/PycharmProjects/TaskSaas/web/static/uploads
+        fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'
+        ab_upload_path = os.path.join(settings.STATICFILES_DIRS[0]+'/uploads',fix+upload_file.name)
+        f = open(ab_upload_path, 'wb')
+        for i in upload_file.chunks():
+            f.write(i)
+        f.close()
+        ip_port = request.get_host()
+        file_url =  'http://'+ip_port+"/static/uploads/"+fix+upload_file.name
+        file_path = "/static/uploads/"+fix+upload_file.name
+        file_repository = FileRepository(name=upload_file.name, file=ab_upload_path,file_path=file_path,file_url=file_url,
+                                         ab_file_path=ab_upload_path,
+                                         file_size=upload_file.size,file_type=1,file_mime_type=get_file_type(upload_file),
+                                         update_user=user)
+        file_repository.save()
+    # 项目的已使用空间更新
+    # request.web.project.user_space += data_dict['file_size']
+    # request.web.project.save()
+        user.sys_avatar = file_url
+        user.save()
+
+        results = {
+            'id': file_repository.id,
+            'name': file_repository.name,
+            'file_size': file_repository.file_size,
+            'username': file_repository.update_user.username,
+            'datetime': file_repository.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
+            'file_type': file_repository.get_file_type_display(),
+            'file_url': file_url
+        }
+        print('file_url ',file_url)
+        return JsonResponse({'status': 1,"results": results })
+
+
 
 # @csrf_exempt
 def upload_file(request,project_id):

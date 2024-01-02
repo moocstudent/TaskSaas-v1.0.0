@@ -73,6 +73,7 @@ urlpatterns = [
     re_path(r'^sentry_setup/', sentry.sentry_setup, name='sentry_setup'),
 
     re_path(r'^fileupload/$', file.uploadfile_common, name='fileupload'),
+    re_path(r'^profileupload/$', file.uploadfile_profile, name='profileupload'),
 
 re_path(r'^manage/(?P<project_id>\d+)/', include([
 
