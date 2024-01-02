@@ -23,6 +23,7 @@ urlpatterns = [
     re_path(r'^register/', account.register, name='register'),
     re_path(r'^login/sms/', account.login_sms, name='login_sms'),
     re_path(r'^login/', account.login, name='login'),
+    re_path(r'^login/', account.login, name='login'),
 
     re_path(r'^do_login/', account.do_login, name='do_login'),
     re_path(r'^do_profile/', userinfo_view.do_profile, name='do_profile'),

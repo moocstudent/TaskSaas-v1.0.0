@@ -173,12 +173,13 @@ def uploadfile_common(request):
     print('openid',openid)
     print('post body ',request.POST)
     if not user_id:
+        print('if not user_id:')
         # select user by openid ,if not exist then return false
-        return JsonResponse({'status':False,'msg':'用户id未传送'})
-    user = UserInfo.objects.filter(id=user_id).first()
+        # return JsonResponse({'status':False,'msg':'用户id未传送'})
+    user = UserInfo.objects.filter(id=request.web.user.id).first()
     if not user:
         return JsonResponse({'status':False,'msg':'不存在的用户'})
-    if upload_file:
+    if upload_file:#/Users/tanghuijuan/PycharmProjects/TaskSaas/web/static/uploads
         fix = datetime.now().strftime('%Y%m%d%H%M%S%f') + '1'
         ab_upload_path = os.path.join(settings.STATICFILES_DIRS[0]+'/uploads',fix+upload_file.name)
         f = open(ab_upload_path, 'wb')

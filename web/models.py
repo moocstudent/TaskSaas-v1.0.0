@@ -24,6 +24,8 @@ class UserInfo(models.Model):
     # max_digits 表示整数部分有至多几位，decimal_places表示小数点后最多几位
     forward_score = models.DecimalField(verbose_name="进取分数",default=0.00,max_digits=9,decimal_places=2)
 
+    sys_avatar = models.CharField(verbose_name="系统头像", default='', max_length=300)
+
     glory_wearing = models.ForeignKey(verbose_name="佩戴的荣誉", null=True, blank=True, to="Glory",
                                 on_delete=models.SET_NULL)
 

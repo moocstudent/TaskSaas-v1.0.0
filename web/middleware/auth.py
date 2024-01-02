@@ -31,8 +31,14 @@ class AuthMiddleWare(MiddlewareMixin):
         user_id = request.session.get('user_id')
         print('user_id in process_request',user_id)
         user_object = models.UserInfo.objects.filter(id=user_id).first()
+
+        if user_object:
+            if user_object.sys_avatar == '':
+                user_object.sys_avatar = 'http://localhost:3000/static/web/image/default_profile.jpg'
         request.web.user = user_object
-        print('request session get user : ',request.web.user)
+
+        print('request session get user : ', request.web.user)
+
 
         # 白名单：没有登录都可以访问的URL
         """

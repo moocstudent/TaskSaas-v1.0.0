@@ -173,6 +173,38 @@ def login(request):
         form.add_error('username', '用户名或密码错误')
     return render(request, 'web/login.html', {'form': form})
 
+def do_login(request):
+    """
+    用户名密码登陆
+    :param request:
+    :return:
+    """
+    if request.method == 'GET':
+        form = LoginForm(request)
+        return render(request, 'web/login.html', {'form': form})
+    form = LoginForm(request, data=request.POST)
+
+    if form.is_valid():
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        print('password',password)
+
+        user_object = models.UserInfo.objects.filter(Q(email=username) | Q(username=username)) \
+            .filter(password=password).first()
+        print('user_obj',user_object)
+        if user_object:
+            # 登陆成功
+            request.session['user_id'] = user_object.id
+            request.session.set_expiry(60 * 60 * 24 * 14)
+            # execution remind deadline task
+            remind_deadline()
+            json_response = JsonResponse({'status': 1})
+            json_response['Access-Control-Allow-Origin'] = "*"
+            return json_response
+        form.add_error('username', '用户名或密码错误')
+        respo =JsonResponse({'status': 0, 'msg': "用户名或密码错误"})
+        respo['Access-Control-Allow-Origin'] = "*"
+        return respo
 
 def image_code(request):
     """

@@ -15,6 +15,7 @@ import django
 from django.utils.encoding import smart_str
 from elasticsearch_dsl.connections import connections
 
+
 django.utils.encoding.smart_text = smart_str
 
 from django.conf.urls import static
@@ -31,7 +32,7 @@ SECRET_KEY = 'vt1!_$!!o4ka5gakevbar9u!fhsjmuw900lw_3)f&s3!6ke3ep'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+
 
 connections.configure(
     default={"hosts": "localhost:9200"},
@@ -91,6 +92,7 @@ AUTHENTICATION_BACKENDS = ('TaskSaasAPP.token_util.CustomBackend',)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'TaskSaasAPP.mymiddle.CoreMiddle',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -100,7 +102,42 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_WHITELIST = (
+#     'http://127.0.0.1:8080',
+# )
+CORS_ALLOWED_ORIGINS_REGEXES = [
+    r'^http://.*?$',
+]
+# CORS_ORIGIN_REGEXES_WHITELIST = (
+#         r'^http://.*?$',
+# )
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'XMLHttpRequest',
+    'X_FILENAME',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Pragma',
+)
+
+ALLOWED_HOSTS = ["*"]
 
 CHANNEL_LAYERS = {
     "default": {
@@ -143,7 +180,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasksaas',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'zhangqi1112',
         'HOST': 'localhost',
         'PORT': 3306,
         'CHARSET': 'utf8',
@@ -191,7 +228,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'None'
 STATIC_URL = '/static/'
 # STATIC_ROOT = 'web/static'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
+    os.path.join(BASE_DIR, 'web/static')
 ]
 
 # 自己的短信模板相关配置
