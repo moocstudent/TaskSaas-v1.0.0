@@ -126,64 +126,80 @@
 
 {% endblock %}
 
+
 {% block content %}
+
     <div class="container-fluid" style="margin-top: 20px">
-
-        <div class="col-md-8">
-            <div id="chart" style="width:115%;min-width:700px;min-height:400px">
-
+        <div id="body-content">
+            <div class="layui-col-md8">
+                <div id="chart" style="width:115%;min-width:700px;min-height:400px">
+                </div>
             </div>
         </div>
-        <div class="col-md-4"></div>
+        <div class="layui-col-md4" style="padding-top: 3%">
+            <div class="" style="width: 120px;float:right;padding-right: 2%">年份选择</div>
+            <div class="layui-inline" style="float:right;padding-right: 4%">
+                <input type="text" class="layui-input" id="ID-laydate-type-year" placeholder="yyyy">
+            </div>
+        </div>
     </div>
+
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+
 {% endblock %}
 
 {% block js %}
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById("chart"));
-        let dayListDirect = '[]'
-        let dayList = (localStorage.getItem("dayList" +{{ request.web.project.id}})) || dayListDirect
+        var dayListDirect = '[]'
+        {#var dayList = (localStorage.getItem("dayList" +{{ request.web.project.id}})) || dayListDirect#}
+        var dayList = dayListDirect
 
-        function getCalendarList() {
+        var yearSelect = localStorage.getItem("yearSelect") ? localStorage.getItem("yearSelect") : new Date().getFullYear();
+
+        function getCalendarList(year) {
+            console.log('get calendar list')
             $.ajax({
                 url: "{% url 'work_record_list' project_id=request.web.project.id %}",
                 type: "GET",
+                async: false,
                 data: {
-                    "year": "2023",
+                    "year": year == null ? yearSelect : year,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 {#dataType: "JSON",#}
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
-                        console.log("reload")
+                        {#console.log("reload")#}
                         {#location.reload();#}
-                        console.log('res data : ', JSON.stringify((res.data)))
-                        console.log('res data : ', JSON.stringify(res.data))
-                        localStorage.setItem("dayList" +{{ request.web.project.id}}, JSON.stringify(res.data))
+                        {#console.log('res data : ', JSON.stringify((res.data)))#}
+                        {#console.log('res data : ', JSON.stringify(res.data))#}
+                        {#localStorage.setItem("dayList" +{{ request.web.project.id}}, JSON.stringify(res.data))#}
                         dayListDirect = JSON.stringify(res.data)
                     } else {
                         localStorage.setItem("dayList" +{{ request.web.project.id}}, '[]')
+                        dayListDirect = JSON.stringify('[]')
                     }
                 }
 
             })
         }
 
-        getCalendarList()
+        {#getCalendarList(yearSelect)#}
 
-        var vdata = getVirtualData("2023")
+        var vdata = getVirtualData(yearSelect)
 
         function getVirtualData(year) {
-            getCalendarList()
+            dayList = dayListDirect
+            {#getCalendarList()#}
             console.log('dayList', dayList)
             {#console.log('dayList p.length', JSON.parse(dayList).length)#}
             {#getCalendarList()#}
             let dayListN = JSON.parse(dayList)
             {#let dayListN = []#}
             console.log('dayListN:', dayListN)
-            if (dayListN == null || dayListN == undefined) {
+            if (dayListN == null) {
                 dayListN = []
             }
             console.log('getVirtualData dayList', dayListN)
@@ -197,14 +213,11 @@
                 let pushAlready = false;
                 for (; cday < dayListN.length;) { //dayListN is ordered list maybe shorter than outter for loop dates
                     let day = (dayListN[cday].calendar_day)
-                    console.log('day:<<<<', day)
                     if (day === showDate) {//if date equals then push to data and set pushAlready 2 true and increase cday++ (judgement next day) and
                         // then break this loop
-                        console.log('day:' + day + ',showDate:' + showDate)
+                        {#console.log('day:' + day + ',showDate:' + showDate)#}
                         data.push([
-                            showDate
-                            ,
-                            24
+                            showDate, 24
                         ]);
                         pushAlready = true
                         cday++
@@ -224,16 +237,13 @@
                 }
 
             }
-            console.log("data>>", data)
             return data;
         }
 
         let graphData = [
             {#['2016-02-04', 200],#}
             {#['2016-02-09', 279],#}
-
         ];
-
 
         option = {
             {#color: ["#c0c1cc", "#c9bbcf", "#b8a8bd", "#aca7c8", "#a09ad1", "#d2b48c", "#373715", "#755dff", "#b78d82"],#}
@@ -307,7 +317,7 @@
                 left: 30,
                 right: 30,
                 cellSize: 20,
-                range: '2023',
+                range: yearSelect,
                 itemStyle: {
                     borderType: 'dashed',
                     borderWidth: 1,
@@ -417,7 +427,7 @@
                     type: 'heatmap',
                     coordinateSystem: 'calendar',
                     //get work calendar date from DB
-                    data: getVirtualData("2023"),
+                    data: getVirtualData(yearSelect),
                     emphasis: {
                         itemStyle: {
                             shadowBlur: 0.2,
@@ -557,7 +567,6 @@
             console.log('params dbclick value ', params.value)
             console.log('params dbclick data ', params.data)
             if (params.data && params.value && params.value[0]) {
-
                 option.series[0].links = null
                 option.series[0].data = null
                 myChart.setOption(option)
@@ -597,14 +606,14 @@
                                     sendCalendarDayContent(params.value[0], util.escape(value));
                                 } else if (thisCalEditDataId && document.querySelector(".layui-layer-input").value.length == 0) {
                                     //删除该条记录
-                                    delCalendarRecord(thisCalEditDataId,document.querySelector(".layui-layer-input").value)
+                                    delCalendarRecord(thisCalEditDataId, document.querySelector(".layui-layer-input").value)
                                 }
-                                getCalendarList()
-                                vdata = getVirtualData("2023")
+                                getCalendarList(yearSelect)
+                                vdata = getVirtualData(yearSelect)
                                 setTimeout(function () {
                                     // 关闭 prompt
                                     layer.close(index);
-                                    window.location.reload()
+                                    {#window.location.reload()#}
                                 }, 1500);
                             }
                         )
@@ -655,7 +664,7 @@
                     })
                     //when press esc (event27) then close prompt of editor
                     $(document).keyup(function (event) {
-                        if (event.which == 27) {
+                        if (event.which === 27) {
                             //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算
                             layer.close(prompt);
                         }
@@ -686,6 +695,7 @@
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
+                        window.location.reload()
                         layer.msg('保存成功')
                     } else {
                         layer.msg('保存失败')
@@ -703,17 +713,27 @@
                 type: "POST",
                 data: {
                     "id": id,
-                    "content": content, //nginx 真的好学吗 nginx有几个模块1-二进制可执行文件，2-conf配置文件，3-access.log访问日志，4-error.log异常日志
+                    "content": content,
+                    //nginx 真的好学吗
+                    // nginx有几个模块
+                    // 1-二进制可执行文件，
+                    // 2-conf配置文件，
+                    // 3-access.log访问日志，
+                    // 4-error.log异常日志
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
+                        window.location.reload()
                         layer.msg('更新成功')
                     } else {
                         layer.msg('更新失败')
                     }
+                    {#option.calendar.range = yearSelect#}
+                    {#option.series[1].data = getVirtualData(yearSelect)#}
+                    {#myChart.setOption(option)#}
                 }
             })
         }
@@ -734,6 +754,7 @@
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
+                        window.location.reload()
                         layer.msg('删除成功')
                     } else {
                         layer.msg('删除失败')
@@ -754,9 +775,9 @@
                 success: function (res) {
                     console.log(res);
                     if (res.status) {
-                        layer.msg('查询成功')
                         console.log("record ", res.record)
                         location.reload();
+                        layer.msg('查询成功')
                     } else {
 
                     }
@@ -764,5 +785,35 @@
 
             })
         }
+
+        layui.use(function () {
+            console.log('layui use function ');
+            var laydate = layui.laydate;
+            getCalendarList(yearSelect)
+            vdata = getVirtualData(yearSelect)
+            option.calendar.range = yearSelect
+            option.series[1].data = getVirtualData(yearSelect)
+            myChart.setOption(option)
+            // 年选择器
+            laydate.render({
+                elem: '#ID-laydate-type-year',
+                value: yearSelect,
+                type: 'year',
+                done: function (value, date, endDate) {
+                    console.log(date.year);
+                    yearSelect = date.year
+                    localStorage.setItem("yearSelect", yearSelect)
+                    getCalendarList(yearSelect)
+                    vdata = getVirtualData(yearSelect)
+                    option.calendar.range = date.year
+                    option.series[1].data = getVirtualData(date.year)
+                    myChart.setOption(option)
+                    {#$("#body-content").load(location.href + "#body-content")#}
+                    {#console.log(value); // 日期字符，如： 2017-08-18#}
+                    {#console.log(date); // 包含年月日时分秒各项值的对象#}
+                    {#console.log(endDate); // 结束日期时间对象，当设置 range 时才会返回。对象成员同上。#}
+                }
+            });
+        });
     </script>
 {% endblock %}
