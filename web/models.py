@@ -8,23 +8,23 @@ class UserInfo(models.Model):
     用户信息
     """
     username = models.CharField(verbose_name="用户名", max_length=100, db_index=True)  # db_index=True 索引
-    nick_name = models.CharField(verbose_name="昵称", default='', max_length=100, db_index=True)  # db_index=True 索引
+    nick_name = models.CharField(verbose_name="昵称", default='', max_length=100, db_index=True,null=True,blank=True)  # db_index=True 索引
     git_username = models.CharField(verbose_name="Git用户名", max_length=100, default='',
-                                    db_index=True)  # db_index=True 索引
-    email = models.EmailField(verbose_name="邮箱", max_length=100)
+                                    db_index=True,null=True,blank=True)  # db_index=True 索引
+    email = models.EmailField(verbose_name="邮箱", max_length=100,default='',blank=True,null=True)
     # git 头像或者其他设置的头像
-    git_avatar = models.CharField(verbose_name="Git头像", default='', max_length=300)
-    mobile_phone = models.CharField(verbose_name="手机号码", max_length=32)
+    git_avatar = models.CharField(verbose_name="Git头像", default='', max_length=300,null=True,blank=True)
+    mobile_phone = models.CharField(verbose_name="手机号码", max_length=32,null=True,blank=True,default='')
     password = models.CharField(verbose_name="密码", max_length=100)
-    git_password = models.CharField(verbose_name="Git密码", default='', max_length=100)
-    wechat_openid = models.CharField(verbose_name="微信小程序获取的用户openid", default='', max_length=100)
-    wechat_unionid = models.CharField(verbose_name="微信小程序获取的用户unionid", default='', max_length=100)
-    wechat_nickname = models.CharField(verbose_name="微信昵称", default='', max_length=100)
-    wechat_avatar = models.CharField(verbose_name="微信头像url地址", default='', max_length=150)
+    git_password = models.CharField(verbose_name="Git密码", default='', max_length=100,null=True,blank=True)
+    wechat_openid = models.CharField(verbose_name="微信小程序获取的用户openid", default='', max_length=100,null=True,blank=True)
+    wechat_unionid = models.CharField(verbose_name="微信小程序获取的用户unionid", default='', max_length=100,null=True,blank=True)
+    wechat_nickname = models.CharField(verbose_name="微信昵称", default='', max_length=100,null=True,blank=True)
+    wechat_avatar = models.CharField(verbose_name="微信头像url地址", default='', max_length=150,null=True,blank=True)
     # max_digits 表示整数部分有至多几位，decimal_places表示小数点后最多几位
-    forward_score = models.DecimalField(verbose_name="进取分数",default=0.00,max_digits=9,decimal_places=2)
+    forward_score = models.DecimalField(verbose_name="进取分数",default=0.00,max_digits=9,decimal_places=2,null=True,blank=True)
 
-    sys_avatar = models.CharField(verbose_name="系统头像", default='', max_length=300)
+    sys_avatar = models.CharField(verbose_name="系统头像", default='', max_length=300,null=True,blank=True)
 
     glory_wearing = models.ForeignKey(verbose_name="佩戴的荣誉", null=True, blank=True, to="Glory",
                                 on_delete=models.SET_NULL)
@@ -121,7 +121,7 @@ class Project(models.Model):
 
     name = models.CharField(verbose_name='项目名', max_length=32)
     color = models.SmallIntegerField(verbose_name='颜色', choices=COLOR_CHOICES, default=1)
-    desc = models.CharField(verbose_name='项目描述', max_length=255, null=True, blank=True)
+    remark = models.CharField(verbose_name='项目描述', max_length=255, null=True, blank=True)
     user_space = models.BigIntegerField(verbose_name='项目已使用空间', default=0, help_text='字节')
     star = models.BooleanField(verbose_name='星标', default=False)
 
