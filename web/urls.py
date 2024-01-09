@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar, project_user_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
-    sentry, userinfo_view, glory
+    sentry, userinfo_view, glory, milestone
 from web.views.upload import FileUploadView
 
 urlpatterns = [
@@ -84,6 +84,8 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^attention_cache_set/', cache.attention_cache_set, name='attention_cache'),
 
     re_path(r'^statistics/$', manage.statistics, name='statistics'),
+    re_path(r'^milestone/$', milestone.milestone, name='milestone'),
+    re_path(r'^milestone_add/$', milestone.milestone_add, name='milestone_add'),
     re_path(r'^git/$', manage.git, name='git'),
     re_path(r'^tool/$', manage.tool, name='tool'),
     re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),

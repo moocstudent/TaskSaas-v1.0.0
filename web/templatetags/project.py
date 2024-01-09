@@ -141,6 +141,7 @@ def manage_menu_list(request):
         {'title': '概览', 'url': reverse('dashboard', kwargs={'project_id': request.web.project.id})},
         {'title': '问题', 'url': reverse('issues', kwargs={'project_id': request.web.project.id})},
         {'title': '统计', 'url': reverse('statistics', kwargs={'project_id': request.web.project.id})},
+        {'title': '迭代', 'url': reverse('milestone', kwargs={'project_id': request.web.project.id})},
         {'title': 'Git', 'url': reverse('git', kwargs={'project_id': request.web.project.id})},
         {'title': '工具', 'url': reverse('tool', kwargs={'project_id': request.web.project.id})},
         {'title': '文件', 'url': reverse('file', kwargs={'project_id': request.web.project.id})},
