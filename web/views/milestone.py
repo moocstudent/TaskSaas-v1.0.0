@@ -12,4 +12,5 @@ def milestone_add(request,project_id):
     print('milestone_name',milestone_name)
     print('milestone_remark',milestone_remark)
     print('milestone_date_range',milestone_date_range)
+    date_range_split = milestone_date_range.split(' - ')
     return JsonResponse({'status':1})
