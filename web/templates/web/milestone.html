@@ -19,12 +19,20 @@
     </div>
 
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+    <input id="ms_list" value="{{ ms_list }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
     <script>
+        const ms_list = eval(document.getElementById("ms_list").value);
+        console.log('ms_list', ms_list)
+        ms_list.map(ms => ms.name)
         var myChart = echarts.init(document.getElementById("chart"));
-        let axisData = ['版本0', 'v1', 'v2', 'stable单体', 'stable单体v1', '微服务', 'stable微服务v1', 'stable微服务v2'];
+        layer.tips('点击里程碑内空白处添加新里程碑，点击里程碑spot修改里程碑。', document.getElementById("chart"), {
+            tips: 4,
+            time: 20000
+        });
+        let axisData = ms_list.map(ms => ms.name)
         let dataBase = 50
         const data = axisData.map(function (item, i) {
             return dataBase += 50;
@@ -103,129 +111,233 @@
         myChart.setOption(option);
         myChart.hideLoading()
 
-        function myChartDivClick() {
-            layer.msg('chart div click')
-        }
+        const formContent = '<div class="layui-form">' +
+            '<input id="milestoneId" hidden="hidden">' +
+            '<input type="text" required id="milestoneName" name="name" placeholder="里程碑名" class="layui-input">' +
+            ' <hr class="ws-space-16">' +
+            '<textarea required id="milestoneRemark" name="remark" placeholder="里程碑概述" class="layui-textarea"></textarea>' +
+            '</div>' +
+            ' <div class="layui-form-item">' +
+            ' <div class="layui-inline">' +
+            ' <hr class="ws-space-16">' +
+            '<label class="layui-form-label">周期</label>' +
+            '<div class="layui-inline" id="ID-laydate-rangeLinked">' +
+            ' <div class="layui-input-inline">' +
+            '<input required type="text" autocomplete="off" id="ID-laydate-start-date-1" class="layui-input" placeholder="开始日期">' +
+            '</div>' +
+            '<div class="layui-form-mid">-</div>' +
+            '<div class="layui-input-inline">' +
+            '<input required type="text" autocomplete="off" id="ID-laydate-end-date-1" class="layui-input" placeholder="结束日期">' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>'
+
 
         let milestoneDates = null
-        layui.use(function () {
-            var util = layui.util;
-            var layer = layui.layer;
-            myChart.on("click", function (params) {
-                let dataIndex = params.dataIndex;
-                {#console.log('seriesIndex',seriesIndex)#}
-                console.log('dataIndex', dataIndex)
-                option.tooltip.show = false
-                event.stopPropagation(); // 阻止事件冒泡
-                layer.msg('chart click')
-                let milestoneWindow = layer.open({
-                    title: '请输入里程碑信息',
-                    content:
-                        '<div class="layui-form">' +
-                        '<input type="text" required id="milestoneName" name="name" placeholder="里程碑名" class="layui-input">' +
-                        ' <hr class="ws-space-16">' +
-                        '<textarea required id="milestoneRemark" name="remark" placeholder="里程碑概述" class="layui-textarea"></textarea>' +
-                        '</div>' +
-                        ' <div class="layui-form-item">' +
-                        ' <div class="layui-inline">' +
-                        ' <hr class="ws-space-16">' +
-                        '<label class="layui-form-label">周期</label>' +
-                        '<div class="layui-inline" id="ID-laydate-rangeLinked">' +
-                        ' <div class="layui-input-inline">' +
-                        '<input required type="text" autocomplete="off" id="ID-laydate-start-date-1" class="layui-input" placeholder="开始日期">' +
-                        '</div>' +
-                        '<div class="layui-form-mid">-</div>' +
-                        '<div class="layui-input-inline">' +
-                        '<input required type="text" autocomplete="off" id="ID-laydate-end-date-1" class="layui-input" placeholder="结束日期">' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>',
-                    success: function (layero, index) {
-                        layui.use(function () {
-                            var laydate = layui.laydate;
-                            // 日期范围 - 左右面板联动选择模式
-                            laydate.render({
-                                elem: '#ID-laydate-rangeLinked',
-                                range: ['#ID-laydate-start-date-1', '#ID-laydate-end-date-1'],
-                                rangeLinked: true, // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
-                                done: function (value, date) {
-                                    console.log('value ', value)
-                                    milestoneDates = value
-                                }
-                            });
-                        })
-                    },
-                    yes: function (value, index, elem) {
-                        console.log('value', value)
-                        console.log('index', index)
-                        console.log('elem', elem)
-                        let milestoneName = $("#milestoneName").val()
-                        let milestoneRemark = $("#milestoneRemark").val()
-                        console.log('milestoneName', milestoneName)
-                        console.log('milestoneRemark', milestoneRemark)
-                        console.log('milestoneDates', milestoneDates)
-                        if (!milestoneName || !milestoneRemark || !milestoneDates) {
-                            layer.msg('请填写完毕内容');
-                            return
-                        }
-                        let mlstoneRecordLoading = layer.load(0);
-                        layer.confirm('确定将' + milestoneDates + '的issues纳入到里程碑:\"' + milestoneName + '\"？', {
-                            btn: ['确定', '关闭'] //按钮
-                        }, function () {
-                            {#layer.msg('第一个回调', {icon: 1});#}
-                            $.ajax({
-                                url: "{% url 'milestone_add' project_id=request.web.project.id %}",
-                                type: "POST",
-                                data: {
-                                    "milestone_name": milestoneName,
-                                    "milestone_remark": milestoneRemark,
-                                    "milestone_date_range": milestoneDates,
-                                    "csrfmiddlewaretoken": $("#csrf_token").val()
-                                },
-                                dataType: "JSON",
-                                success: function (res) {
-                                    console.log(res);
-                                    if (res.status) {
-                                        console.log("reload")
-                                        location.reload();
-                                    } else {
 
-                                    }
-                                }
-
-                            })
-                            layer.close(mlstoneRecordLoading)
-                        }, function () {
-                            layer.close(mlstoneRecordLoading)
-                            {% comment %}   layer.msg('第二个回调', {
-                                   time: 20000, // 20s 后自动关闭
-                                   btn: ['明白了', '知道了']
-                               });{% endcomment %}
+        myChart.on("click", function (params) {
+            let dataIndex = params.dataIndex;
+            {#console.log('seriesIndex',seriesIndex)#}
+            console.log('dataIndex', dataIndex)
+            option.tooltip.show = false
+            event.stopPropagation(); // 阻止事件冒泡
+            layer.msg('chart click')
+            var milestoneWindow = layer.open({
+                title: '请输入里程碑信息',
+                content: formContent,
+                success: function (layero, index) {
+                    layui.use(function () {
+                        var laydate = layui.laydate;
+                        // 日期范围 - 左右面板联动选择模式
+                        laydate.render({
+                            elem: '#ID-laydate-rangeLinked',
+                            range: ['#ID-laydate-start-date-1', '#ID-laydate-end-date-1'],
+                            value: ms_list[dataIndex].date_range,
+                            rangeLinked: true, // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
+                            done: function (value, date) {
+                                console.log('value ', value)
+                                milestoneDates = value
+                            }
                         });
-
-                        {#layer.close(milestoneWindow)#}
-
-                    },
-                    end: function () {
-                        //更新索引
-                        {% comment %}if (typeof layer.escIndex === 'object') {
-                            layer.escIndex.splice(0, 1);
-                        }{% endcomment %}
+                    })
+                },
+                btn: ['更新', '删除'],
+                yes: function (value, index, elem) {
+                    let milestoneId = $("#milestoneId").val()
+                    let milestoneName = $("#milestoneName").val()
+                    let milestoneRemark = $("#milestoneRemark").val()
+                    console.log('milestoneName', milestoneName)
+                    console.log('milestoneRemark', milestoneRemark)
+                    console.log('milestoneDates', milestoneDates)
+                    if (!milestoneName || !milestoneRemark || !milestoneDates) {
+                        layer.msg('请填写完毕内容');
+                        return
                     }
-                }, function (value, index, elem) {
-                    console.log('value', value)
-                    console.log('index', index)
-                    console.log('elem', elem)
-                    if (value === '') return elem.focus();
-                    layer.msg('获得：' + util.escape(value)); // 显示 value
-                    axisData[dataIndex] = util.escape(value)
-                    refreshOptionWithMilestone(axisData)
-                    // 关闭 prompt
-                    layer.close(index);
-                });
+                    let mlstoneRecordLoading = layer.load(0);
+                    layer.confirm('确定将' + milestoneDates + '的issues纳入到里程碑:\"' + milestoneName + '\"？', {
+                        btn: ['确定', '关闭'] //按钮
+                    }, function () {
+                        {#layer.msg('第一个回调', {icon: 1});#}
+                        $.ajax({
+                            url: "{% url 'milestone_add_or_update' project_id=request.web.project.id %}",
+                            type: "POST",
+                            data: {
+                                "milestone_id": milestoneId,
+                                "milestone_name": milestoneName,
+                                "milestone_remark": milestoneRemark,
+                                "milestone_date_range": milestoneDates,
+                                "csrfmiddlewaretoken": $("#csrf_token").val()
+                            },
+                            dataType: "JSON",
+                            success: function (res) {
+                                console.log(res);
+                                if (res.status) {
+                                    console.log("reload")
+                                    location.reload();
+                                } else {
+
+                                }
+                            }
+
+                        })
+                        layer.close(mlstoneRecordLoading)
+                    }, function () {
+                        layer.close(mlstoneRecordLoading)
+                        {% comment %}   layer.msg('第二个回调', {
+                               time: 20000, // 20s 后自动关闭
+                               btn: ['明白了', '知道了']
+                           });{% endcomment %}
+                    });
+                    {#layer.close(milestoneWindow)#}
+                },
+                btn2() {
+                    let milestoneId = $("#milestoneId").val()
+                    let milestoneName = $("#milestoneName").val()
+                    if (!milestoneId) {
+                        layer.msg('不可删除');
+                        return
+                    }
+                    let mlstoneDelLoading = layer.load(0);
+                    layer.confirm('确定将里程碑:\"' + milestoneName + '\"删除？', {
+                        btn: ['确定', '关闭'] //按钮
+                    }, function () {
+                        {#layer.msg('第一个回调', {icon: 1});#}
+                        $.ajax({
+                            url: "{% url 'milestone_del' project_id=request.web.project.id %}",
+                            type: "POST",
+                            data: {
+                                "milestone_id": milestoneId,
+                                "csrfmiddlewaretoken": $("#csrf_token").val()
+                            },
+                            dataType: "JSON",
+                            success: function (res) {
+                                console.log(res);
+                                if (res.status) {
+                                    console.log("reload")
+                                    location.reload();
+                                } else {
+
+                                }
+                            }
+
+                        })
+                        layer.close(mlstoneDelLoading)
+                    }, function () {
+                        layer.close(mlstoneDelLoading)
+                    });
+                    {#layer.close(milestoneWindow)#}
+                },
+                end: function () {
+                    //更新索引
+                    {% comment %}if (typeof layer.escIndex === 'object') {
+                        layer.escIndex.splice(0, 1);
+                    }{% endcomment %}
+                }
             });
-        })
+            $("#milestoneId").val(ms_list[dataIndex].id)
+            $("#milestoneName").val(ms_list[dataIndex].name)
+            $("#milestoneRemark").val(ms_list[dataIndex].remark)
+        });
+
+        function myChartDivClick() {
+            layer.msg('chart div click')
+            var milestoneWindow = layer.open({
+                title: '请输入里程碑信息',
+                content: formContent,
+                success: function (layero, index) {
+                    layui.use(function () {
+                        var laydate = layui.laydate;
+                        // 日期范围 - 左右面板联动选择模式
+                        laydate.render({
+                            elem: '#ID-laydate-rangeLinked',
+                            range: ['#ID-laydate-start-date-1', '#ID-laydate-end-date-1'],
+                            rangeLinked: true, // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
+                            done: function (value, date) {
+                                console.log('value ', value)
+                                milestoneDates = value
+                            }
+                        });
+                    })
+                },
+                yes: function (value, index, elem) {
+                    let milestoneId = $("#milestoneId").val()
+                    let milestoneName = $("#milestoneName").val()
+                    let milestoneRemark = $("#milestoneRemark").val()
+                    console.log('milestoneName', milestoneName)
+                    console.log('milestoneRemark', milestoneRemark)
+                    console.log('milestoneDates', milestoneDates)
+                    if (!milestoneName || !milestoneRemark || !milestoneDates) {
+                        layer.msg('请填写完毕内容');
+                        return
+                    }
+                    let mlstoneRecordLoading = layer.load(0);
+                    layer.confirm('确定将' + milestoneDates + '的issues纳入到里程碑:\"' + milestoneName + '\"？', {
+                        btn: ['确定', '关闭'] //按钮
+                    }, function () {
+                        {#layer.msg('第一个回调', {icon: 1});#}
+                        $.ajax({
+                            url: "{% url 'milestone_add_or_update' project_id=request.web.project.id %}",
+                            type: "POST",
+                            data: {
+                                "milestone_id": milestoneId,
+                                "milestone_name": milestoneName,
+                                "milestone_remark": milestoneRemark,
+                                "milestone_date_range": milestoneDates,
+                                "csrfmiddlewaretoken": $("#csrf_token").val()
+                            },
+                            dataType: "JSON",
+                            success: function (res) {
+                                console.log(res);
+                                if (res.status) {
+                                    console.log("reload")
+                                    location.reload();
+                                } else {
+
+                                }
+                            }
+
+                        })
+                        layer.close(mlstoneRecordLoading)
+                    }, function () {
+                        layer.close(mlstoneRecordLoading)
+                        {% comment %}   layer.msg('第二个回调', {
+                               time: 20000, // 20s 后自动关闭
+                               btn: ['明白了', '知道了']
+                           });{% endcomment %}
+                    });
+
+                    {#layer.close(milestoneWindow)#}
+
+                },
+                end: function () {
+                    //更新索引
+                    {% comment %}if (typeof layer.escIndex === 'object') {
+                        layer.escIndex.splice(0, 1);
+                    }{% endcomment %}
+                }
+            });
+        }
 
         function refreshOptionWithMilestone(milestoneData) {
             option.xAxis.data = milestoneData

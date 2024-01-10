@@ -570,26 +570,21 @@ def do_issue_list(request):
     user_id = request.GET.get("user_id")
     user = UserInfo.objects.filter(id=user_id).filter()
     project_id = request.GET.get("project_id")
-    print('project_id',project_id)
     project = Project.objects.filter(id=project_id).first()
     q = request.GET.get('q')
-    print('q>',q)
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
         # 筛选条件(根据用户通过GET传过来的参数实现)
         # ?status=1&status=2&issues_type=1
         condition = {}
         for name in allow_filter_name:
-            print('name>>>>>>', name)
             value_list = request.GET.getlist(name)
-            print('request value_list', value_list)
             request_object = request.GET.get(name)
             if name == 'issues_type' and request_object:
                 issues_type_ids = request_object.split(',')
                 if issues_type_ids:
                     print('request value_str', issues_type_ids)
                     if len(value_list) > len(issues_type_ids):
-                        print('BIG')
                         condition['{}__in'.format(name)] = value_list
                     else:
                         condition['{}__in'.format(name)] = issues_type_ids
@@ -615,8 +610,6 @@ def do_issue_list(request):
             queryset=queryset.filter(qq)
         trigger = cache.get('mytaskTrigger' + str(user_id) + '_' + str(project_id), 'off')
         if trigger == 'on':
-            print("trigger == 'on':")
-            print(user)
             queryset = queryset.filter(Q(assign=user) | Q(attention=user)
                                        | Q(creator=user)).distinct()
         print('issues_filter size aft filter ', len(queryset))

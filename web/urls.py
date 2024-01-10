@@ -85,7 +85,8 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
 
     re_path(r'^statistics/$', manage.statistics, name='statistics'),
     re_path(r'^milestone/$', milestone.milestone, name='milestone'),
-    re_path(r'^milestone_add/$', milestone.milestone_add, name='milestone_add'),
+    re_path(r'^milestone_add_or_update/$', milestone.milestone_add_or_update, name='milestone_add_or_update'),
+    re_path(r'^milestone_del/$', milestone.milestone_del, name='milestone_del'),
     re_path(r'^git/$', manage.git, name='git'),
     re_path(r'^tool/$', manage.tool, name='tool'),
     re_path(r'^tool_generate_str/$', tool.generate_random_chinese_string, name='tool_generate_str'),
