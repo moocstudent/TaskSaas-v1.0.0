@@ -257,14 +257,12 @@ class FileRepository(models.Model):
     file_url = models.CharField(verbose_name='网络路径', max_length=255, null=True, blank=True)
     ab_file_path = models.CharField(verbose_name='服务器绝对路径', max_length=255, null=True, blank=True)
     file = models.FileField(null=True, upload_to=upload_to, max_length=500)
-
     parent = models.ForeignKey(verbose_name='父级目录', to='self', related_name='child', null=True, blank=True,
                                on_delete=models.SET_NULL)
-
     update_user = models.ForeignKey(verbose_name='最近更新者', null=True, to='UserInfo', on_delete=models.SET_NULL)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
 
-
+# 问题
 class Issues(models.Model):
     id = models.BigAutoField(primary_key=True)
     issue_id = models.BigIntegerField(default=0, null=True, blank=True)
@@ -272,7 +270,6 @@ class Issues(models.Model):
     project = models.ForeignKey(verbose_name='项目', to='Project', null=True, on_delete=models.SET_NULL)
     issues_type = models.ForeignKey(verbose_name='问题类型', to='IssuesType', null=True, on_delete=models.SET_NULL)
     module = models.ForeignKey(verbose_name='模块', to='Module', null=True, blank=True, on_delete=models.SET_NULL)
-
     subject = models.CharField(verbose_name='主题', max_length=80)
     desc = models.TextField(verbose_name='问题描述', null=True, blank=True)
     priority_choices = {
@@ -281,7 +278,6 @@ class Issues(models.Model):
         ("success", "低"),
     }
     priority = models.CharField(verbose_name='优先级', max_length=12, choices=priority_choices, default='danger')
-
     # 新建/处理中/已解决/已忽略/待反馈/已关闭/重新打开
     status_choices = {
         (1, '新建'),
@@ -293,33 +289,48 @@ class Issues(models.Model):
         (7, '重新打开'),
     }
     status = models.SmallIntegerField(verbose_name='状态', choices=status_choices, default=1)
-
+    milestone = models.ForeignKey(verbose_name='所属里程碑',to='Milestone',related_name='ms',null=True,blank=True,
+                                  on_delete=models.SET_NULL)
     assign = models.ForeignKey(verbose_name='指派', to='UserInfo', related_name='task', null=True, blank=True,
                                on_delete=models.SET_NULL)
     attention = models.ManyToManyField(verbose_name='关注者', to='UserInfo', related_name='observe', blank=True)
-
     start_date = models.DateField(verbose_name='开始时间', null=True, blank=True)
     end_date = models.DateField(verbose_name='结束时间', null=True, blank=True)
-
     mode_choices = {
         (1, '公开模式'),
         (2, '隐私模式'),
     }
     mode = models.SmallIntegerField(verbose_name='模式', choices=mode_choices, default=1)
-
     parent = models.ForeignKey(verbose_name='父问题', to='self', related_name='child', null=True, blank=True,
                                on_delete=models.SET_NULL)
-
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL,
                                 related_name='create_problems')
-
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='创建时间', auto_now=True)
-
     using_time = models.CharField(verbose_name='用时从创建到已解决到用时format',max_length=30,default=None,null=True,blank=True)
-
     def __str__(self):
         return self.subject
+
+# 问题tag
+class IssuesTag(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(verbose_name='tag名', max_length=32)
+    remark = models.CharField(verbose_name='tag备注', max_length=2000)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
+    create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
+    def __str__(self):
+        return self.name
+
+# 问题 tag 关联
+class IssuesTagRelation(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    issue = models.ForeignKey(verbose_name='问题', to='Issues',null=True,blank=True,on_delete=models.SET_NULL)
+    tag = models.ForeignKey(verbose_name='tag', to='IssuesTag',null=True,blank=True,on_delete=models.SET_NULL)
+    creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
+    create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
+    latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
+
 
 
 class IssuesLog(models.Model):
@@ -328,19 +339,16 @@ class IssuesLog(models.Model):
     """问题"""
     creator = models.ForeignKey(verbose_name='更新者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
     record = models.TextField(verbose_name='更新记录', null=True, blank=True)
-
     type_choices = {
         (1, '新建'),
         (2, '更新'),
         (3, '回复'),
         (4, '删除'),
     }
-
     log_type = models.SmallIntegerField(verbose_name='日志类型', choices=type_choices, default=2)
     # 或之前issues再次更改，会再产生一条新的issuesChangeLog，create_datetime对应其latest_update_datetime
     create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
     latest_update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now=True)
-
     def __str__(self):
         return self.issues
 
@@ -350,7 +358,6 @@ class Module(models.Model):
     """模块(里程碑)"""
     project = models.ForeignKey(verbose_name='项目', null=True, to='Project', on_delete=models.SET_NULL)
     title = models.CharField(verbose_name='模块名称', max_length=32)
-
     def __str__(self):
         return self.title
 
@@ -386,12 +393,9 @@ class InfoLog(models.Model):
 class IssuesType(models.Model):
     id = models.BigAutoField(primary_key=True)
     """问题类型 例如：任务，功能，Bug，需求确认"""
-
     PROJECT_INIT_LIST = ["任务", "功能", "Bug", "需求确认"]
-
     title = models.CharField(verbose_name='类型名称', max_length=32)
     project = models.ForeignKey(verbose_name='项目', null=True, to='Project', on_delete=models.SET_NULL)
-
     def __str__(self):
         return self.title
 
@@ -399,20 +403,17 @@ class IssuesType(models.Model):
 class IssuesReply(models.Model):
     id = models.BigAutoField(primary_key=True)
     """ 问题回复"""
-
     reply_type_choices = (
         (1, '修改记录'),
         (2, '回复')
     )
     reply_type = models.IntegerField(verbose_name='类型', choices=reply_type_choices)
-
     issues = models.ForeignKey(verbose_name='问题', db_column='issues_pk', to="Issues", null=True,
                                on_delete=models.SET_NULL)
     content = models.TextField(verbose_name='描述')
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, related_name='create_reply',
                                 on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-
     reply = models.ForeignKey(verbose_name='回复', to='self', null=True, blank=True, on_delete=models.SET_NULL)
 
 

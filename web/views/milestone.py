@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from TaskSaas.serializers.milestone_serializer import MilestoneSerializer
-from web.models import Milestone, Project
+from web.models import Milestone, Project, Issues
 
 
 def milestone(request, project_id):
@@ -20,6 +20,10 @@ def milestone_add_or_update(request,project_id):
     milestone_name = request.POST.get('milestone_name')
     milestone_remark = request.POST.get('milestone_remark')
     milestone_date_range = request.POST.get('milestone_date_range')
+    sync_issues = request.POST.get('sync_issues')
+    is_sync_issues = sync_issues.lower() == 'true'
+
+
     if milestone_id:
         # update
         ms_update = Milestone.objects.filter(id=milestone_id).first()
@@ -27,12 +31,28 @@ def milestone_add_or_update(request,project_id):
         ms_update.remark = milestone_remark
         ms_update.date_range = milestone_date_range
         ms_update.save()
+        if is_sync_issues:
+            ms_dates = milestone_date_range.split(' - ')
+            ms_issues = Issues.objects.filter(create_datetime__range=(ms_dates[0], ms_dates[1]))
+            print('ms_issues len ', len(ms_issues))
+            for i in ms_issues:
+                i.milestone = ms_update
+                i.save()
+            # 将这些issues更新milestone到当前milestone
     else:
         #add
         project = Project.objects.filter(id=project_id).first()
         ms_add = Milestone(project=project,name=milestone_name,remark=milestone_remark,
             date_range=milestone_date_range)
         ms_add.save()
+        if is_sync_issues:
+            ms_dates = milestone_date_range.split(' - ')
+            ms_issues = Issues.objects.filter(create_datetime__range=(ms_dates[0], ms_dates[1]))
+            print('ms_issues len ', len(ms_issues))
+            for i in ms_issues:
+                i.milestone = ms_add
+                i.save()
+            # 将这些issues更新milestone到当前milestone
     return JsonResponse({'status':1})
 
 def milestone_del(request,project_id):
