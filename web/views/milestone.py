@@ -33,7 +33,7 @@ def milestone_add_or_update(request,project_id):
         ms_update.save()
         if is_sync_issues:
             ms_dates = milestone_date_range.split(' - ')
-            ms_issues = Issues.objects.filter(create_datetime__range=(ms_dates[0], ms_dates[1]))
+            ms_issues = Issues.objects.filter(project_id=project_id,create_datetime__range=(ms_dates[0], ms_dates[1]))
             print('ms_issues len ', len(ms_issues))
             for i in ms_issues:
                 i.milestone = ms_update
@@ -47,7 +47,7 @@ def milestone_add_or_update(request,project_id):
         ms_add.save()
         if is_sync_issues:
             ms_dates = milestone_date_range.split(' - ')
-            ms_issues = Issues.objects.filter(create_datetime__range=(ms_dates[0], ms_dates[1]))
+            ms_issues = Issues.objects.filter(project_id=project_id,create_datetime__range=(ms_dates[0], ms_dates[1]))
             print('ms_issues len ', len(ms_issues))
             for i in ms_issues:
                 i.milestone = ms_add
