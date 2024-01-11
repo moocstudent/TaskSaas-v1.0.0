@@ -259,6 +259,11 @@
                                     <span>
                                         <i class="fa fa-refresh" aria-hidden="true"></i> {{ item.get_status_display }}
                                     </span>
+                                    {% if item.milestone.name %}
+                                        <span>
+                                        <i class="fa fa-flag" aria-hidden="true"></i> {{ item.milestone.name }}
+                                    </span>
+                                    {% endif %}
                                     {% if item.assign.username %}
                                         <span>
                                         <i class="fa fa-hand-o-right" aria-hidden="true"></i>

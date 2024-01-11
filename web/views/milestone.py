@@ -23,28 +23,26 @@ def milestone_add_or_update(request,project_id):
     sync_issues = request.POST.get('sync_issues')
     is_sync_issues = sync_issues.lower() == 'true'
 
-
     if milestone_id:
         # update
         ms_update = Milestone.objects.filter(id=milestone_id).first()
         ms_update.name = milestone_name
         ms_update.remark = milestone_remark
         ms_update.date_range = milestone_date_range
-        ms_update.save()
         if is_sync_issues:
             ms_dates = milestone_date_range.split(' - ')
             ms_issues = Issues.objects.filter(project_id=project_id,create_datetime__range=(ms_dates[0], ms_dates[1]))
-            print('ms_issues len ', len(ms_issues))
             for i in ms_issues:
                 i.milestone = ms_update
                 i.save()
+            ms_update.sync_count = len(ms_issues)
+        ms_update.save()
             # 将这些issues更新milestone到当前milestone
     else:
         #add
         project = Project.objects.filter(id=project_id).first()
         ms_add = Milestone(project=project,name=milestone_name,remark=milestone_remark,
             date_range=milestone_date_range)
-        ms_add.save()
         if is_sync_issues:
             ms_dates = milestone_date_range.split(' - ')
             ms_issues = Issues.objects.filter(project_id=project_id,create_datetime__range=(ms_dates[0], ms_dates[1]))
@@ -52,11 +50,18 @@ def milestone_add_or_update(request,project_id):
             for i in ms_issues:
                 i.milestone = ms_add
                 i.save()
+            ms_add.sync_count = len(ms_issues)
+        ms_add.save()
             # 将这些issues更新milestone到当前milestone
     return JsonResponse({'status':1})
 
 def milestone_del(request,project_id):
     milestone_id = request.POST.get('milestone_id')
     ms = Milestone.objects.filter(project_id=project_id,id=milestone_id).first()
-    ms.delete()
+    if ms:
+        ms.delete()
+        issues_ms = Issues.objects.filter(project_id=project_id,milestone_id=milestone_id)
+        for i in issues_ms:
+            i.milestone = None
+            i.save()
     return JsonResponse({'status': 1})

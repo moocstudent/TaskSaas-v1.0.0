@@ -127,11 +127,10 @@ class SelectFilter(object):
 # todo 改为对应的restframework form
 def issues(request, project_id):
     print('issues pid ', request.web.project.id)
-
     q = request.GET.get('q')
     print('q>',q)
     if request.method == 'GET':
-        allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention']
+        allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention','milestone_id']
         # 筛选条件(根据用户通过GET传过来的参数实现)
         # ?status=1&status=2&issues_type=1
         condition = {}
@@ -145,7 +144,6 @@ def issues(request, project_id):
                 if issues_type_ids:
                     print('request value_str', issues_type_ids)
                     if len(value_list) > len(issues_type_ids):
-                        print('BIG')
                         condition['{}__in'.format(name)] = value_list
                     else:
                         condition['{}__in'.format(name)] = issues_type_ids
@@ -160,7 +158,6 @@ def issues(request, project_id):
         "issues_type__in":[1,]
         }
         """
-
         # 分页获取数据
         queryset = models.Issues.objects.filter(project_id=project_id).filter(**condition)
         if q:
@@ -183,15 +180,11 @@ def issues(request, project_id):
             base_url=request.path_info,
             query_params=request.GET,
         )
-
         issues_object_list = queryset[page_object.start:page_object.end]
-
         form = IssuesModelForm(request)
-
         project_total_user = [(request.web.project.creator_id, request.web.project.creator.username)]
         join_user = models.ProjectUser.objects.filter(project_id=project_id).values_list('user_id', 'user__username')
         project_total_user.extend(join_user)
-
         invite_form = IssuesInviteModelForm()
         context = {
             'form': form,
@@ -208,7 +201,6 @@ def issues(request, project_id):
             ]
         }
         return render(request, 'web/issues.html', context)
-
     form = IssuesModelForm(request, data=request.POST)
     this_proj_max_issue_id = models.Issues.objects.filter(project_id=request.web.project.id).aggregate(
         this_proj_max_issue_id=Max('issue_id'))

@@ -13,6 +13,7 @@ class IssuesSerializer(serializers.ModelSerializer):
     create_datetime = serializers.DateTimeField(read_only=True)
     reply_count = serializers.IntegerField(read_only=True)
     avatars = serializers.ListField(read_only=True)
+    milestone_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = Issues
@@ -22,6 +23,7 @@ class IssuesSerializer(serializers.ModelSerializer):
             "issue_id",
             "issue_type",
             "subject",
+            "milestone_name",
             "desc",
             "create_datetime",
             "reply_count",
@@ -31,6 +33,8 @@ class IssuesSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         reply_count = IssuesReply.objects.filter(issues_id=instance.id).count()
         setattr(instance, "reply_count", reply_count)
+        print('instance.milestone.name',instance.milestone.name)
+        setattr(instance, "milestone_name", instance.milestone.name)
         setattr(instance, "avatars", [{'url':instance.creator.wechat_avatar}])
 
         return super().to_representation(instance)

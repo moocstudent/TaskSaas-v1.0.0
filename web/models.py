@@ -138,6 +138,7 @@ class Milestone(models.Model):
     name = models.CharField(verbose_name='项目里程碑名称', max_length=32)
     remark = models.TextField(verbose_name="项目里程碑概述", null=True, blank=True)
     project = models.ForeignKey(verbose_name="项目",to="Project",null=True,on_delete=models.SET_NULL)
+    sync_count = models.IntegerField(verbose_name="同步issue数量",default=None)
     date_range = models.CharField(verbose_name='时间区间字符串如2020-01-01 - 2024-01-01', max_length=32)
     create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     update_datetime = models.DateTimeField(verbose_name='更新时间', auto_now_add=True)

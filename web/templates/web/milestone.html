@@ -163,10 +163,10 @@
             '</div>' +
             '</div>' +
             '<hr class="ws-space-16">' +
-            '<input lay-checkbox type="checkbox" id="syncIssues" name="syncIssues" value="0" checked>' +
-            ' 同步里程碑tag到issues' +
-            '</div>' +
-            '</div>'
+            '<input lay-checkbox type="checkbox" id="syncIssues" name="syncIssues" value="0" checked>同步里程碑tag到issues，当前已同步' +
+            '<a href="javascript:void(0)" onclick="checkoutMsIssues(document.getElementById(`milestoneId`).value)"><span id="syncCount">0</span>条</a>' +
+        '</div>' +
+        '</div>'
 
 
         let milestoneDates = null
@@ -192,7 +192,6 @@
                             value: ms_list[dataIndex].date_range,
                             rangeLinked: true, // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
                             done: function (value, date) {
-                                console.log('value ', value)
                                 milestoneDates = value
                             }
                         });
@@ -204,10 +203,6 @@
                     let milestoneName = $("#milestoneName").val()
                     let milestoneRemark = $("#milestoneRemark").val()
                     let syncIssues = $("#syncIssues").is(':checked')
-                    console.log('milestoneName', milestoneName)
-                    console.log('milestoneRemark', milestoneRemark)
-                    console.log('milestoneDates', milestoneDates)
-                    console.log('syncIssues', syncIssues)
                     if (!milestoneId) {
                         layer.msg('破损的里程碑，请删除重加入');
                         return
@@ -243,7 +238,6 @@
 
                                 }
                             }
-
                         })
                         layer.close(mlstoneRecordLoading)
                     }, function () {
@@ -285,7 +279,6 @@
 
                                 }
                             }
-
                         })
                         layer.close(mlstoneDelLoading)
                     }, function () {
@@ -309,6 +302,7 @@
             $("#milestoneId").val(ms_list[dataIndex].id)
             $("#milestoneName").val(ms_list[dataIndex].name)
             $("#milestoneRemark").val(ms_list[dataIndex].remark)
+            $("#syncCount").text(ms_list[dataIndex].sync_count)
         });
 
         function myChartDivClick() {
@@ -325,7 +319,6 @@
                             range: ['#ID-laydate-start-date-1', '#ID-laydate-end-date-1'],
                             rangeLinked: true, // 开启日期范围选择时的区间联动标注模式 ---  2.8+ 新增
                             done: function (value, date) {
-                                console.log('value ', value)
                                 milestoneDates = value
                             }
                         });
@@ -336,10 +329,6 @@
                     let milestoneName = $("#milestoneName").val()
                     let milestoneRemark = $("#milestoneRemark").val()
                     let syncIssues = $("#syncIssues").is(':checked')
-                    console.log('milestoneName', milestoneName)
-                    console.log('milestoneRemark', milestoneRemark)
-                    console.log('milestoneDates', milestoneDates)
-                    console.log('syncIssues', syncIssues)
                     if (!milestoneName || !milestoneRemark || !milestoneDates) {
                         layer.msg('请填写完毕内容');
                         return
@@ -406,6 +395,14 @@
             localStorage.setItem('milestoneData', milestoneData)
         }
 
+        /**
+         * 查看milestone issues
+         * @param milestoneId
+         */
+        function checkoutMsIssues(milestoneId) {
+            var url = "{% url 'issues' project_id=request.web.project.id %}?milestone_id=" + milestoneId; // 构建URL
+            window.open(url)
+        }
 
     </script>
 {% endblock %}
