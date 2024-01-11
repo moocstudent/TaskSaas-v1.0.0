@@ -1,5 +1,5 @@
 from django.contrib.auth import base_user
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 from TaskSaasAPP import user_util
@@ -11,11 +11,13 @@ from web import models
 def setting(request,project_id):
     return render(request, 'web/setting.html')
 
-def sys_setting(request):
-    return HttpResponse('主题颜色 / 密码 / 布局偏好 (现在并没有功能实现)')
+def sys_config(request):
+    return render(request, 'web/sys_config.html')
+    # return HttpResponse('主题颜色 / 密码 / 布局偏好 (现在并没有功能实现)')
 
 def setting_common_spider(request,project_id):
     status = request.POST.get('status')
+    return JsonResponse({'status':1})
 
 def setting_common(request,project_id):
     return render(request,'web/setting_common.html')

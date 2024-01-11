@@ -246,13 +246,13 @@
                                     <span class="{% if item.status == 1 %}
                                             type_primary
                                             {% elif item.status == 2 %}
-                                            type_warning
+                                             type_warning
                                             {% elif item.status == 3 %}
-                                            type_info
-                                            {% elif item.status == 5 %}
-                                            type_danger
-                                            {% elif item.status == 7 %}
                                             type_success
+                                            {% elif item.status == 4 %}
+                                            type_danger
+                                            {% elif item.status == 5 %}
+                                            type_info
                                    {% else %}type{% endif %}">
                                         {{ item.issues_type }}
                                     </span>
@@ -290,8 +290,15 @@
                                         {{ item.using_time }} 用时
                                     </span>
                                     {% endif %}
+                                    {% if request.web.user == request.web.project.creator %}
+                                        <a href=""
+                                           onclick="del({{ item.id }})"
+                                           style="float:right">[删除]</a>
+                                    {% endif %}
                                 </div>
+
                             </td>
+
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -729,6 +736,26 @@
         }
 
         storageTriggerInit()
+
+        function del(issue_pk) {
+            $.ajax({
+                url: "{% url 'issues_del' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'issues_pk': issue_pk,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res.status)
+                        window.location.reload()
+                    } else {
+
+                    }
+                }
+            })
+        }
 
     </script>
 {% endblock %}

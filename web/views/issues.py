@@ -17,7 +17,7 @@ from utils.encrypt import uid
 from utils.pagination import Pagination
 from web import models
 from web.forms.issues import IssuesModelForm, IssuesReplyModelForm, IssuesInviteModelForm
-from web.models import IssuesLog, UserInfo, Project
+from web.models import IssuesLog, UserInfo, Project, Issues, IssuesReply, IssuesTagRelation
 
 
 class CheckFilter(object):
@@ -128,16 +128,13 @@ class SelectFilter(object):
 def issues(request, project_id):
     print('issues pid ', request.web.project.id)
     q = request.GET.get('q')
-    print('q>',q)
     if request.method == 'GET':
         allow_filter_name = ['issues_type', 'status', 'priority', 'assign', 'attention','milestone_id']
         # 筛选条件(根据用户通过GET传过来的参数实现)
         # ?status=1&status=2&issues_type=1
         condition = {}
         for name in allow_filter_name:
-            print('name>>>>>>', name)
             value_list = request.GET.getlist(name)
-            print('request value_list', value_list)
             request_object = request.GET.get(name)
             if name == 'issues_type' and request_object:
                 issues_type_ids = request_object.split(',')
@@ -173,7 +170,6 @@ def issues(request, project_id):
             print(request.web.user)
             queryset = queryset.filter(Q(assign=request.web.user) | Q(attention=request.web.user)
                                        | Q(creator=request.web.user)).distinct()
-        print('issues_filter size aft filter ', len(queryset))
         page_object = Pagination(
             current_page=request.GET.get('page'),
             all_count=queryset.count(),
@@ -214,12 +210,10 @@ def issues(request, project_id):
         form.instance.project = request.web.project
         form.instance.creator = request.web.user
         form.instance.issue_id = this_proj_max_issue_id + 1
-        print('form>>', form.instance.desc)
         if form.instance.desc is None or len(form.instance.desc) == 0:
             form.instance.desc = form.instance.subject
         # 保存
         form.save()
-        print('问题描述：',form.instance.desc)
         user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(1.00,2.00))
         change_record = "{} 创建问题 {}".format(request.web.user.username, form.instance.subject)
         issues_log = IssuesLog(issues=form.instance, creator=request.web.user,
@@ -228,7 +222,6 @@ def issues(request, project_id):
                                             create_datetime=form.instance.create_datetime)
         issues_log.save()
         return JsonResponse({'status': True, })
-    print('form is invalid', form.errors)
     return JsonResponse({'status': False, 'error': form.errors})
 
 
@@ -483,6 +476,13 @@ def issues_change(request, project_id, issues_pk):
 
     return JsonResponse({'status': False, 'error': 'Error！'})
 
+def issues_del(request,project_id):
+    issues_pk = request.POST.get('issues_pk')
+    Issues.objects.filter(id=issues_pk).delete()
+    IssuesReply.objects.filter(issues=issues_pk).delete()
+    IssuesLog.objects.filter(issues=issues_pk).delete()
+    IssuesTagRelation.objects.filter(issues=issues_pk).delete()
+    return JsonResponse({'status': 1})
 
 def invite_url(request, project_id):
     """生成邀请码"""

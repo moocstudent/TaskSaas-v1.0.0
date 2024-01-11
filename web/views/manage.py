@@ -500,8 +500,16 @@ def collect(request, project_id):
     collects = collections.OrderedDict()
     for coll in collects_set:
         if coll.type == 1:
-            collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'issue',
-                                 'link': coll.link, 'id': coll.issues.issue_id, 'project': coll.project.name}
+            if coll.issues:
+                link = coll.link
+                issue_id = coll.issues.issue_id
+                title = coll.title
+            else:
+                link = ''
+                issue_id = None
+                title = coll.title + '(已删除)'
+            collects[coll.id] = {'create_time': coll.create_datetime, 'title': title, 'type': 'issue',
+                                 'link': link, 'id': issue_id, 'project': coll.project.name}
         if coll.type == 2:
             collects[coll.id] = {'create_time': coll.create_datetime, 'title': coll.title, 'type': 'wiki',
                                  'link': coll.link, 'id': coll.wiki.id, 'project': coll.project.name}

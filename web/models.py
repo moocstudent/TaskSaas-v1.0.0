@@ -281,13 +281,15 @@ class Issues(models.Model):
     priority = models.CharField(verbose_name='优先级', max_length=12, choices=priority_choices, default='danger')
     # 新建/处理中/已解决/已忽略/待反馈/已关闭/重新打开
     status_choices = {
+        #is_todo
         (1, '新建'),
         (2, '处理中'),
-        (3, '已解决'),
-        (4, '已忽略'),
-        (5, '待反馈'),
-        (6, '已关闭'),
-        (7, '重新打开'),
+        (3, '重新打开'),
+        (4, '待反馈'),
+        #is_done
+        (5, '已解决'),
+        (6, '已忽略'),
+        (7, '已关闭'),
     }
     status = models.SmallIntegerField(verbose_name='状态', choices=status_choices, default=1)
     milestone = models.ForeignKey(verbose_name='所属里程碑',to='Milestone',related_name='ms',null=True,blank=True,
@@ -326,7 +328,7 @@ class IssuesTag(models.Model):
 # 问题 tag 关联
 class IssuesTagRelation(models.Model):
     id = models.BigAutoField(primary_key=True)
-    issue = models.ForeignKey(verbose_name='问题', to='Issues',null=True,blank=True,on_delete=models.SET_NULL)
+    issues = models.ForeignKey(verbose_name='问题',db_column='issues_pk', to='Issues',null=True,blank=True,on_delete=models.SET_NULL)
     tag = models.ForeignKey(verbose_name='tag', to='IssuesTag',null=True,blank=True,on_delete=models.SET_NULL)
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
     create_datetime = models.DateTimeField(verbose_name='创建时间,将等同于当时更新issues的更新时间,', auto_now_add=True)
@@ -336,7 +338,7 @@ class IssuesTagRelation(models.Model):
 
 class IssuesLog(models.Model):
     id = models.BigAutoField(primary_key=True)
-    issues = models.ForeignKey(to="Issues", null=True, blank=True, on_delete=models.SET_NULL)
+    issues = models.ForeignKey(to="Issues", db_column='issues_pk',null=True, blank=True, on_delete=models.SET_NULL)
     """问题"""
     creator = models.ForeignKey(verbose_name='更新者', to='UserInfo', null=True, blank=True, on_delete=models.SET_NULL)
     record = models.TextField(verbose_name='更新记录', null=True, blank=True)

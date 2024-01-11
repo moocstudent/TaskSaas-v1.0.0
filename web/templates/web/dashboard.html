@@ -200,7 +200,7 @@
                             </div>
                             <div class="panel-body">
                                 {% for key,item in status_dict.items %}
-                                    <div class="col-sm-4 status-count">
+                                    <div class="col-sm-3 status-count">
                                         <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
                                             <div class="count">{{ item.count }}</div>
                                             <div>{{ item.text }}</div>

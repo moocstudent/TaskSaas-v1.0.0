@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from TaskChat import chat_views, consumers
 from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar, project_user_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
-    sentry, userinfo_view, glory, milestone
+    sentry, userinfo_view, glory, milestone, sys_config
 from web.views.upload import FileUploadView
 
 urlpatterns = [
@@ -64,7 +64,10 @@ urlpatterns = [
     re_path(r'^remind_json/$', manage.remind_json, name='remind_json'),
     # 项目管理
     # 路由分发
-    re_path(r'^sys_setting/$', setting.sys_setting, name='sys_setting'),
+    re_path(r'^sys_config/$', setting.sys_config, name='sys_config'),
+    re_path(r'^sys_config_notify/$', sys_config.sys_config_notify, name='sys_config_notify'),
+    re_path(r'^sys_config_template/$', sys_config.sys_config_template, name='sys_config_template'),
+    re_path(r'^sys_config_notify_switch/$', sys_config.sys_config_notify_switch, name='sys_config_notify_switch'),
 
     re_path(r'^profile/$', user_api.profile, name='profile'),
     re_path(r'^profile_git/$', user_api.profile_git, name='profile_git'),
@@ -74,6 +77,7 @@ urlpatterns = [
 
     re_path(r'^fileupload/$', file.uploadfile_common, name='fileupload'),
     re_path(r'^profileupload/$', file.uploadfile_profile, name='profileupload'),
+
 
 re_path(r'^manage/(?P<project_id>\d+)/', include([
 
@@ -133,6 +137,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^issues/detail/(?P<issues_id>\d+)/$', issues.issues_detail, name='issues_detail'),
     re_path(r'^issues/record/(?P<issues_pk>\d+)/$', issues.issues_record, name='issues_record'),
     re_path(r'^issues/change/(?P<issues_pk>\d+)/$', issues.issues_change, name='issues_change'),
+    re_path(r'^issues/del/$', issues.issues_del, name='issues_del'),
     re_path(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
 
     re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),

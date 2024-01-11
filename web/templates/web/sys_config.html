@@ -1,0 +1,49 @@
+{% extends 'layout/manage.html' %}
+{% block title %}{% endblock %}
+
+{% block css %}
+        <style>
+        .list-group .choices {
+            border-left: 2px solid #f90 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container clearfix" style="margin-top: 20px">
+
+        <div class="col-sm-3">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: transparent;font-weight: bold">
+                    系统设置
+                </div>
+                <div class="list-group" style="border-radius: 0">
+                    <div>
+                        <a href="{% url 'sys_config_notify' %}" class="list-group-item">提醒设置</a>
+                         <a href="{% url 'sys_config_template' %}" class="list-group-item">主题设置</a>
+{#                        <a href="{% url 'setting_delete' %}" class="list-group-item">****</a>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-9">
+            <div class="panel panel-default">
+                <h3>相关配置数据汇总</h3>
+{#                <div class="panel-heading">#}
+{#                    <i class="fa fa-address-card-o" aria-hidden="true"></i>#}
+{#                    我的资料#}
+{#                </div>#}
+{#                <div class="panel-body">#}
+{#                    <h4 style="text-align: center;">系统设置</h4>#}
+{#                </div>#}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block js %}
+{% endblock %}

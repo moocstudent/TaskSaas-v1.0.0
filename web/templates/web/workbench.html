@@ -441,10 +441,7 @@
                      </span>
                         </div>
                     </form>
-                    {#                    <div class="panel-body">#}
-                    {#                        <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>#}
-                    {#                        <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
-                    {#                    </div>#}
+
 
                     <!-- Table -->
                     <table class="table">
@@ -466,13 +463,13 @@
                                     {% if item.status == 1 %}
                                             type_primary
                                             {% elif item.status == 2 %}
-                                            type_warning
+                                             type_warning
                                             {% elif item.status == 3 %}
-                                            type_info
-                                            {% elif item.status == 5 %}
-                                            type_danger
-                                            {% elif item.status == 7 %}
                                             type_success
+                                            {% elif item.status == 4 %}
+                                            type_danger
+                                            {% elif item.status == 5 %}
+                                            type_info
                                    {% else %}type{% endif %}">
                                         {{ item.issues_type }}
                                 <i class="fa fa-refresh" aria-hidden="true"></i>
@@ -725,8 +722,6 @@
                         },
 
                     },
-
-
                     magicType: {show: true, type: ['line', 'bar']},
                     restore: {show: true},
                     saveAsImage: {show: true}
@@ -846,8 +841,6 @@
                 console.log('params.seriesName ', params.seriesName)
 
 
-                {#window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(params.name) + 1) +#}
-                {#    "&issues_type=" + (issues_types[(xMatchTypes.indexOf(params.seriesName))])#}
             }
         });
         myChart.on("mousemove", function (params) {
@@ -924,14 +917,14 @@
             if (val.处理中) {
                 reqVal += 2
             }
-            if (val.已解决) {
+            if (val.重新打开) {
                 reqVal += 3
             }
             if (val.待反馈) {
-                reqVal += 5
+                reqVal += 4
             }
-            if (val.重新打开) {
-                reqVal += 7
+            if (val.已解决) {
+                reqVal += 5
             }
             if (!reqVal) {
                 alert('至少保留一项😄')
@@ -993,9 +986,9 @@
         function legendTriggerRefresh() {
             let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
-            let legendArr = ['新建', '处理中', '待反馈', '重新打开']
+            let legendArr = ['新建', '处理中', '重新打开','待反馈']
             if (!legend) {
-                legend = '1257'
+                legend = '1234'
                 localStorage.setItem(legendTriggerKey, legend);
             } else {
                 if (legend) {
@@ -1016,15 +1009,15 @@
                             })
                         } else if (splitLegend[s] == '3') {
                             myChart.setOption({
-                                legend: {selected: {['已解决']: true}}
+                                legend: {selected: {['重新打开']: true}}
                             })
-                        } else if (splitLegend[s] == '5') {
+                        } else if (splitLegend[s] == '4') {
                             myChart.setOption({
                                 legend: {selected: {['待反馈']: true}}
                             })
-                        } else if (splitLegend[s] == '7') {
+                        } else if (splitLegend[s] == '5') {
                             myChart.setOption({
-                                legend: {selected: {['重新打开']: true}}
+                                legend: {selected: {['已解决']: true}}
                             })
                         }
                     }
@@ -1553,26 +1546,26 @@
                             '<input id="chat-message-input" oninput="msginputOnchange(event,this)" type="text" placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>' +
                             '<input id="chat-message-submit"  type="button" value="Send"/></div></div></div>'
 
-                            {#'<div class="layui-upload">' +#}
-                            {#'<button type="button" class="layui-btn layui-btn-normal" id="ID-upload-demo-files">选择多文件</button>' +#}
-                            {#'<div class="layui-upload-list">' +#}
-                            {#'<table class="layui-table">' +#}
-                            {#'<colgroup>' +#}
-                            {#'<col style="min-width: 100px;">' +#}
-                            {#'<col width="150">' +#}
-                            {#'<col width="260">' +#}
-                            {#'<col width="150">' +#}
-                            {#'</colgroup>' +#}
-                            {#'<thead>' +#}
-                            {#'<th>文件名</th>' +#}
-                            {#'<th>大小</th>' +#}
-                            {#'<th>上传进度</th>' +#}
-                            {#'<th>操作</th>' +#}
-                            {#'</thead>' +#}
-                            {#'<tbody id="ID-upload-demo-files-list"></tbody>' +#}
-                            {#'</table>' +#}
-                            {#'</div>' +#}
-                            {#'<button type="button" class="layui-btn" id="ID-upload-demo-files-action">开始上传</button></div>'#}
+                        {#'<div class="layui-upload">' +#}
+                        {#'<button type="button" class="layui-btn layui-btn-normal" id="ID-upload-demo-files">选择多文件</button>' +#}
+                        {#'<div class="layui-upload-list">' +#}
+                        {#'<table class="layui-table">' +#}
+                        {#'<colgroup>' +#}
+                        {#'<col style="min-width: 100px;">' +#}
+                        {#'<col width="150">' +#}
+                        {#'<col width="260">' +#}
+                        {#'<col width="150">' +#}
+                        {#'</colgroup>' +#}
+                        {#'<thead>' +#}
+                        {#'<th>文件名</th>' +#}
+                        {#'<th>大小</th>' +#}
+                        {#'<th>上传进度</th>' +#}
+                        {#'<th>操作</th>' +#}
+                        {#'</thead>' +#}
+                        {#'<tbody id="ID-upload-demo-files-list"></tbody>' +#}
+                        {#'</table>' +#}
+                        {#'</div>' +#}
+                        {#'<button type="button" class="layui-btn" id="ID-upload-demo-files-action">开始上传</button></div>'#}
 
                     });
                     chatRoomSetup()

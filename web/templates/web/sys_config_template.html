@@ -1,0 +1,94 @@
+{% extends 'layout/manage.html' %}
+{% block title %}{% endblock %}
+
+{% block css %}
+        <style>
+        .list-group .choices {
+            border-left: 2px solid #f90 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="container clearfix" style="margin-top: 20px">
+
+        <div class="col-sm-3">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="background-color: transparent;font-weight: bold">
+                    系统设置
+                </div>
+                <div class="list-group" style="border-radius: 0">
+                    <div>
+                        <a href="{% url 'sys_config_notify' %}" class="list-group-item">提醒设置</a>
+                        <a href="{% url 'sys_config_template' %}" class="list-group-item choices">主题设置</a>
+{#                        <a href="{% url 'setting_delete' %}" class="list-group-item">****</a>#}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-9">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-address-card-o" aria-hidden="true"></i>
+                    主题设置
+                </div>
+                <div class="panel-body">
+
+                  颜色/按钮/样式/页面模版配置
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+    layui.use(function () {
+            var form = layui.form;
+            var layer = layui.layer;
+            // checkbox 事件
+            // 指定开关事件
+            form.on('switch(switchTaskDDL)', function (data) {
+                layer.msg((this.checked ? '开启了taskSpider' : '关闭了taskSpider'), {
+                    offset: '6px'
+                });
+                sysNotifyStatus(this.checked)
+                {#layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是 ON|OFF', data.othis)#}
+            });
+        });
+
+
+        function sysNotifyStatus(isChecked) {
+            layer.msg('这块没完成')
+            return
+            $.ajax({
+                url: "{% url 'sys_config_notify_switch' %}",
+                type: "POST",
+                data: {
+                    "status": isChecked,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        layer.msg('更改状态成功', {icon: 6})
+                        location.reload();
+                        {#$("#badge").load(location.href + " #badge")#}
+                    } else {
+                        layer.msg('更改状态异常', {icon: 5})
+                    }
+                }
+
+            })
+
+        }
+    </script>
+{% endblock %}

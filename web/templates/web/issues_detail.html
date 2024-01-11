@@ -117,10 +117,13 @@
                         {% if issues_object.using_time %}
                             <span style="text-align: center">已完成,用时:{{ issues_object.using_time }}</span>
                         {% endif %}
+
                         {% if is_collected %}
                             <a style="float:right;color: darkkhaki">[已收藏]</a>
-                        {% else %}<a href="" onclick="collect({{ id }},{{ issues_pk }})"
-                                     style="float:right">[收藏]</a>{% endif %}
+                        {% else %}
+                            <a href="" onclick="collect({{ id }},{{ issues_pk }})"
+                                     style="float:right">[收藏]</a>
+                        {% endif %}
 
                     </div>
 
@@ -429,10 +432,10 @@
                 type: 'GET',
                 dataType: 'JSON',
                 success: function (res) {
-                    console.log('initIssuesRecord res.data ',res.data)
+                    console.log('initIssuesRecord res.data ', res.data)
                     if (res.status) {
                         $.each(res.data, function (index, item) {
-                            console.log('initIssuesRecord item ',item)
+                            console.log('initIssuesRecord item ', item)
                             createRecordNode(item);
                         });
                     }
@@ -453,8 +456,8 @@
             $item.find('.type').html(nodeDict.reply_type_text);
             $item.find('.date').html(nodeDict.datetime);
             $item.attr({id: nodeDict.id, username: nodeDict.creator});
-            console.log("$item:",$item)
-            console.log('nodeDict',nodeDict)
+            console.log("$item:", $item)
+            console.log('nodeDict', nodeDict)
             if (nodeDict.parent_id) {
                 console.log('nodeDict.parent_id')
                 // 挂在谁下
@@ -689,6 +692,8 @@
                 }
             })
         }
+
+
 
     </script>
 
