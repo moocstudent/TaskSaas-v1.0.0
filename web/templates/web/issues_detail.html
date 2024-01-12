@@ -122,7 +122,7 @@
                             <a style="float:right;color: darkkhaki">[已收藏]</a>
                         {% else %}
                             <a href="" onclick="collect({{ id }},{{ issues_pk }})"
-                                     style="float:right">[收藏]</a>
+                               style="float:right">[收藏]</a>
                         {% endif %}
 
                     </div>
@@ -311,7 +311,7 @@
                             <span class="error-msg"></span>
                         </div>
 
-                        <input class="btn btn-primary" type="button" id="btnSubmit" value="提 交">
+                        <input class="btn btn-primary" type="button" id="btnSubmit" value="提 交 (ctrl+enter)">
                         <div class="reply-user hide" id="replyUser">
                             回复 <span></span>
                             <i class="fa fa-times-circle" aria-hidden="true" style="color: #9d9d9d;"></i>
@@ -345,9 +345,12 @@
                         <span class="date"></span>
                     </div>
 
-                    <a href="#commentText" class="reply">
+                    <a href="javascript:void(0)" class="reply">
                         <i class="fa fa-commenting-o" aria-hidden="true"></i> 回复
                     </a>
+
+                    <input class="commentId" hidden="hidden" value=""/>
+
 
                 </div>
             </div>
@@ -369,6 +372,8 @@
     <script src="{% static 'web/plugin/bootstrap-select/js/i18n/defaults-zh_CN.min.js' %}"></script>
 
     <script>
+
+
         var WIKI_UPLOAD_URL = "{% url 'wiki_upload' project_id=request.web.project.id %}";
         var ISSUES_RECORD_API = "{% url 'issues_record' project_id=request.web.project.id issues_pk=issues_object.id %}";
         var ISSUES_CHANGE_API = "{% url 'issues_change' project_id=request.web.project.id issues_pk=issues_object.id %}";
@@ -448,16 +453,33 @@
          * @param nodeDict
          */
         function createRecordNode(nodeDict) {
+            console.log('nodeDict:', nodeDict)
             console.log('createRecordNode', createRecordNode)
             var $item = $("#recordTemplate").find('.item').clone();
             $item.find('.left-avatar').html(nodeDict.creator[0].toUpperCase());
             $item.find('pre').html(nodeDict.content);
+            $item.find('.commentId').val(nodeDict.id);
+            $item.find('.delComment').val(nodeDict.id);
             $item.find('.user').html(nodeDict.creator);
             $item.find('.type').html(nodeDict.reply_type_text);
             $item.find('.date').html(nodeDict.datetime);
             $item.attr({id: nodeDict.id, username: nodeDict.creator});
             console.log("$item:", $item)
+            console.log("$item.id:", $item.attr('id'))
             console.log('nodeDict', nodeDict)
+            console.log('nodeDict type ', nodeDict.reply_type_text)
+            console.log('commentId>>>', nodeDict.id)
+            if ('{{ request.web.user }}' === '{{issues_object.creator }}' || nodeDict.creator === '{{ request.web.user }}') {
+                const delBtn = '<a href = "javascript:void(0)" onclick = "delComment(' + nodeDict.id + ')" class= "delComment" >' +
+                    '<i class= "fa fa-close" aria - hidden = "true" > </i> 删除' +
+                    '</a>'
+                {#console.log("$item.find('.desc').",$item.find('.desc'))#}
+                $item.find('.desc').append(delBtn);
+            }
+
+            {% comment %}   {% if request.web.user == issues_object.creator or nodeDict.creator ==  request.web.user%}
+
+               {% endif %}{% endcomment %}
             if (nodeDict.parent_id) {
                 console.log('nodeDict.parent_id')
                 // 挂在谁下
@@ -478,6 +500,7 @@
                 var id = $item.attr('id');
                 var username = $item.attr('username');
                 $('#replyUser').removeClass('hide').attr('parent-id', id).children('span').text(username);
+                document.getElementById('content').focus();
             })
         }
 
@@ -485,18 +508,22 @@
          取消回复
          */
         function bindCancelReplyUser() {
-
             $('#replyUser').click(function () {
                 $(this).addClass('hide').removeAttr('parent-id').children('span').text("");
             })
         }
 
-        /**
-         * 点击评论
-         */
-        function bindSubmit() {
-            $('#btnSubmit').click(function () {
-                $('#commentText .error-msg').text('');
+        document.getElementById("commentText").addEventListener("keydown", function (event) {
+            if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
+                layer.msg('提交中')
+                event.preventDefault();
+                // 执行你想要的操作
+                commentSubmit()
+            }
+        });
+
+        function commentSubmit(){
+            $('#commentText .error-msg').text('');
                 $.ajax({
                     url: ISSUES_RECORD_API,
                     type: 'POST',
@@ -520,6 +547,13 @@
                         }
                     }
                 })
+        }
+        /**
+         * 点击评论
+         */
+        function bindSubmit() {
+            $('#btnSubmit').click(function () {
+                commentSubmit()
             });
 
         }
@@ -693,6 +727,26 @@
             })
         }
 
+        function delComment(reply_id) {
+            $.ajax({
+                url: "{% url 'del_reply' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    'reply_id': reply_id,
+                    'issues_pk':{{ issues_object.id }},
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res.status)
+                        location.reload();
+                    } else {
+
+                    }
+                }
+            })
+        }
 
 
     </script>

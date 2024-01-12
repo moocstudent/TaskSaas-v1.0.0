@@ -986,7 +986,7 @@
         function legendTriggerRefresh() {
             let legend = localStorage.getItem(legendTriggerKey);
             console.log('legendTriggerRefresh le>>', legend);
-            let legendArr = ['新建', '处理中', '重新打开','待反馈']
+            let legendArr = ['新建', '处理中', '重新打开', '待反馈']
             if (!legend) {
                 legend = '1234'
                 localStorage.setItem(legendTriggerKey, legend);
@@ -1544,7 +1544,15 @@
                             '<ul id="atMembersUl" class="elementList2"></ul></div>' +
                             '<div id="atTasks" style="position: absolute" class="col-xs-4 elementListTask" hidden="hidden"><ul id="atTasksUl" class="elementList2Task"></ul></div>' +
                             '<input id="chat-message-input" oninput="msginputOnchange(event,this)" type="text" placeholder="聊天信息发送" onblur="closeInputChooseElements()"/><br/>' +
-                            '<input id="chat-message-submit"  type="button" value="Send"/></div></div></div>'
+                            '<input id="chat-message-submit" class="btn layui-btn" type="button" value="Send (enter)"/></div></div></div>' +
+
+                            '<div class="col-md-5" style="float:right">' +
+                            '视频区域 ' +
+                            '之后默认全屏视频流<input type="checkbox" name="streamAlways" title="ON|OFF" lay-skin="switch" >' +
+                            '<div style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
+                            '<p style="text-align: center;font-size: 30px;color:white;padding-top:25%">peerjs</p>'+
+                            '</div>' +
+                            '</div>'
 
                         {#'<div class="layui-upload">' +#}
                         {#'<button type="button" class="layui-btn layui-btn-normal" id="ID-upload-demo-files">选择多文件</button>' +#}
@@ -1586,6 +1594,14 @@
 
 
         });
+        {% comment %}     document.getElementById("chat-message-input").addEventListener("keydown", function (event) {
+                 if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
+                     layer.msg('发送中')
+                     event.preventDefault();
+                     // 执行你想要的操作
+
+                 }
+             });{% endcomment %}
     </script>
 
 

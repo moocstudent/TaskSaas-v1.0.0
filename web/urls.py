@@ -3,7 +3,7 @@ from django.urls import re_path, include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from TaskChat import chat_views, consumers
-from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar, project_user_api
+from TaskSaas.api import oauth_callback_api, user_api, collect_api, wx_api, calendar, project_user_api, reply_api
 from web.views import account, home, project, manage, issues, cache, setting, file, wiki, dashboard, tool, module, \
     sentry, userinfo_view, glory, milestone, sys_config
 from web.views.upload import FileUploadView
@@ -139,6 +139,9 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^issues/change/(?P<issues_pk>\d+)/$', issues.issues_change, name='issues_change'),
     re_path(r'^issues/del/$', issues.issues_del, name='issues_del'),
     re_path(r'^issues/invite/url/$', issues.invite_url, name='invite_url'),
+
+    #delete reply by id
+    re_path(r'^del_reply/$', reply_api.del_reply, name='del_reply'),
 
     re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
 
