@@ -180,7 +180,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tasksaas',
         'USER': 'root',
-        'PASSWORD': '*******',
+        'PASSWORD': 'zhangqi1112',
         'HOST': 'localhost',
         'PORT': 3306,
         'CHARSET': 'utf8',

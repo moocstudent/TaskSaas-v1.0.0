@@ -533,6 +533,7 @@
 {% block js %}
 
     <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js' %}"></script>
+    <script src="{% static 'web/js/peerjs.min.js' %}"></script>
     <script>
         function setF(the) {
             this.focus()
@@ -1549,8 +1550,8 @@
                             '<div class="col-md-5" style="float:right">' +
                             '视频区域 ' +
                             '之后默认全屏视频流<input type="checkbox" name="streamAlways" title="ON|OFF" lay-skin="switch" >' +
-                            '<div style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
-                            '<p style="text-align: center;font-size: 30px;color:white;padding-top:25%">peerjs</p>'+
+                            '<div onclick="openPeerConn()" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
+                            '<p style="text-align: center;font-size: 30px;color:white;padding-top:25%">peerjs</p>' +
                             '</div>' +
                             '</div>'
 
@@ -1602,6 +1603,13 @@
 
                  }
              });{% endcomment %}
+
+        function openPeerConn() {
+            var peer = new Peer(null,{debug:2,host:'localhost',port:9000,path:'peer'});
+            peer.on('open', function (id) {
+                console.log('My peer ID is: ' + id);
+            });
+        }
     </script>
 
 
