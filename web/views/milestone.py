@@ -37,7 +37,7 @@ def milestone_add_or_update(request,project_id):
                 i.milestone = ms_update
                 i.save()
             ms_update.sync_count = len(ms_issues)
-        ms_update.save()
+            ms_update.save()
             # 将这些issues更新milestone到当前milestone
     else:
         #add
@@ -53,7 +53,7 @@ def milestone_add_or_update(request,project_id):
                 i.milestone = ms_add
                 i.save()
             ms_add.sync_count = len(ms_issues)
-        ms_add.save()
+            ms_add.save()
             # 将这些issues更新milestone到当前milestone
     return JsonResponse({'status':1})
 
