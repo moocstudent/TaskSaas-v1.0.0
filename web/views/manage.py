@@ -171,7 +171,7 @@ def workbench(request, project_id):
     # 根据优先级排序
     ordering = "FIELD(`priority`, 'danger','warning','success')"
     legendTriggrer = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
-                               '1257')
+                               '1234')
     attention_trigger = cache.get('myAttentionTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
                                   'off')
     people_involve_q = Q(assign=request.web.user) | Q(creator=request.web.user)
@@ -190,7 +190,6 @@ def workbench(request, project_id):
     day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
     # elif day_trigger == 'day0':
-
     print('total size', len(my_issues_set))
     danger_count = my_issues_set.filter(priority='danger').count()
     warning_count = my_issues_set.filter(priority='warning').count()
@@ -212,7 +211,6 @@ def workbench(request, project_id):
     elif day_trigger == 'day1':
         days = get_every_day(day_trigger, date_util.get_today(), '%Y-%m-%d')
     print('days', days)
-
     fresh_counts = ['新建']
     handle_counts = ['处理中']
     resolve_counts = ['已解决']
@@ -223,20 +221,13 @@ def workbench(request, project_id):
                                                                 Q(latest_update_datetime__date=d))).count())
         handle_counts.append(my_issues_set.filter(Q(status=2) & (Q(create_datetime__date=d) |
                                                                  Q(latest_update_datetime__date=d))).count())
-        resolve_counts.append(my_issues_set.filter(Q(status=3) & (Q(create_datetime__date=d) |
+        resolve_counts.append(my_issues_set.filter(Q(status=5) & (Q(create_datetime__date=d) |
                                                                   Q(latest_update_datetime__date=d))).count())
-        wait_counts.append(my_issues_set.filter(Q(status=5) & (Q(create_datetime__date=d) |
+        wait_counts.append(my_issues_set.filter(Q(status=4) & (Q(create_datetime__date=d) |
                                                                Q(latest_update_datetime__date=d))).count())
-        reopen_counts.append(my_issues_set.filter(Q(status=7) & (Q(create_datetime__date=d) |
+        reopen_counts.append(my_issues_set.filter(Q(status=3) & (Q(create_datetime__date=d) |
                                                                  Q(latest_update_datetime__date=d))).count())
-
     my_issues_set.filter()
-    fresh_count = my_issues_set.filter(status=1).count()
-    print('fresh c', fresh_count)
-    handle_count = my_issues_set.filter(status=2).count()
-    resolve_count = my_issues_set.filter(status=3).count()
-    wait_count = my_issues_set.filter(status=5).count()
-    reopen_count = my_issues_set.filter(status=7).count()
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
     if int(pagesize) != pagesize:

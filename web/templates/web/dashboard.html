@@ -530,7 +530,7 @@
         var myChart = echarts.init(document.getElementById("chart"));
         var echartsData = JSON.parse(document.getElementById("echarts_data").value);
         console.log('echartsData', echartsData);
-        const yDataNames = ['重新打开', '已关闭', '待反馈', '已忽略', '已解决', '处理中', '新建']
+        const yDataNames = ['已关闭', '已忽略', '已解决', '待反馈', '重新打开', '处理中', '新建']
         var tasksCount = JSON.parse(document.getElementById("tasks_count").value);
         console.log('tasksCount', tasksCount);
         if (tasksCount.length == 0) {
@@ -659,14 +659,13 @@
 
             ]
         };
-        let yMatchTypes = ["新建", "处理中", "已解决", "已忽略", "待反馈", "已关闭", "重新打开"]
+        let yMatchTypes = ["新建", "处理中", "重新打开", "待反馈", "已解决", "已忽略", "已关闭"]
         let xMatchTypes = ["任务", "功能", "Bug", "需求确认"]
 
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
         myChart.hideLoading();
         myChart.on("click", function (e) {
-            console.log(e.name)
             console.log(e.seriesName)
             console.log(e.seriesName == 'Bug')
             {#alert('chart on click>>', params);#}
@@ -852,9 +851,7 @@
             }
             legendTriggerRefresh()
         }
-
         storageTriggerInit()
-
         $(function () {
             bindCopyUrl();
         });
@@ -1119,6 +1116,7 @@
                 }
             })
         }
+
 
         function status(key) {
             $.ajax({

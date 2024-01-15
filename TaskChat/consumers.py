@@ -76,7 +76,7 @@ class yChatConsumer(WebsocketConsumer):
             room_users.add(self.username)
             hash_map._put(self.room_group_name,room_users)
             print('connect users this room ', list(hash_map.get(self.room_group_name).val))
-        push_message_to_group(self.room_group_name,list(hash_map.get(self.room_group_name).val) , userlist_message_key)
+        push_message_to_group(self.room_group_name,userlist_reset(self.project_id) , userlist_message_key)
 
         # 提示消息
         # push_message_to_group(self.username,'欢迎来到该项目组聊天室,'+self.username,private_message_key)
@@ -101,7 +101,7 @@ class yChatConsumer(WebsocketConsumer):
         else:
             print('disconnect users this room ', None)
             pass
-        push_message_to_group(self.room_group_name, list(hash_map.get(self.room_group_name).val), userlist_message_key)
+        push_message_to_group(self.room_group_name, userlist_reset(self.project_id), userlist_message_key)
 
         # push_message_to_group(self.room_group_name,self.username+' <已离线>')
 
@@ -130,14 +130,9 @@ class yChatConsumer(WebsocketConsumer):
                 print('push hint msg to ',receiver)
                 push_message_to_group(encrypt.md5(receiver)+'__'+str(self.project_id),message,constants.private_message_key,sender)
 
-             # push_message_to_group()
-        # push(self.room_group_name,'system info')
-        # async_to_sync(system_info_push(self))
-
     # Receive message from room group
     def chat_message(self, event):
         message = date_util.get_today_until_second() + '>> ' + event['message']
-
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'message': message,
@@ -337,3 +332,45 @@ def send_private_hint_msg(request,project_id):
         return JsonResponse({'status':0})
     return JsonResponse({'status': 1})
 
+status_hash_map = HashMap()
+status_hash_map._put('peeropen','视频会议中')
+status_hash_map._put('peerclose','')
+
+peer_id_map = HashMap()
+
+on_peer_user_list = []
+
+def received_userlist_status(request,project_id):
+    print('received_userlist_status')
+    status = request.POST.get('status')
+    print('status ',status)
+    peer_id = request.POST.get('peer_id')
+    print('peer_id ',peer_id)
+    peer_id_map._put(request.web.user.username,peer_id)
+    userlist = list(hash_map.get('matrix' + project_id).val)
+    if status:
+        print('userlist:',userlist)
+        if (status == 'peeropen'):
+            print('peeropen')
+            on_peer_user_list.append(request.web.user.username)
+        elif (status=='peerclose'):
+            print('peerclose')
+            on_peer_user_list.remove(request.web.user.username)
+        print('on_peer_user_list ',on_peer_user_list)
+        push_message_to_group('matrix' + project_id,userlist_reset(project_id), userlist_message_key)
+        return JsonResponse({'status': 1})
+    return JsonResponse({'status': 0})
+
+def userlist_reset(project_id):
+    userlist=list(hash_map.get('matrix' + project_id).val)
+    userlist_ = []
+    for u in userlist:
+        uname = u.split(' ')[0]
+        print('u', uname)
+        if uname in on_peer_user_list:
+            print('eq user')
+            uname += ' ' + str(status_hash_map.get('peeropen'))
+            userlist_.append(uname)
+        else:
+            userlist_.append(uname)
+    return (userlist_)

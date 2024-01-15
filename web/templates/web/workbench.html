@@ -1322,6 +1322,8 @@
             init_start_timer();
         }
 
+        let chatUserList = []
+
         /**
          * websocket 的初始化
          */
@@ -1329,17 +1331,17 @@
             ws.onmessage = function (e) {
                 console.log('evt e ', e)
                 var data = JSON.parse(e.data);
-
                 console.log('>>>>>', data.type)
                 if (data.type == 'userlist.message') {
                     let userlistval = eval(data.message);
                     console.log(userlistval)
                     userlist_online = userlistval
-                    console.log('userlistmessage refresh userlist ')
+                    console.log('userlistmessage refresh userlist ', userlistval.length)
                     var userlist = ''
                     for (let i = 0; i < userlistval.length; i++) {
                         userlist += ` <li>` + userlistval[i] + `</li>`;
                     }
+                    chatUserList = userlistval
                     $("#user_list").val(userlist)
                     $("#chatMembers").html(userlist);
                     return
@@ -1349,7 +1351,6 @@
                     localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
                     const notify_audio = document.getElementById('notifyAudio')
                     notify_audio.play();
-
                     document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
                     $("#badge").load(location.href + " #badge")
 
@@ -1359,20 +1360,6 @@
                     localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
                     document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
                 }
-
-
-                {#var message = eval('(' + e.data + ')');#}
-                {#switch (message.type) {#}
-                {#case#}
-                {#'init'#}
-                {#:#}
-                {#changeNoReadLogs();#}
-                {#var bind = '{"type":"bind","from_id":"' + from_id + '","to_id":"' + to_id + '"}';#}
-                {#ws.send(bind);#}
-                {#message_load();#}
-                {#    break;#}
-
-                {% comment %}}{% endcomment %}
             };
             ws.onclose = function (e) {
                 console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean);
@@ -1538,6 +1525,8 @@
                             '<div class="panel panel-default"><div class="panel-heading">' +
                             '<i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (@选择提醒用户#选择task)</div><div><div id="chat-log" class="col-md-10" contenteditable="false" style="resize:none;height: 300px;background-color: floralwhite;align:top;overflow: auto;">' +
                             '</div>' +
+                            '<video id="shareScreen" onclick="openPeerConn()" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
+                            '</video>' +
                             '<div class="col-md-2" style="float: right">online用户: <div>' +
                             '<ul id="chatMembers"></ul></div></div></div>' +
                             '<div class="col-md-4" style="float: right;padding-top: 0%">' +
@@ -1550,9 +1539,10 @@
                             '<div class="col-md-5" style="float:right">' +
                             '视频区域 ' +
                             '之后默认全屏视频流<input type="checkbox" name="streamAlways" title="ON|OFF" lay-skin="switch" >' +
-                            '<div onclick="openPeerConn()" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
-                            '<p style="text-align: center;font-size: 30px;color:white;padding-top:25%">peerjs</p>' +
-                            '</div>' +
+                            '<button onclick="leavePeerConn()">关闭视频</button>' +
+                            '<button onclick="reConnPeer()">重联视频</button>' +
+                            '<video id="peerScreen" onclick="openPeerConn()" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
+                            '</video>' +
                             '</div>'
 
                         {#'<div class="layui-upload">' +#}
@@ -1592,8 +1582,6 @@
                     });
                 },
             });
-
-
         });
         {% comment %}     document.getElementById("chat-message-input").addEventListener("keydown", function (event) {
                  if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
@@ -1603,13 +1591,151 @@
 
                  }
              });{% endcomment %}
+        var peerId = null
+
+        var peer = null
 
         function openPeerConn() {
-            var peer = new Peer(null,{debug:2,host:'localhost',port:9000,path:'peer'});
-            peer.on('open', function (id) {
-                console.log('My peer ID is: ' + id);
+            if (peerId === '{{ request.web.user.username }}' + '_PEER') {
+                console.log('peerId exist and right')
+                sendUserlistStatus('peeropen', peerId)
+            } else {
+                peer = new Peer('{{ request.web.user.username }}' + '_PEER', {
+                    debug: 2,
+                    host: 'localhost',
+                    port: 9000,
+                    path: 'peer'
+                });
+                console.log('peer.disconnected', peer.disconnected)
+                peer.on('open', function (id) {
+                    console.log('My peer ID is: ' + id);
+                    peerId = id
+                    peerId = id
+                    layer.msg('user {{ request.web.user.username }} on peer')
+                    sendUserlistStatus('peeropen', id)
+                });
+            }
+            //获取摄像头instance
+            getConnectedDevices('videoinput', cameras => {
+                console.log('Cameras found', cameras)
+                layer.msg('当前可用的摄像头:' + JSON.stringify(cameras.map(c => c.deviceId)))
+                if (cameras) {
+                    //开启摄像头
+                    navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: {min: 1024, max: 1920, ideal: 1280},
+                            height: {min: 576, max: 1080, ideal: 720},
+                            frameRate: {max: 30}
+                        }, audio: true
+                    }).then((stream) => {
+                        //私屏
+                        let video = document.getElementById("peerScreen")
+                        video.srcObject = stream;
+                        video.onloadedmetadata = () => {
+                            video.play();
+                        }
+                        {#const call = peer.call(peerId, stream)#}
+                        {% comment %}call.on('stream', remoteStream => {
+                            //公屏
+                            const shareScreen = document.getElementById("shareScreen")
+                            shareScreen.srcObject = remoteStream
+                            shareScreen.onloadedmetadata = () => {
+                                shareScreen.play();
+                            }
+                        });{% endcomment %}
+                    }).catch(err => {
+                        console.error('Error accessing media devices.', err)
+                    })
+                }
             });
+            peer.on('data', function (data) {
+                console.log('data ', data)
+            })
+            peer.on('call', call => {
+                console.log('peer on call ')
+                navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: {min: 1024, max: 1920, ideal: 1280},
+                        height: {min: 576, max: 1080, ideal: 720},
+                        frameRate: {max: 30}
+                    }, audio: true
+                }).then(stream => {
+                    //私屏
+                    let video = document.getElementById("peerScreen")
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                    }
+                    call.answer(stream)
+                    call.on('stream', remoteStream => {
+                        //公屏
+                        const shareScreen = document.getElementById("shareScreen")
+                        shareScreen.srcObject = remoteStream
+                        shareScreen.onloadedmetadata = () => {
+                            shareScreen.play();
+                        }
+                    });
+                }).catch(err => {
+                    console.error("on call Error", err)
+                })
+            })
         }
+
+
+        function leavePeerConn() {
+            peer.disconnect()
+            console.log('peer disconnected', peer.disconnected)
+            document.getElementById("peerScreen").srcObject = null
+            sendUserlistStatus('peerclose', null)
+        }
+
+        function reConnPeer() {
+            console.log('peer disconnected', peer.disconnected)
+            peer.reconnect()
+            console.log('peer disconnected', peer.disconnected)
+            let video = document.getElementById("peerScreen")
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                video.play();
+            }
+        }
+
+        function connMedia(peerObj) {
+
+        }
+
+        function getConnectedDevices(type, callback) {
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    const filtered = devices.filter(device => device.kind === type);
+                    callback(filtered);
+                });
+        }
+
+
+        function sendUserlistStatus(status, peerId) {
+            $.ajax({
+                url: "{% url 'received_userlist_status' project_id=request.web.project.id %}",
+                type: "POST",
+                data: {
+                    "status": status,
+                    "peer_id": peerId,
+                    "csrfmiddlewaretoken": $("#csrf_token").val()
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        layer.msg('发送成功', {icon: 6})
+
+                        {#location.reload();#}
+                        {#$("#badge").load(location.href + " #badge")#}
+                    } else {
+                        layer.msg('发送异常', {icon: 5})
+                    }
+                }
+            })
+        }
+
     </script>
 
 

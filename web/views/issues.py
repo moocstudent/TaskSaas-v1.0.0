@@ -295,9 +295,7 @@ def issues_change(request, project_id, issues_pk):
     # 数据库字段更新
     name = post_dict.get('name')
     value = post_dict.get('value')
-
     field_object = models.Issues._meta.get_field(name)
-
     def create_reply_record(change_record):
         new_object = models.IssuesReply.objects.create(
             reply_type=1,
@@ -305,7 +303,6 @@ def issues_change(request, project_id, issues_pk):
             content=change_record,
             creator=request.web.user
         )
-
         success = None
         if new_object.id:
             success = True
@@ -318,9 +315,7 @@ def issues_change(request, project_id, issues_pk):
             'datetime': new_object.create_datetime.strftime("%Y-%m-%d %H:%M"),
             'parent_id': new_object.reply_id
         }
-
         return new_reply_dict
-
     # 文本内容
     if name in ['subject', 'desc', 'start_date', 'end_date']:
         if not value:
@@ -335,7 +330,6 @@ def issues_change(request, project_id, issues_pk):
                                    record=change_record,
                                    create_datetime=issues_object.latest_update_datetime)
             issues_log.save()
-
         else:
             setattr(issues_object, name, value)
             issues_object.save()
@@ -363,7 +357,6 @@ def issues_change(request, project_id, issues_pk):
                                    record=change_record,
                                    create_datetime=issues_object.latest_update_datetime)
             issues_log.save()
-
         else:
             if name == 'assign':
                 if value == str(request.web.project.creator_id):
@@ -377,7 +370,6 @@ def issues_change(request, project_id, issues_pk):
                         instance = None
                 if not instance:
                     return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
-
             else:
                 print('用户输入的值是自己的值value:', value)
                 # 用户输入的值是自己的值
@@ -392,9 +384,7 @@ def issues_change(request, project_id, issues_pk):
                                    record=change_record,
                                    create_datetime=issues_object.latest_update_datetime)
             issues_log.save()
-
         return JsonResponse({'status': True, 'data': create_reply_record(change_record)})
-
     # choice字段
     if name in ['mode', 'status', 'priority']:
         seleted_text = None
@@ -403,7 +393,6 @@ def issues_change(request, project_id, issues_pk):
                 seleted_text = text
         if not seleted_text:
             return JsonResponse({'status': False, 'error': '您选择的值不存在！'})
-
         setattr(issues_object, name, value)
         issues_object.save()
         user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(0.01, 0.06))
@@ -412,10 +401,9 @@ def issues_change(request, project_id, issues_pk):
                                record=change_record,
                                create_datetime=issues_object.latest_update_datetime)
         issues_log.save()
-
         if name in ['status']:
             print('name in status',)
-            if value == '3':
+            if value == '5':
                 using_time_delta = datetime.datetime.now()-issues_object.create_datetime
                 using_time_str = "{}天-{}小时-{}分钟-{}秒".format(using_time_delta.days,(using_time_delta.seconds//3600),
                                                  ((using_time_delta.seconds%3600)//60),using_time_delta.seconds%60)

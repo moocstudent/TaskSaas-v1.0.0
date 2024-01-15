@@ -146,6 +146,7 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
     re_path(r'^dashboard/$', dashboard.dashboard, name='dashboard'),
 
     re_path(r'^send_private_hint_msg/$', consumers.send_private_hint_msg, name='send_private_hint_msg'),
+    re_path(r'^received_userlist_status/$', consumers.received_userlist_status, name='received_userlist_status'),
 
     # work_record
     re_path(r'^add_work_record/$', manage.work_record, name='add_work_record'),
