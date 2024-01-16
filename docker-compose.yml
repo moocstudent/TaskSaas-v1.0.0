@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  web:
+    build: ./
+    restart: always
+    command: python manage.py runserver 0.0.0.0:3000
+    volumes:
+      - /TaskSaas
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+  db:
+    image: mysql:latest
+    restart: always
+    container_name: db
+    command:
+      --max_connections=1000
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    volumes:
+      - /opt/homebrew/bin/mysql
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/config/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_DATABASE=tasksaas
+      - MYSQL_ROOT_PASSWORD=zhangqi1112

@@ -270,12 +270,10 @@ def push_message_to_group(group_name, message, type=None,sender=None):
     )
 
 
-
 pattern = r'<a\s+href="([^"]*)">(.*?)</a>'
 
 def save_msg_to_db_impl(msg,sender,receiver,type,project_id):
     print('save_msg_to_db_impl')
-
     user = models.UserInfo.objects.filter(username=sender).first()
     receiver_ = models.UserInfo.objects.filter(username=receiver).first()
     project = models.Project.objects.filter(id=project_id).first()
@@ -345,7 +343,6 @@ def received_userlist_status(request,project_id):
     status = request.POST.get('status')
     print('status ',status)
     peer_id = request.POST.get('peer_id')
-    print('peer_id ',peer_id)
     peer_id_map._put(request.web.user.username,peer_id)
     userlist = list(hash_map.get('matrix' + project_id).val)
     if status:

@@ -1525,7 +1525,7 @@
                             '<div class="panel panel-default"><div class="panel-heading">' +
                             '<i class="fa fa-tasks" aria-hidden="true"></i> Team Communicate (@选择提醒用户#选择task)</div><div><div id="chat-log" class="col-md-10" contenteditable="false" style="resize:none;height: 300px;background-color: floralwhite;align:top;overflow: auto;">' +
                             '</div>' +
-                            '<video id="shareScreen" onclick="openPeerConn()" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
+                            '<video id="shareScreen" style="min-height:380px;min-width:600px;width:100%;background-color: #00a8c6">' +
                             '</video>' +
                             '<div class="col-md-2" style="float: right">online用户: <div>' +
                             '<ul id="chatMembers"></ul></div></div></div>' +
@@ -1612,7 +1612,17 @@
                     peerId = id
                     peerId = id
                     layer.msg('user {{ request.web.user.username }} on peer')
-                    sendUserlistStatus('peeropen', id)
+                    sendUserlistStatus('peeropen', peerId)
+                });
+                peer.on('close', function () {
+                    layer.msg('close')
+                    leavePeerConn()
+                    sendUserlistStatus('peerclose', peerId)
+                });
+                peer.on('disconnected', function () {
+                    layer.msg('disconnected')
+                    leavePeerConn()
+                    sendUserlistStatus('peerclose', peerId)
                 });
             }
             //获取摄像头instance
@@ -1634,15 +1644,15 @@
                         video.onloadedmetadata = () => {
                             video.play();
                         }
-                        {#const call = peer.call(peerId, stream)#}
-                        {% comment %}call.on('stream', remoteStream => {
-                            //公屏
-                            const shareScreen = document.getElementById("shareScreen")
-                            shareScreen.srcObject = remoteStream
-                            shareScreen.onloadedmetadata = () => {
-                                shareScreen.play();
-                            }
-                        });{% endcomment %}
+                        const call = peer.call(peerId, stream)
+                        {% comment %}   call.on('stream', remoteStream => {
+                               //公屏
+                               const shareScreen = document.getElementById("shareScreen")
+                               shareScreen.srcObject = remoteStream
+                               shareScreen.onloadedmetadata = () => {
+                                   shareScreen.play();
+                               }
+                           });{% endcomment %}
                     }).catch(err => {
                         console.error('Error accessing media devices.', err)
                     })
@@ -1651,7 +1661,7 @@
             peer.on('data', function (data) {
                 console.log('data ', data)
             })
-            peer.on('call', call => {
+            peer.on('call', function (call) {
                 console.log('peer on call ')
                 navigator.mediaDevices.getUserMedia({
                     video: {
@@ -1661,10 +1671,10 @@
                     }, audio: true
                 }).then(stream => {
                     //私屏
-                    let video = document.getElementById("peerScreen")
-                    video.srcObject = stream;
-                    video.onloadedmetadata = () => {
-                        video.play();
+                    const shareScreen = document.getElementById("shareScreen")
+                    shareScreen.srcObject = stream
+                    shareScreen.onloadedmetadata = () => {
+                        shareScreen.play();
                     }
                     call.answer(stream)
                     call.on('stream', remoteStream => {
@@ -1686,18 +1696,26 @@
             peer.disconnect()
             console.log('peer disconnected', peer.disconnected)
             document.getElementById("peerScreen").srcObject = null
-            sendUserlistStatus('peerclose', null)
         }
 
         function reConnPeer() {
             console.log('peer disconnected', peer.disconnected)
             peer.reconnect()
             console.log('peer disconnected', peer.disconnected)
-            let video = document.getElementById("peerScreen")
-            video.srcObject = stream;
-            video.onloadedmetadata = () => {
-                video.play();
-            }
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: {min: 1024, max: 1920, ideal: 1280},
+                    height: {min: 576, max: 1080, ideal: 720},
+                    frameRate: {max: 30}
+                }, audio: true
+            }).then(stream => {
+                //私屏
+                let video = document.getElementById("peerScreen")
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                }
+            })
         }
 
         function connMedia(peerObj) {
@@ -1714,6 +1732,7 @@
 
 
         function sendUserlistStatus(status, peerId) {
+            layer.msg('sendUserlistStatus')
             $.ajax({
                 url: "{% url 'received_userlist_status' project_id=request.web.project.id %}",
                 type: "POST",

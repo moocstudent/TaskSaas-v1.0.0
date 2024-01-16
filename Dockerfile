@@ -1,9 +1,14 @@
-FROM python:latest
+FROM python:3.9.9
 
-WORKDIR /app
+RUN mkdir /TaskSaas -p
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /TaskSaas
+
+ADD ./requirements.txt /TaskSaas
+ADD ./ /TaskSaas
+
+RUN cd /TaskSaas
+RUN pip install -r requirements.txt
 
 
-CMD ["python","manage.py","runserver"]
+CMD ["python","manage.py","runserver","0:3000"]

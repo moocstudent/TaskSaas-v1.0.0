@@ -181,7 +181,7 @@ DATABASES = {
         'NAME': 'tasksaas',
         'USER': 'root',
         'PASSWORD': 'zhangqi1112',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': 3306,
         'CHARSET': 'utf8',
         'OPTIONS': {'charset': 'utf8mb4'},

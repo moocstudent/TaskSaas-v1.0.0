@@ -17,7 +17,7 @@ from utils.encrypt import uid
 from utils.pagination import Pagination
 from web import models
 from web.forms.issues import IssuesModelForm, IssuesReplyModelForm, IssuesInviteModelForm
-from web.models import IssuesLog, UserInfo, Project, Issues, IssuesReply, IssuesTagRelation
+from web.models import IssuesLog, UserInfo, Project, Issues, IssuesReply, IssuesTagRelation, Milestone
 
 
 class CheckFilter(object):
@@ -212,6 +212,19 @@ def issues(request, project_id):
         form.instance.issue_id = this_proj_max_issue_id + 1
         if form.instance.desc is None or len(form.instance.desc) == 0:
             form.instance.desc = form.instance.subject
+        milestones = Milestone.objects.filter(project_id=project_id)
+        ms2 = None
+        if milestones:
+            now = datetime.datetime.now().strftime("%Y-%m-%d")
+            for ms in milestones:
+                date_range_arr = ms.date_range.split(' - ')
+                if  datetime.datetime.strptime(now,"%Y-%m-%d") >= datetime.datetime.strptime(date_range_arr[0] ,"%Y-%m-%d") and \
+                        datetime.datetime.strptime(now,"%Y-%m-%d") <= datetime.datetime.strptime(date_range_arr[1] ,"%Y-%m-%d") :
+                    ms2 = ms
+                    break
+        form.instance.milestone = ms2
+        ms2.sync_count+=1
+        ms2.save()
         # 保存
         form.save()
         user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(1.00,2.00))
@@ -466,10 +479,15 @@ def issues_change(request, project_id, issues_pk):
 
 def issues_del(request,project_id):
     issues_pk = request.POST.get('issues_pk')
-    Issues.objects.filter(id=issues_pk).delete()
+    issue = Issues.objects.filter(id=issues_pk).first()
+    ms = issue.milestone
+    issue.delete()
+    ms.sync_count-=1
+    ms.save()
     IssuesReply.objects.filter(issues=issues_pk).delete()
     IssuesLog.objects.filter(issues=issues_pk).delete()
     IssuesTagRelation.objects.filter(issues=issues_pk).delete()
+
     return JsonResponse({'status': 1})
 
 def invite_url(request, project_id):
