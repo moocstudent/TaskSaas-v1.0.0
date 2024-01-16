@@ -2,15 +2,22 @@ version: '3'
 
 services:
   web:
+    image: tasksaas:1.0.11
     build: ./
     restart: always
     command: python manage.py runserver 0.0.0.0:3000
     volumes:
-      - /TaskSaas
+      - /TaskSaas_Dck
+    environment:
+      - REDIS_HOST=redis
+      - MYSQL_DATABASE=tasksaas
+      - MYSQL_ROOT_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=zhangqi1112
     ports:
       - "3000:3000"
     depends_on:
       - db
+      - redis
   db:
     image: mysql:latest
     restart: always
@@ -26,6 +33,19 @@ services:
       - /opt/homebrew/bin/mysql
       - ./mysql/data:/var/lib/mysql
       - ./mysql/config/my.cnf:/etc/mysql/my.cnf
-    environment:
-      - MYSQL_DATABASE=tasksaas
-      - MYSQL_ROOT_PASSWORD=zhangqi1112
+#    environment:
+
+  redis:
+    image: redis:7.0.8
+    container_name: redis
+#    networks:
+#      - 127.0.0.1
+#    network_mode: bridge
+#    hostname: 0.0.0.0
+#    volumes:
+#        - ./redis.conf:/usr/local/etc/redis/redis.conf
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=yes
+    restart: always
+    ports:
+      - "6379:6379"

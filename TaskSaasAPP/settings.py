@@ -139,11 +139,22 @@ CORS_ALLOW_HEADERS = (
 
 ALLOWED_HOSTS = ["*"]
 
+# Redis配置
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
+REDIS_DB = os.environ.get('REDIS_DB', 0)
+MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE', '')
+MYSQL_ROOT_USERNAME = os.environ.get('MYSQL_ROOT_USERNAME', '')
+MYSQL_ROOT_PASSWORD = os.environ.get('MYSQL_ROOT_PASSWORD', '')
+
+print('REDIS_HOST',REDIS_HOST)
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'],
             # 或"hosts": [os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')],
         },
     },
@@ -178,9 +189,9 @@ ASGI_APPLICATION = 'TaskChat.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tasksaas',
-        'USER': 'root',
-        'PASSWORD': 'zhangqi1112',
+        'NAME': {MYSQL_DATABASE},
+        'USER': {MYSQL_ROOT_USERNAME},
+        'PASSWORD': {MYSQL_ROOT_PASSWORD},
         'HOST': 'db',
         'PORT': 3306,
         'CHARSET': 'utf8',
@@ -240,11 +251,13 @@ TENCENT_SMS_TEMPLATES = {
     'register': 645735,
     'login': 645736,
 }
+
+
 # Django-redis配置
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://0.0.0.0:6379",
+        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}',
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {
@@ -252,6 +265,7 @@ CACHES = {
                 "encoding": "utf-8"
             },
             # "PASSWORD": '0'
+            'PASSWORD': REDIS_PASSWORD,
         }
     }
 }

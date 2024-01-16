@@ -1,3 +1,5 @@
+import os
+
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
@@ -19,6 +21,8 @@ def project_list(request):
     :return:
     """
     if request.method == 'GET':
+        REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost----')
+        print('REDIS_HOST>>>>>>>>', REDIS_HOST)
         if not user:
             user = UserInfo.objects.filter(id=request.GET.get('user_id')).first()
         """
