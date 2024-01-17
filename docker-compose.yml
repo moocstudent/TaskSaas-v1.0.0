@@ -2,7 +2,8 @@ version: '3'
 
 services:
   web:
-    image: tasksaas:1.0.11
+    image: tasksaas:1.0.13
+    container_name: web
     build: ./
     restart: always
     command: python manage.py runserver 0.0.0.0:3000
@@ -26,15 +27,19 @@ services:
       --max_connections=1000
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
-      --default-authentication-plugin=mysql_native_password
+      --default-authentication-plugin=caching_sha2_password
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - /opt/homebrew/bin/mysql
       - ./mysql/data:/var/lib/mysql
       - ./mysql/config/my.cnf:/etc/mysql/my.cnf
+    expose:
+      - "3306"
 #    environment:
-
+#      - MYSQL_DATABASE=tasksaas
+#      - MYSQL_ROOT_USERNAME=root
+#      - MYSQL_ROOT_PASSWORD=zhangqi1112
   redis:
     image: redis:7.0.8
     container_name: redis
@@ -44,8 +49,8 @@ services:
 #    hostname: 0.0.0.0
 #    volumes:
 #        - ./redis.conf:/usr/local/etc/redis/redis.conf
-#    environment:
-#      - ALLOW_EMPTY_PASSWORD=yes
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
     restart: always
     ports:
       - "6379:6379"

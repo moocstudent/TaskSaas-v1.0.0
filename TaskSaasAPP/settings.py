@@ -189,9 +189,9 @@ ASGI_APPLICATION = 'TaskChat.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': {MYSQL_DATABASE},
-        'USER': {MYSQL_ROOT_USERNAME},
-        'PASSWORD': {MYSQL_ROOT_PASSWORD},
+        'NAME': f'{MYSQL_DATABASE}',
+        'USER': f'{MYSQL_ROOT_USERNAME}',
+        'PASSWORD': f'{MYSQL_ROOT_PASSWORD}',
         'HOST': 'db',
         'PORT': 3306,
         'CHARSET': 'utf8',
