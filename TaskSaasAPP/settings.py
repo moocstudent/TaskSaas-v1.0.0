@@ -144,9 +144,10 @@ REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
 REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
 REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 REDIS_DB = os.environ.get('REDIS_DB', 0)
-MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE', '')
-MYSQL_ROOT_USERNAME = os.environ.get('MYSQL_ROOT_USERNAME', '')
-MYSQL_ROOT_PASSWORD = os.environ.get('MYSQL_ROOT_PASSWORD', '')
+MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
+MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE', 'tasksaas')
+MYSQL_ROOT_USERNAME = os.environ.get('MYSQL_ROOT_USERNAME', 'root')
+MYSQL_ROOT_PASSWORD = os.environ.get('MYSQL_ROOT_PASSWORD', 'zhangqi1112')
 
 print('REDIS_HOST',REDIS_HOST)
 
@@ -192,7 +193,7 @@ DATABASES = {
         'NAME': f'{MYSQL_DATABASE}',
         'USER': f'{MYSQL_ROOT_USERNAME}',
         'PASSWORD': f'{MYSQL_ROOT_PASSWORD}',
-        'HOST': 'db',
+        'HOST': f'{MYSQL_HOST}',
         'PORT': 3306,
         'CHARSET': 'utf8',
         'OPTIONS': {'charset': 'utf8mb4'},

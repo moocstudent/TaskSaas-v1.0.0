@@ -118,19 +118,16 @@ class Project(models.Model):
         (6, '#7461c2'),
         (7, '#20bfa3'),
     }
-
     name = models.CharField(verbose_name='项目名', max_length=32)
-    color = models.SmallIntegerField(verbose_name='颜色', choices=COLOR_CHOICES, default=1)
+    color = models.SmallIntegerField(verbose_name='颜色', choices=COLOR_CHOICES, default=1,null=True,blank=True)
     remark = models.CharField(verbose_name='项目描述', max_length=255, null=True, blank=True)
-    user_space = models.BigIntegerField(verbose_name='项目已使用空间', default=0, help_text='字节')
-    star = models.BooleanField(verbose_name='星标', default=False)
-
-    join_count = models.SmallIntegerField(verbose_name='参与人数', default=1)
+    user_space = models.BigIntegerField(verbose_name='项目已使用空间', default=0, help_text='字节',null=True,blank=True)
+    star = models.BooleanField(verbose_name='星标', default=False,null=True,blank=True)
+    join_count = models.SmallIntegerField(verbose_name='参与人数', default=1,null=True,blank=True)
     creator = models.ForeignKey(verbose_name='创建者', to='UserInfo', null=True, on_delete=models.SET_NULL)
-    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-
-    bucket = models.CharField(verbose_name='COS桶', max_length=128)
-    region = models.CharField(verbose_name='COS区域', max_length=32)
+    create_datetime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True,null=True,blank=True)
+    bucket = models.CharField(verbose_name='COS桶', max_length=128,null=True,blank=True)
+    region = models.CharField(verbose_name='COS区域', max_length=32,null=True,blank=True)
 
 
 class Milestone(models.Model):
@@ -170,9 +167,9 @@ class ProjectUser(models.Model):
     invitee = models.ForeignKey(verbose_name='邀请人', to='UserInfo', related_name='invites', on_delete=models.SET_NULL,
                                 null=True, blank=True)
 
-    star = models.BooleanField(verbose_name='星标', default=False)
+    star = models.BooleanField(verbose_name='星标', default=False,null=True,blank=True)
 
-    create_datetime = models.DateTimeField(verbose_name='加入时间', auto_now_add=True)
+    create_datetime = models.DateTimeField(verbose_name='加入时间', auto_now_add=True,null=True,blank=True)
 
 
 class Wiki(models.Model):

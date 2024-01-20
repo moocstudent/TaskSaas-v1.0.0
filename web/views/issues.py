@@ -222,9 +222,10 @@ def issues(request, project_id):
                         datetime.datetime.strptime(now,"%Y-%m-%d") <= datetime.datetime.strptime(date_range_arr[1] ,"%Y-%m-%d") :
                     ms2 = ms
                     break
-        form.instance.milestone = ms2
-        ms2.sync_count+=1
-        ms2.save()
+        if ms2:
+            form.instance.milestone = ms2
+            ms2.sync_count+=1
+            ms2.save()
         # 保存
         form.save()
         user_util.compute_forward_score(user=request.web.user, forward_score=create_random_decimal(1.00,2.00))

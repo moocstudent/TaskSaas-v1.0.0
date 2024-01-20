@@ -24,8 +24,9 @@ class GloryAPI(APIView):
 
     def get_object(self,request):
         glory_id = request.GET.get('glory_id')
-        print('glory_id ',glory_id)
-        return JsonResponse({'status':1})
+        glory = Glory.objects.filter(id=glory_id).first()
+        print('glory ',glory)
+        return JsonResponse({'status':1,'glory':glory})
 
     def post(self,request):
         form = GloryModelForm(request, data=request.POST,user=request.web.user)
