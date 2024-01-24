@@ -69,6 +69,9 @@
                         {% else %}<a type="button" class="layui-btn layui-btn-xs" href=""
                                      onclick="collect({{ wiki_object.id }})">[收藏]</a>
                         {% endif %}
+                        <button type="button" id="fullscreen-btn">全屏切换
+                        </button>
+                        <label id="browserTip">使用谷歌或火狐来进行编辑获得最佳体验</label>
                     {% endif %}
                 </div>
 
@@ -114,6 +117,107 @@
     {#    <script src="{% static 'web/plugin/editor-md/lib/sequence-diagram.min.js' %}"></script>#}
     <script src="{% static 'web/plugin/editor-md/lib/underscore.min.js' %}"></script>
     <script>
+         function showFullScreenBtn2Preview() {
+            $('#fullscreen-btn').show()
+            $('#browserTip').hide()
+        }
+
+        function hideFullScreenBtn2Preview() {
+            $('#fullscreen-btn').hide()
+            $('#browserTip').show()
+        }
+
+        function browserDetect() {
+            var userAgent = navigator.userAgent; // 取得浏览器的userAgent字符串
+            console.log(userAgent)
+
+            var isFirefox = navigator.userAgent.indexOf('Firefox') > -1  // 是否是火狐  ，火狐内核Gecko
+            console.log('火狐' + isFirefox)  // 返回 true  则是 ，false  则不是
+
+
+            var isWebKit = navigator.userAgent.indexOf('WebKit') > -1  // 是否是WebKit 内核
+            console.log('谷歌内核' + isWebKit)  // 返回 true  则是，false  则不是
+
+            var isChrome = navigator.userAgent.indexOf('Chrome') > -1  // 是否是谷歌
+            console.log('谷歌' + isChrome)  // 返回 true  则是 ，false  则不是
+
+            var isOpera = navigator.userAgent.indexOf('Opera') > -1  // 是否是opera ， opera内核 Presto
+            console.log('Opera' + isOpera)  // 返回 true  则是 ，false  则不是
+
+            var isTrident = navigator.userAgent.indexOf('Trident') > -1  // 是否是IE内核
+            console.log('IE内核' + isTrident)  // 返回 true  则是 ，false  则不是
+
+            var isIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera
+            console.log('IE ' + isIE)  //判断是否IE浏览器
+            //  因为ie10-ie11的版本问题，不再支持document.all判断，所以ie判断函数要重新写
+            var isIeL = !!window.ActiveXObject || "ActiveXObject" in window
+            console.log('IELLQ ' + isIeL)  //判断是否IE浏览器
+
+            var isIE9 = navigator.userAgent.indexOf("MSIE 9.0") > 0
+            console.log('IE999 ' + isIE9)  //判断是否IE9  ;如果是其他IE版本，则 MSIE 7.0   MSIE 8.0
+
+
+            if (isFirefox || isChrome) {
+                showFullScreenBtn2Preview()
+            } else {
+                hideFullScreenBtn2Preview()
+            }
+            // 判断是否为移动端
+            var browser = {
+                versions: function () {
+                    var u = navigator.userAgent;
+                    return {
+                        trident: u.indexOf('Trident') > -1, //IE内核
+                        presto: u.indexOf('Presto') > -1, //opera内核
+                        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+                        gecko: u.indexOf('Firefox') > -1, //火狐内核Gecko
+                        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+                        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios
+                        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android
+                        iPhone: u.indexOf('iPhone') > -1, //iPhone
+                        iPad: u.indexOf('iPad') > -1, //iPad
+                        webApp: u.indexOf('Safari') > -1 //Safari
+                    };
+                }()
+            }
+            var isPhone = browser.versions.mobile || browser.versions.ios || browser.versions.android || browser.versions.iPhone || browser.versions.iPad
+            console.log('是否为移动端' + isPhone)
+
+// JS判断浏览器是否是IE9以下，处理可能遇到的兼容性问题
+            if (navigator.appName == "Microsoft Internet Explorer" && parseInt(navigator.appVersion.split(";")[1].replace(/[ ]/g, "").replace("MSIE", "")) < 9) {
+                console.log("您的浏览器版本过低，请使用IE9及以上版本");
+            }
+        }
+
+        browserDetect()
+
+        $('#fullscreen-btn').click(function () {
+
+            var modal = $('#previewMarkdown'); //
+            if (modal.hasClass('fullscreen')) {
+                // 如果已经是全屏状态，则退出全屏
+                let removeClass = modal.removeClass('fullscreen');
+                if (!removeClass) {
+                    document.exitFullscreen();
+                }
+                //再次进入全屏
+                modal.addClass('fullscreen');
+                var element = modal.get(0);
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                }
+            } else {
+                // 否则进入全屏
+                modal.addClass('fullscreen');
+                var element = modal.get(0);
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                }
+            }
+        });
+
+
+
         var WIKI_DETAIL_URL = "{% url 'wiki' project_id=request.web.project.id%}";
 
         $(function () {

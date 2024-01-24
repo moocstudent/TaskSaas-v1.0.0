@@ -1,5 +1,3 @@
-import json
-
 from django.core.cache import cache
 from django.http import JsonResponse
 
@@ -17,7 +15,10 @@ def attention_cache_set(request,project_id):
 def day_cache_set(request,project_id):
     trigger = request.POST.get("trigger")
     print('day_cache_set pid ',project_id)
+    print("'mydayTrigger'+str(request.web.user.id)+'_'+str(project_id)>",'mydayTrigger'+str(request.web.user.id)+'_'+str(project_id))
+    print('trigger>',trigger)
     cache.set('mydayTrigger'+str(request.web.user.id)+'_'+str(project_id), trigger, timeout=None)
+    print(cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(project_id)))
     return JsonResponse({'code':1})
 
 def main_echart_legend_cache_set(request,project_id):

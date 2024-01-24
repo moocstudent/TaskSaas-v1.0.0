@@ -137,7 +137,7 @@
         }
 
         .avatar {
-              float: left;
+            float: left;
             margin-right: 10px;
             display: inline-block;
             width: 30px;
@@ -221,9 +221,9 @@
                                 </span>
 
                                 {% if request.web.project.creator == request.web.user %}
-                                <span class="col-md-2" style="float: right;"><a
-                                        class="layui-btn layui-btn-normal layui-btn-xs"
-                                        data-toggle="modal" data-target="#memberManage">成员管理</a>
+                                    <span class="col-md-2" style="float: right;"><a
+                                            class="layui-btn layui-btn-normal layui-btn-xs"
+                                            data-toggle="modal" data-target="#memberManage">成员管理</a>
                                       </span>
                                 {% endif %}
                             </div>
@@ -320,37 +320,38 @@
                                     aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" id="myMembers">成员管理</h4>
                         </div>
-                        <div class="modal-body" style="width:300px;padding-right: 40px;word-wrap:break-word;word-break:break-all;display: block;overflow-y: scroll;">
-                            <div class="layui-col-sm12 layui-col-sm-offset1 title" ></div>
-                        <table id="memberTable"
-                               style="word-wrap:break-word;word-break:break-all;min-width:20vh;display: block;overflow-y: scroll;">
-                            <tbody>
-                           {% for item in join_user %}
-                                <tr>
-                                    <td style="min-width:300px;">
-                                       <div class="layui-col-sm3 layui-col-sm-offset1">
-                                        <div class="layui-row ws-docs-anim">
-                                            <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-                                                {% if item.2 %}
-                                                    <img class="avatar" src="{{ item.2 }}" alt="">
-                                                {% else %}
-                                                    {{ item.1.0 |upper }}
-                                                {% endif %}
+                        <div class="modal-body"
+                             style="width:300px;padding-right: 40px;word-wrap:break-word;word-break:break-all;display: block;overflow-y: scroll;">
+                            <div class="layui-col-sm12 layui-col-sm-offset1 title"></div>
+                            <table id="memberTable"
+                                   style="word-wrap:break-word;word-break:break-all;min-width:20vh;display: block;overflow-y: scroll;">
+                                <tbody>
+                                {% for item in join_user %}
+                                    <tr>
+                                        <td style="min-width:300px;">
+                                            <div class="layui-col-sm3 layui-col-sm-offset1">
+                                                <div class="layui-row ws-docs-anim">
+                                                    <div class="avatar layui-anim" data-anim="layui-anim-rotate">
+                                                        {% if item.2 %}
+                                                            <img class="avatar" src="{{ item.2 }}" alt="">
+                                                        {% else %}
+                                                            {{ item.1.0 |upper }}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="text">{{ item.1 }}</div>
+                                                <div class="text" style="min-width: 220px">加入时间:{{ item.3 }}</div>
+                                                <button onclick="removeMember({{ item.0 }})">移除成员</button>
+                                                <hr>
                                             </div>
-                                        </div>
-                                        <div class="text">{{ item.1 }}</div>
-                                        <div class="text" style="min-width: 220px">加入时间:{{ item.3 }}</div>
-                                           <button onclick="removeMember({{ item.0 }})">移除成员</button>
-                                           <hr>
-                                    </div>
-                                    </td>
+                                        </td>
 
 
-                                </tr>
+                                    </tr>
 
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                {% endfor %}
+                                </tbody>
+                            </table>
 
                         </div>
                         {% comment %} <div class="modal-body" style="padding-right: 40px;">
@@ -490,11 +491,8 @@
                                             </label>
 
                                         {% endif %}
-
                                     </td>
-
                                 </tr>
-
                             {% endfor %}
                             </tbody>
                         </table>
@@ -531,25 +529,30 @@
         var echartsData = JSON.parse(document.getElementById("echarts_data").value);
         console.log('echartsData', echartsData);
         const yDataNames = ['已关闭', '已忽略', '已解决', '待反馈', '重新打开', '处理中', '新建']
-        var tasksCount = JSON.parse(document.getElementById("tasks_count").value);
-        console.log('tasksCount', tasksCount);
-        if (tasksCount.length == 0) {
-            console.log('rray(yDataNames.lengt')
-            tasksCount = Array(yDataNames.length).fill(0);
+
+        //ao
+        function fillIfEmpty(arr, length, fillValue) {
+            return arr.length === 0 ? new Array(length).fill(fillValue) : arr;
         }
-        var funcsCount = JSON.parse(document.getElementById("funcs_count").value);
-        if (funcsCount.length == 0) {
-            funcsCount = Array(yDataNames.length).fill(0);
-        }
-        console.log('funcsCount', funcsCount)
-        var bugsCount = JSON.parse(document.getElementById("bugs_count").value);
-        if (bugsCount.length == 0) {
-            bugsCount = Array(yDataNames.length).fill(0);
-        }
-        var demandCount = JSON.parse(document.getElementById("demand_count").value);
-        if (demandCount.length == 0) {
-            demandCount = Array(yDataNames.length).fill(0);
-        }
+
+        const FILL_VALUE = 0;
+        let tasksCount = JSON.parse(document.getElementById("tasks_count").value);
+        let funcsCount = JSON.parse(document.getElementById("funcs_count").value);
+        let bugsCount = JSON.parse(document.getElementById("bugs_count").value);
+        let demandCount = JSON.parse(document.getElementById("demand_count").value);
+        // 处理 tasksCount
+        console.log(`tasksCount: ${tasksCount}`);
+        tasksCount = fillIfEmpty(tasksCount, yDataNames.length, FILL_VALUE);
+        // 处理 funcsCount
+        console.log(`funcsCount: ${funcsCount}`);
+        funcsCount = fillIfEmpty(funcsCount, yDataNames.length, FILL_VALUE);
+        // 处理 bugsCount
+        console.log(`bugsCount: ${bugsCount}`);
+        bugsCount = fillIfEmpty(bugsCount, yDataNames.length, FILL_VALUE);
+        // 处理 demandCount
+        console.log(`demandCount: ${demandCount}`);
+        demandCount = fillIfEmpty(demandCount, yDataNames.length, FILL_VALUE);
+
         var issues_types = eval(document.getElementById("issues_types"));
         var status_choices = JSON.parse(document.getElementById("status_choices").value);
         var type_ids = document.getElementById("type_ids").value;
@@ -569,20 +572,14 @@
             {% comment %}  }{% endcomment %}
         }
         var pid = JSON.parse(document.getElementById("pid").value);
-
         const dashboardLegendTriggerKey = "mainLegendTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
         console.log('dashboardLegendTriggerKey', dashboardLegendTriggerKey)
-
         const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
         console.log('mytaskTriggerKey', mytaskTriggerKey)
-
         var username = document.getElementById("username").value;
         var project_id = eval(document.getElementById("project_id").value);
-
-
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
-
         option = {
             tooltip: {
                 trigger: 'axis',
@@ -665,134 +662,110 @@
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
         myChart.hideLoading();
+        //ao
         myChart.on("click", function (e) {
-            console.log(e.seriesName)
-            console.log(e.seriesName == 'Bug')
-            {#alert('chart on click>>', params);#}
-            {#console.log((yMatchTypes.indexOf(e.name) + 1))#}
-            {#console.log((all_type_ids[(xMatchTypes.indexOf(e.seriesName))]))#}
-            if (e.name && e.seriesName) {
-                {#alert('issues_types', (xMatchTypes.indexOf(e.seriesName)))#}
-                window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(e.name) + 1) +
-                    "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])
+            // 使用模板字符串优化console.log的输出
+            console.log(`yMatchTypes index: ${yMatchTypes.indexOf(e.name) + 1}`);
+            console.log(`all_type_ids index: ${all_type_ids[xMatchTypes.indexOf(e.seriesName)]}`);
+            // 检查e.name和e.seriesName是否已定义
+            if (!e.name || !e.seriesName) {
+                layer.msg('请点击有数值的柱状图进行跳转');
+                return;
             }
-        })
-
-
-        function legendTriggerRefresh() {
-            let legend = localStorage.getItem(dashboardLegendTriggerKey);
-            console.log('mainLegendTrigger le>>', legend);
-            let legendArr = ['任务', '功能', 'Bug', '需求确认']
-            if (!legend) {
-                legend = '任务,功能,Bug,需求确认'
-                localStorage.setItem(dashboardLegendTriggerKey, legend);
+            // 提取公共部分避免重复代码
+            const yIndex = yMatchTypes.indexOf(e.name) + 1;
+            const xIndex = all_type_ids[xMatchTypes.indexOf(e.seriesName)];
+            if (xIndex !== null && xIndex !== undefined) {
+                window.location.href = `/manage/${pid}/issues/?status=${yIndex}&issues_type=${xIndex}`;
             } else {
-                if (legend) {
-                    let splitLegend = legend.split(",");
-                    for (var i = 0; i < 4; i++) {
-                        myChart.setOption({
-                            legend: {selected: {[legendArr[i]]: false}},
-                        })
-                    }
-                    for (s in splitLegend) {
-                        if (splitLegend[s] == '任务') {
-                            myChart.setOption({
-                                legend: {selected: {['任务']: true}}
-                            })
-                        } else if (splitLegend[s] == '功能') {
-                            myChart.setOption({
-                                legend: {selected: {['功能']: true}}
-                            })
-                        } else if (splitLegend[s] == 'Bug') {
-                            myChart.setOption({
-                                legend: {selected: {['Bug']: true}}
-                            })
-                        } else if (splitLegend[s] == '需求确认') {
-                            myChart.setOption({
-                                legend: {selected: {['需求确认']: true}}
-                            })
-                        }
-                    }
+                layer.msg('请点击有数值的柱状图进行跳转');
+            }
+        });
 
-                } else {
-                    console.log('mainLegendTrigger', legend)
-                    {% comment %}for (var i = 0; i < 5; i++) {
+
+        //ao
+        function legendTriggerRefresh() {
+            const legendKey = dashboardLegendTriggerKey;
+            let legend = localStorage.getItem(legendKey);
+            console.log('mainLegendTrigger le>>', legend);
+            const legendArr = ['任务', '功能', 'Bug', '需求确认'];
+            if (!legend) {
+                legend = '任务,功能,Bug,需求确认';
+                localStorage.setItem(legendKey, legend);
+            } else {
+                const splitLegend = legend.split(",");
+                // 设置未选中状态
+                legendArr.forEach(item => {
+                    myChart.setOption({
+                        legend: {selected: {[item]: false}}
+                    });
+                });
+                // 设置选中状态
+                splitLegend.forEach((item) => {
+                    if (legendArr.includes(item)) {
                         myChart.setOption({
-                            legend: {selected: {[legendArr[i]]: false}},
-                        })
-                    }{% endcomment %}
-                }
+                            legend: {selected: {[item]: true}}
+                        });
+                    }
+                });
             }
         }
 
         myChart.on('legendselectchanged', function (e) {
-            if (e.selected[e.name]) {
-                // 点击项是选中状态
-                console.log(e.name + ' checked')
-                sendFreshMainEchartLegendTriggerVal(e.selected)
+            const itemName = e.name;
+            const isSelected = e.selected[itemName];
+
+            if (isSelected) {
+                console.log(`${itemName} is checked`);
             } else {
-                // 点击项是取消状态
-                console.log(e.name + ' un checked')
-                sendFreshMainEchartLegendTriggerVal(e.selected)
+                console.log(`${itemName} is unchecked`);
             }
-            // do something
+            sendFreshMainEchartLegendTriggerVal(e.selected);
+            // 在这里添加需要进行的其他操作
         });
 
 
         function sendFreshMainEchartLegendTriggerVal(val) {
-            let reqVal = ''
-            if (val.任务) {
-                if (reqVal.length > 0) {
-                    reqVal += ','
-                }
-                reqVal += '任务'
-            }
-            if (val.功能) {
-                if (reqVal.length > 0) {
-                    reqVal += ','
-                }
-                reqVal += '功能'
-            }
-            if (val.Bug) {
-                if (reqVal.length > 0) {
-                    reqVal += ','
-                }
-                reqVal += 'Bug'
-            }
-            if (val.需求确认) {
-                if (reqVal.length > 0) {
-                    reqVal += ','
-                }
-                reqVal += '需求确认'
-            }
-            console.log(reqVal)
+            const keys = ['任务', '功能', 'Bug', '需求确认'];
+            const values = keys.map(key => val[key] || false);
+            const reqVal = values
+                .filter(Boolean)
+                .join(',');
             if (!reqVal) {
-                alert('至少保留一项😄')
+                alert('至少保留一项😄');
                 location.reload();
-                return
+                return;
             }
-            $.ajax({
-                url: "{% url 'main_echart_legend_cache' project_id=request.web.project.id %}",
-                type: "POST",
-                data: {
+            if (localStorage.getItem(dashboardLegendTriggerKey) === reqVal) {
+                // 防止不必要的请求，如果缓存中有相同的值
+                console.log('缓存中的数据与所需值相同');
+                return;
+            }
+            fetch("{% url 'main_echart_legend_cache' project_id=request.web.project.id %}", {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
                     "trigger": reqVal,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
-                },
-                dataType: "JSON",
-                success: function (res) {
-                    if (res.code) {
-                        localStorage.setItem(dashboardLegendTriggerKey, reqVal)
-                        console.log("reload")
-                        {#legendTriggerRefresh()#}
-                        {#reloadWorkBenchJson()#}
-                        location.reload();
-                        {#$("#tasklist").load(issues_object_list=[])#}
-                    } else {
-
-                    }
+                })
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('网络响应状态不正确');
                 }
-
             })
+                .then(res => {
+                    localStorage.setItem(dashboardLegendTriggerKey, reqVal);
+                    console.log("reload");
+                    // 此处可以添加需要在成功后执行的其他操作
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('请求错误', error);
+                });
         }
 
         //deprecated
@@ -851,6 +824,7 @@
             }
             legendTriggerRefresh()
         }
+
         storageTriggerInit()
         $(function () {
             bindCopyUrl();

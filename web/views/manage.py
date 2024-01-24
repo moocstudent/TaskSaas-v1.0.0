@@ -11,7 +11,6 @@ from django.shortcuts import render
 from TaskSaas.result.result import APIResult
 from TaskSaasAPP import date_util
 from TaskSaasAPP.date_util import get_every_day
-from TaskSaasAPP.type_util import isint
 from utils.pagination import Pagination
 from web import models
 from web.models import Collect, Issues, UserInfo, WorkRecord, Project
@@ -165,31 +164,38 @@ def git(request, project_id):
     return render(request, 'web/git.html', context=context)
 
 
+from functools import reduce
+
 def workbench(request, project_id):
     q = request.GET.get('q')
-    print('workbench pid ', request.web.project.id)
-    # 根据优先级排序
-    ordering = "FIELD(`priority`, 'danger','warning','success')"
-    legendTriggrer = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+    # 构建缓存键时使用 reduce 函数
+    legend_trigger_cache_key = cache.get('myechartlegendTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
                                '1234')
-    attention_trigger = cache.get('myAttentionTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
+    attention_trigger_cache_key = cache.get('myAttentionTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id),
                                   'off')
+    cache_key = 'mydayTrigger' + str(request.web.user.id) + '_' + str(project_id)
+    print('cache_key:',cache_key)
+    day_trigger_cache_key = cache.get(cache_key,'day7')
+    ordering = "FIELD(`priority`, 'danger','warning','success')"
+    legend_trigger = cache.get(legend_trigger_cache_key, '1234')
+    attention_trigger = cache.get(attention_trigger_cache_key, 'off')
     people_involve_q = Q(assign=request.web.user) | Q(creator=request.web.user)
     if attention_trigger == 'on':
         people_involve_q = people_involve_q | Q(attention=request.web.user)
-    my_issues_set = models.Issues.objects.filter(Q(project_id=project_id) & (people_involve_q)
-                                                 & Q(status__in=(list(legendTriggrer)))).extra(
+    my_issues_set = models.Issues.objects.filter(
+        Q(project_id=project_id) & people_involve_q &
+        Q(status__in=list(legend_trigger))).extra(
         select={'ordering': ordering}, order_by=('ordering', 'id',)).distinct()
+    print('my_issues_set size:', len(my_issues_set))
     if q:
-        qq = None
-        if isint(q):
+        if q.isdigit():
             qq = Q(issue_id=q) | Q(subject__icontains=q)
         else:
             qq = Q(subject__icontains=q)
         my_issues_set = my_issues_set.filter(qq)
-    day_trigger = cache.get('mydayTrigger' + str(request.web.user.id) + '_' + str(request.web.project.id), 'day7')
+    day_trigger = cache.get(day_trigger_cache_key, 'day7')
+    print('dayy_trigger:',day_trigger)
     my_issues_set = filter_by_day(my_issues_set, day_trigger)
-    # elif day_trigger == 'day0':
     print('total size', len(my_issues_set))
     danger_count = my_issues_set.filter(priority='danger').count()
     warning_count = my_issues_set.filter(priority='warning').count()
@@ -199,11 +205,9 @@ def workbench(request, project_id):
     if my_issues_set:
         max_dates = my_issues_set.aggregate(cd=Min('create_datetime'), lud=Min('latest_update_datetime'))
         for k, v in max_dates.items():
-            if min_date:
-                if v < min_date:
-                    min_date = v
-                    continue
-            min_date = v
+            if min_date is None or v < min_date:
+                min_date = v
+    # 更多优化可能需要对 filter_by_day 函数和 ORM 查询进行分析
     days = []
     print('min_date', min_date)
     if min_date and day_trigger != 'day1':
@@ -227,7 +231,8 @@ def workbench(request, project_id):
                                                                Q(latest_update_datetime__date=d))).count())
         reopen_counts.append(my_issues_set.filter(Q(status=3) & (Q(create_datetime__date=d) |
                                                                  Q(latest_update_datetime__date=d))).count())
-    my_issues_set.filter()
+    # my_issues_set.filter()
+    print('my_issues_set.count()',my_issues_set.count())
     current_page = request.GET.get('page')
     pagesize = my_issues_set.count() / 3
     if int(pagesize) != pagesize:
@@ -299,7 +304,7 @@ def workbench_json(request):
     danger_count = my_issues_set.filter(priority='danger').count()
     warning_count = my_issues_set.filter(priority='warning').count()
     success_count = my_issues_set.filter(priority='success').count()
-    todo_count = len(my_issues_set)
+    # todo_count = len(my_issues_set)
     min_date = None
     if day_trigger == 'day0':
         max_dates = my_issues_set.aggregate(cd=Min('create_datetime'), lud=Min('latest_update_datetime'))
