@@ -253,7 +253,8 @@
 
     </div>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
-
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
+    <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -461,7 +462,7 @@
             })
         }
 
-             function collect(pk) {
+        function collect(pk) {
             $.ajax({
                 url: "{% url 'file_collect' project_id=request.web.project.id %}",
                 type: "POST",
@@ -480,5 +481,9 @@
                 }
             })
         }
+
+
+
+
     </script>
 {% endblock %}

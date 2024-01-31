@@ -1,0 +1,90 @@
+{% load static %}
+{% load project %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'web/layui/css/layui.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/plugin/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'web/css/manage.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
+            integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        .navbar-av {
+            border-radius: 0;
+        }
+
+        .error-msg {
+            color: red;
+            position: absolute;
+            font-size: 13px;
+        }
+    </style>
+    {% block css %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-av">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url '' %}">TaskSaas</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {% all_project_list request %}
+                {#                {% all_glory_list request %}#}
+
+                {% if request.web.project %}
+                    {% manage_menu_list request %}
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.web.project %}
+                    {% right_side_manage_menu_list request %}
+                {% endif %}
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">
+                        <img src="{{ request.web.user.sys_avatar }}" alt="" class=""
+                             style="width: 18px;height:18px;">
+                        {{ request.web.user.username }}<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'index' %}">首 页</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'profile' %}">用户设置</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'sys_config' %}">系统设置</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="{% url 'logout' %}">用户注销</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+<script src="{% static 'web/layui/layui.js' %}"></script>
+<script src="{% static 'web/js/jquery.min.js' %}"></script>
+<script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
+<script>
+</script>
+{% block js %}
+    <script>
+    </script>
+{% endblock %}
+</body>
+</html>

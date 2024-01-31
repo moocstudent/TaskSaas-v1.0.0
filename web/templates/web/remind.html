@@ -1,6 +1,7 @@
-{% extends 'layout/manage.html' %}
+{% extends 'layout/pure_manage.html' %}
 {% load dashboard %}
 {% load issues %}
+{% load static %}
 {% block title %}{% endblock %}
 
 {% block css %}
@@ -141,6 +142,10 @@
 {% endblock %}
 
 {% block content %}
+    <audio id="notifyAudio" hidden="hidden">
+        <source src="{% static 'web/audio/notify.mp3' %}" type="audio/mpeg">
+        您的浏览器不支持 audio 与元素。
+    </audio>
     <div class="container-fluid" style="margin-top: 20px">
         <div class="row">
             <div class="col-md-4">
@@ -239,7 +244,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="panel panel-default">
+                <div class="panel panel-default" id="remindInfoDiv">
                     <div class="panel-heading">
                         <i class="fa fa-history" aria-hidden="true"></i>
                         提醒信息 {{ hint_size }} 条
@@ -413,6 +418,9 @@
         </div>
     </div>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
+    <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
+    <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -438,5 +446,124 @@
             })
 
         }
+
+        var project_id = eval(document.getElementById("project_id").value);
+        var user_id = eval(document.getElementById("user_id").value);
+        var username = document.getElementById("username").value;
+
+        var interval_timer = null;//计时器
+        var timer_count = 0;
+        const position = 'workbench';
+        var wsUrl = 'ws://' + window.location.host + '/cache_chat/ws/' + project_id + '/' + user_id + '/' + username
+        var ws;
+
+        createOrConnectWebSocket();	// 创建websocket
+        /**
+         * 创建websocket或掉线重连
+         */
+        function createOrConnectWebSocket() {
+            var count = 0
+            if (!ws) {
+                ws = new WebSocket(wsUrl);
+                websocketInit();
+            } else {
+                if (!isOnlineCurrUser() && count < 100) {
+                    count++
+                    ws = null;
+                    createOrConnectWebSocket();
+                }
+            }
+            // 开启定时器
+            init_start_timer();
+        }
+
+        /**
+         * websocket 的初始化
+         */
+        function websocketInit() {
+            ws.onmessage = function (e) {
+                console.log('evt e ', e)
+                var data = JSON.parse(e.data);
+                console.log('>>>>>', data.type)
+                if (data.type == 'userlist.message') {
+                    let userlistval = eval(data.message);
+                    console.log(userlistval)
+                    return
+                } else if (data.type == 'private.message') {
+                    var message = data['message'];
+                    console.log('private.message:',message)
+                    {#document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');#}
+                    {#localStorage.setItem((user_id+'_'+project_id)+'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                    const notify_audio = document.getElementById('notifyAudio')
+                    notify_audio.play();
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
+                     $("#badge").load(location.href + " #badge")
+                     $("#remindInfoDiv").load(location.href + " #remindInfoDiv")
+
+                } else {
+                    var message = data['message'];
+                    console.log('message:',message)
+                    {#document.querySelector('#chat-log').innerHTML += (message + '<br>');#}
+                    {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
+                }
+            };
+            ws.onclose = function (e) {
+                console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean);
+            };
+
+        }
+
+        /**
+         * 设置一个 30秒的轮询监听方法，避免页面关闭
+         */
+        function init_start_timer() {
+            //重置计数器
+            timer_count = 0;
+            if (interval_timer != null) {
+                clearInterval(interval_timer);
+                interval_timer = null;
+            }
+            interval_timer = setInterval(function () {
+                myTimer()
+            }, 10000);
+        }
+
+        /**
+         *定时器具体实现方法
+         */
+        function myTimer() {
+            //TODO 如果超过半小时没有交互，则关闭计时器
+            if (timer_count >= 300000) {
+                clearInterval(interval_timer);
+            } else {
+                timer_count += 30;
+                createOrConnectWebSocket()
+                {#var online = '{"type":"timer","user_id":" + ' + user_id + '}';#}
+                {% comment %}   while (!isOnlineCurrUser()) {
+                       {#createOrConnectWebSocket()#}
+                       console.log('my timer reconnect ws')
+                   }{% endcomment %}
+                {#ws.send(online);#}
+                console.log('timer_count', timer_count);
+            }
+        }
+
+         /**
+         * 判断当前用户是否 还在线
+         */
+        function isOnlineCurrUser() {
+            if (ws) {
+                if (ws.readyState == WebSocket.OPEN) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+
     </script>
 {% endblock %}

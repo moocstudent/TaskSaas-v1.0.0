@@ -1,4 +1,5 @@
 {% extends 'layout/manage.html' %}
+{% load static %}
 {% block title %}{% endblock %}
 
 {% block css %}
@@ -19,13 +20,18 @@
             border: 1px solid black;
         }
 
-        .layui-input:focus,.layui-textarea:focus{border-color:deepskyblue!important;}
-        .layui-btn {background-color: deepskyblue;color: white}
+        .layui-input:focus, .layui-textarea:focus {
+            border-color: deepskyblue !important;
+        }
+
+        .layui-btn {
+            background-color: deepskyblue;
+            color: white
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-
     <div class="layui-container" style="margin-top: 20px">
         <div class="layui-tab">
             <ul class="layui-tab-title">
@@ -142,7 +148,8 @@
                                             <div class="layui-form-item">
                                                 <div class="layui-input-inline" style="width: 120px;">
                                                     <input type="text" name="color" value="" placeholder="请选择颜色"
-                                                           class="layui-input layui-border-blue" id="ID-colorpicker-demo-form-color">
+                                                           class="layui-input layui-border-blue"
+                                                           id="ID-colorpicker-demo-form-color">
                                                 </div>
                                                 <div class="layui-inline" style="left: -11px;">
                                                     <div id="ID-colorpicker-demo-form"></div>
@@ -212,15 +219,15 @@
                                 <div class="col-md-8">
                                     <div class="col-md-6">
                                         <span><input type="input" id="ipv4SupportSize"></span>
-{#                                        <button onclick="touch1()" id="copyText1" type="button" class="success">复制加密密码#}
-{#                                        </button>#}
+                                        {#                                        <button onclick="touch1()" id="copyText1" type="button" class="success">复制加密密码#}
+                                        {#                                        </button>#}
                                     </div>
-{#                                    <div class="col-md-6">#}
-{#                                        <span><input type="input" id="public_key"></span>#}
-{#                                        <button onclick="touch2()" id="copyText2" type="button" class="success">#}
-{#                                            复制PublicKey#}
-{#                                        </button>#}
-{#                                    </div>#}
+                                    {#                                    <div class="col-md-6">#}
+                                    {#                                        <span><input type="input" id="public_key"></span>#}
+                                    {#                                        <button onclick="touch2()" id="copyText2" type="button" class="success">#}
+                                    {#                                            复制PublicKey#}
+                                    {#                                        </button>#}
+                                    {#                                    </div>#}
                                 </div>
                             </div>
                         </div>
@@ -235,7 +242,7 @@
 
     </div>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
-
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
 {% endblock %}
 
 {% block js %}
@@ -314,8 +321,8 @@
 
         $("#ipv4Check").click(ipv4Check)
 
-        function ipv4Check(){
-           $.ajax({
+        function ipv4Check() {
+            $.ajax({
                 url: "{% url 'resolve_mask_of_ipv4' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
@@ -430,6 +437,7 @@
                 }
             });
         });
+
 
 
     </script>

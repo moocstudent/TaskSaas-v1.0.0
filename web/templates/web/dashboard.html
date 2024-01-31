@@ -1,25 +1,27 @@
-{% extends 'layout/manage.html' %}
+{% extends 'layout/pure_manage.html' %}
 {% load dashboard %}
 {% load issues %}
+{% load static %}
 {% block title %}{% endblock %}
 
 {% block css %}
     <style>
+
 
         .layui-layer-prompt {
             width: 100px;
             min-width: 46vh;
         }
 
-        .layui-layer-btn0 {
-            width: 25%;
-            position: relative;
-        }
+        {% comment %}     .layui-layer-btn0 {
+                 width: 25%;
+                 position: relative;
+             }
 
-        .layui-layer-btn1 {
-            width: 25%;
-            position: relative;
-        }
+             .layui-layer-btn1 {
+                 width: 25%;
+                 position: relative;
+             }{% endcomment %}
 
         .layui-layer-btn2 {
             width: 25%;
@@ -170,6 +172,10 @@
 {% endblock %}
 
 {% block content %}
+    <audio id="notifyAudio" hidden="hidden">
+        <source src="{% static 'web/audio/notify.mp3' %}" type="audio/mpeg">
+        您的浏览器不支持 audio 与元素。
+    </audio>
     <div class="container-fluid" style="margin-top: 20px">
         <div class="row">
 
@@ -200,13 +206,18 @@
                             </div>
                             <div class="panel-body">
                                 {% for key,item in status_dict.items %}
+
                                     <div class="col-sm-3 status-count">
                                         <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
                                             <div class="count">{{ item.count }}</div>
                                             <div>{{ item.text }}</div>
                                         </a>
                                     </div>
+                                    {% if key == 4 %}
+                                        <hr>
+                                    {% endif %}
                                 {% endfor %}
+
                             </div>
                         </div>
                     </div>
@@ -230,13 +241,14 @@
                             <div class="panel-body user-item">
                                 <div class="layui-col-sm12 layui-col-sm-offset1 title">创建者</div>
                                 <div class="clearfix" style="margin-bottom: 30px;">
-                                    <div class="layui-col-sm3 layui-col-sm-offset1">
+                                    <div class="layui-col-sm3 layui-col-sm-offset1"
+                                         onclick="priChat('{{ request.web.project.creator.id }}','{{ request.web.project.creator.username }}')">
                                         <div class="layui-row ws-docs-anim">
                                             {#                                       id {{ request.web.project.creator.id }}#}
                                             <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-                                                {% if  request.web.project.creator.git_avatar %}
+                                                {% if  request.web.project.creator.sys_avatar %}
                                                     <img class="avatar"
-                                                         src="{{ request.web.project.creator.git_avatar }}" alt="">
+                                                         src="{{ request.web.project.creator.sys_avatar }}" alt="">
                                                 {% else %}
                                                     {{ request.web.project.creator.username.0|upper }}
                                                 {% endif %}
@@ -249,7 +261,8 @@
                                 <div class="layui-col-sm12 layui-col-sm-offset1 title">参与者</div>
                                 <div>
                                     {% for item in join_user %}
-                                        <div class="layui-col-sm3 layui-col-sm-offset1">
+                                        <div class="layui-col-sm3 layui-col-sm-offset1"
+                                             onclick="priChat('{{ item.0 }}','{{ item.1 }}')">
                                             <div class="layui-row ws-docs-anim">
                                                 <div class="avatar layui-anim" data-anim="layui-anim-rotate">
                                                     {% if item.2 %}
@@ -516,6 +529,7 @@
     <input id="all_type_ids" value="{{ all_type_ids }}" hidden="hidden"/>
     <input id="remind_infos" value="{{ remind_infos }}" hidden="hidden"/>
     <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
+    <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
     <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
@@ -577,6 +591,7 @@
         const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
         console.log('mytaskTriggerKey', mytaskTriggerKey)
         var username = document.getElementById("username").value;
+        var user_id = eval(document.getElementById("user_id").value);
         var project_id = eval(document.getElementById("project_id").value);
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
@@ -686,12 +701,12 @@
         //ao
         function legendTriggerRefresh() {
             const legendKey = dashboardLegendTriggerKey;
-            let legend = localStorage.getItem(legendKey);
+            let legend = localStorage.getItem((user_id + '_' + project_id) + legendKey);
             console.log('mainLegendTrigger le>>', legend);
             const legendArr = ['任务', '功能', 'Bug', '需求确认'];
             if (!legend) {
                 legend = '任务,功能,Bug,需求确认';
-                localStorage.setItem(legendKey, legend);
+                localStorage.setItem((user_id + '_' + project_id) + legendKey, legend);
             } else {
                 const splitLegend = legend.split(",");
                 // 设置未选中状态
@@ -736,7 +751,7 @@
                 location.reload();
                 return;
             }
-            if (localStorage.getItem(dashboardLegendTriggerKey) === reqVal) {
+            if (localStorage.getItem((user_id + '_' + project_id) + dashboardLegendTriggerKey) === reqVal) {
                 // 防止不必要的请求，如果缓存中有相同的值
                 console.log('缓存中的数据与所需值相同');
                 return;
@@ -758,7 +773,7 @@
                 }
             })
                 .then(res => {
-                    localStorage.setItem(dashboardLegendTriggerKey, reqVal);
+                    localStorage.setItem((user_id + '_' + project_id) + dashboardLegendTriggerKey, reqVal);
                     console.log("reload");
                     // 此处可以添加需要在成功后执行的其他操作
                     location.reload();
@@ -781,7 +796,7 @@
                 dataType: "JSON",
                 success: function (res) {
                     if (res.code) {
-                        localStorage.setItem(dashboardLegendTriggerKey, initialDashBoardLegend)
+                        localStorage.setItem((user_id + '_' + project_id) + dashboardLegendTriggerKey, initialDashBoardLegend)
                         console.log("sendInitDashboardEchartLegendTriggerVal reload")
                         {#legendTriggerRefresh()#}
                         {#reloadWorkBenchJson()#}
@@ -800,20 +815,20 @@
             let isChecked = $('input[type="checkbox"]').prop('checked');
             if (isChecked) {
                 console.log("勾选");
-                localStorage.setItem(mytaskTriggerKey, "on")
+                localStorage.setItem((user_id + '_' + project_id) + mytaskTriggerKey, "on")
             } else {
                 console.log("未勾选");
-                localStorage.setItem(mytaskTriggerKey, "off")
+                localStorage.setItem((user_id + '_' + project_id) + mytaskTriggerKey, "off")
             }
             sendFreshTriggerVal()
 
         }
 
         function storageTriggerInit() {
-            let item = localStorage.getItem(mytaskTriggerKey);
+            let item = localStorage.getItem((user_id + '_' + project_id) + mytaskTriggerKey);
             if (!item) {
                 item = 'off'
-                localStorage.setItem(mytaskTriggerKey, item);
+                localStorage.setItem((user_id + '_' + project_id) + mytaskTriggerKey, item);
             } else {
                 console.log("mytaskTrigger", item)
                 if (item == "on") {
@@ -853,7 +868,7 @@
                 url: "{% url 'cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
-                    "trigger": localStorage.getItem(mytaskTriggerKey),
+                    "trigger": localStorage.getItem((user_id + '_' + project_id) + mytaskTriggerKey),
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -1207,7 +1222,7 @@
                 console.log('reconnect ws...')
                 createOrConnectWebSocket()
                 var count = 0
-                while (!isOnlineCurrUser() && count < 100) {
+                while (!isOnlineCurrUser() && count < 10000) {
                     count++
                     {#createOrConnectWebSocket()#}
                     console.log('reconnect ws 3')
@@ -1215,7 +1230,7 @@
                 console.log('ws.send(stringifyMsg)', stringifyMsg)
                 let send = ws.send(stringifyMsg);
                 console.log('send', send)
-                messageInputDom.value = '';
+                {#messageInputDom.value = '';#}
                 atMemberNames = []
                 atTaskIds = []
                 atTaskFlag = false
@@ -1346,6 +1361,21 @@
             {#chatHisInit()#}
         }
 
+        /**
+         * 判断当前用户是否 还在线
+         */
+        function isOnlineCurrUser() {
+            if (ws) {
+                if (ws.readyState == WebSocket.OPEN) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
 
         function websocketInit() {
             ws.onmessage = function (e) {
@@ -1367,19 +1397,21 @@
                     return
                 } else if (data.type == 'private.message') {
                     var message = data['message'];
-                    document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');
-                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
+                    console.log('private message:',message)
+                    {#document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');#}
+                    {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
                     const notify_audio = document.getElementById('notifyAudio')
                     notify_audio.play();
 
-                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
                     $("#badge").load(location.href + " #badge")
 
                 } else {
                     var message = data['message'];
-                    document.querySelector('#chat-log').innerHTML += (message + '<br>');
-                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
-                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                    console.log('normal message:',message)
+                    {#document.querySelector('#chat-log').innerHTML += (message + '<br>');#}
+                    {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
                 }
 
 
@@ -1442,7 +1474,7 @@
         var ws;
 
         function createOrConnectWebSocket() {
-            var wsUrl = 'ws://' + window.location.host + '/chat/ws/' + project_id + '/' + user_id + '/' + username
+            var wsUrl = 'ws://' + window.location.host + '/cache_chat/ws/' + project_id + '/' + user_id + '/' + username
             var count = 0
             if (!ws) {
                 ws = new WebSocket(wsUrl);
@@ -1456,6 +1488,43 @@
             }
             // 开启定时器
             init_start_timer();
+        }
+
+        createOrConnectWebSocket()
+
+        /**
+         * 设置一个 30秒的轮询监听方法，避免页面关闭
+         */
+        function init_start_timer() {
+            //重置计数器
+            timer_count = 0;
+            if (interval_timer != null) {
+                clearInterval(interval_timer);
+                interval_timer = null;
+            }
+            interval_timer = setInterval(function () {
+                myTimer()
+            }, 10000);
+        }
+
+          /**
+         *定时器具体实现方法
+         */
+        function myTimer() {
+            //TODO 如果超过半小时没有交互，则关闭计时器
+            if (timer_count >= 300000) {
+                clearInterval(interval_timer);
+            } else {
+                timer_count += 30;
+                createOrConnectWebSocket()
+                {#var online = '{"type":"timer","user_id":" + ' + user_id + '}';#}
+                {% comment %}   while (!isOnlineCurrUser()) {
+                       {#createOrConnectWebSocket()#}
+                       console.log('my timer reconnect ws')
+                   }{% endcomment %}
+                {#ws.send(online);#}
+                console.log('timer_count', timer_count);
+            }
         }
 
         function removeMember(remove_user_id) {
@@ -1475,6 +1544,74 @@
                     } else {
                     }
                 }
+            })
+        }
+
+        //可发离线信息
+        function priChat(id, username) {
+            console.log('id,', id)
+            console.log('uid,', '{{ request.web.user.id }}')
+            {% comment %}    if (id == '{{ request.web.user.id }}') {
+                    layer.msg('Can not send message to self.')
+                    return;
+                }{% endcomment %}
+            layer.msg('priChat,' + id)
+            let title = `发送给${username}的提醒信息`
+            layui.use(function () {
+                var util = layui.util;
+                var layer = layui.layer;
+                let prompt = layer.prompt({
+                            id: 'pri_chat_prompt',
+                            title: title,
+                            formType: 2,
+                            area: ['480px', '220px'],
+                            closeBtn: 1,
+                            maxlength: 2000,
+                            shade: [0.3, '#FFF'],
+                            shadeClose: true,
+                            resize: true,
+                            minStack: true,
+                            btn2: function () {
+                                layer.msg('取消发送')
+                            }
+                        }
+                        , function (value, index, elem) {
+                            console.log('prompt elem :', elem)
+                            console.log('prompt index :', index)
+                            {#if (value === '') return elem.focus();#}
+                            layer.msg('获得：' + util.escape(value)); // 显示 value
+                            //send calendayDayContent to save
+                            if (document.querySelector(".layui-layer-input").value.length > 0) {
+                                // ws发送提醒信息
+                                triggerReply(util.escape(value), username)
+                            } else {
+                                layer.msg("请输入信息")
+                                return;
+                            }
+
+                            setTimeout(function () {
+                                // 关闭 prompt
+                                layer.close(index);
+                                {#window.location.reload()#}
+                            }, 1000);
+                        }
+                    )
+                ;
+                layer.style(prompt, {
+                    width: '600px',
+                    height: '400px',
+                    top: '20%',
+                    left: '55%',
+                });
+
+
+                //when press esc (event27) then close prompt of editor
+                $(document).keyup(function (event) {
+                    if (event.which === 27) {
+                        //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算
+                        layer.close(prompt);
+                    }
+                })
             })
         }
 

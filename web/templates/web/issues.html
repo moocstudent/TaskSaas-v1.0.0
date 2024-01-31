@@ -174,7 +174,6 @@
 {% endblock %}
 
 {% block content %}
-
     <div class="container-fluid clearfix" style="padding: 20px 0;">
         <div class="col-sm-3">
             <div class="panel panel-default">
@@ -201,7 +200,6 @@
                         </div>
                     {% endfor %}
 
-
                 </div>
             </div>
         </div>
@@ -223,8 +221,8 @@
                 </form>
 
                 <div class="panel-body">
-                    <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建问题</a>
-                    <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>
+                    <a class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">新建Task</a>
+                    {#                    <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#inviteModal">邀请成员</a>#}
                 </div>
 
                 <!-- Table -->
@@ -321,7 +319,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">新建问题</h4>
+                    <h4 class="modal-title">新建Task</h4>
                 </div>
                 <div class="modal-body" style="padding-right: 40px;">
 
@@ -532,6 +530,10 @@
     </div>
 
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
+    <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
+    <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
+
 {% endblock %}
 
 {% block js %}
@@ -550,7 +552,9 @@
 
         const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
         console.log('mytaskTriggerKey', mytaskTriggerKey)
-
+        var user_id = eval(document.getElementById("user_id").value);
+        var project_id = eval(document.getElementById("project_id").value);
+        var username = document.getElementById("username").value;
         $(function () {
             bindBootStrapShowEvent();
             initDatePicker();
@@ -687,10 +691,10 @@
             let isChecked = $('input[type="checkbox"][name="trigger"]').prop('checked');
             if (isChecked) {
                 console.log("勾选");
-                localStorage.setItem(mytaskTriggerKey, "on")
+                localStorage.setItem((user_id+'_'+project_id)+mytaskTriggerKey, "on")
             } else {
                 console.log("未勾选");
-                localStorage.setItem(mytaskTriggerKey, "off")
+                localStorage.setItem((user_id+'_'+project_id)+mytaskTriggerKey, "off")
             }
             sendFreshTriggerVal()
 
@@ -703,7 +707,7 @@
                 url: "{% url 'cache' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
-                    "trigger": localStorage.getItem(mytaskTriggerKey),
+                    "trigger": localStorage.getItem((user_id+'_'+project_id)+mytaskTriggerKey),
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -721,10 +725,10 @@
         }
 
         function storageTriggerInit() {
-            let item = localStorage.getItem(mytaskTriggerKey);
+            let item = localStorage.getItem((user_id+'_'+project_id)+mytaskTriggerKey);
             if (!item) {
                 item = 'off'
-                localStorage.setItem(mytaskTriggerKey, item);
+                localStorage.setItem((user_id+'_'+project_id)+mytaskTriggerKey, item);
             } else {
                 console.log("trigger", item)
                 if (item == "on") {
@@ -756,6 +760,8 @@
                 }
             })
         }
+
+
 
     </script>
 {% endblock %}

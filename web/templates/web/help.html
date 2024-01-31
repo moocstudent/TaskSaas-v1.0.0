@@ -1,0 +1,95 @@
+{% extends 'layout/basic.html' %}
+{% load static %}
+
+{% block title %} 帮助文档 {% endblock %}
+
+{% block css %}
+    <style>
+        img {
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="{% static 'web/highlight/styles/default.min.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid">
+        Java String数组转int数组
+        <div class="code-block">
+            <pre><code id="code-to-copy" class="">int[] array = Arrays.stream(strings).mapToInt(Integer::parseInt).toArray();</code></pre>
+            <button onclick="copyCode()">点击复制代码</button>
+        </div>
+
+        <hr>
+        <div id="markdownDiv"></div>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'web/highlight/highlight.min.js' %}"></script>
+    <script src="{% static 'web/highlight/markdown-it.min.js' %}"></script>
+
+    <script>
+
+        hljs.highlightAll();
+
+        var md = window.markdown = window.markdownit({
+            html: true,
+            highlight: function (str, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(lang, str).value;
+                    } catch (__) {}
+                }
+                return ''; // use external default escaping
+            }
+        });
+
+        var markdownSource = `
+    int[] array = Arrays.stream(strings).mapToInt(Integer::parseInt).toArray();
+        `
+
+
+        document.getElementById("markdownDiv").innerHTML = md.render(markdownSource);
+
+        // 点击复制函数
+        function copyCode() {
+            const codeElement = document.getElementById('code-to-copy');
+            navigator.clipboard.writeText(codeElement.innerText);
+            layer.msg("代码已复制到剪贴板！");
+        }
+
+        function goDashboard() {
+            window.location.href = "{% url 'project_list' %}";
+        }
+
+        {% comment %}let canvas = document.querySelector('canvas');
+        let ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth * 1;
+        canvas.height = window.innerHeight * 0.85;
+        let str = "makemestronger".split('');
+        let arr = Array(Math.ceil(canvas.width / 10)).fill(0);
+        let run = () => {
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            arr.forEach((item, index) => {
+                ctx.fillText(str[Math.floor(Math.random() * str.length)], index * 10, item + 10);
+                arr[index] = item > canvas.height || item > 10000 * Math.random() ? 0 : item + 10;
+            });
+        };
+        // run()
+        setInterval(run, 40);{% endcomment %}
+
+
+        layui.use(['layer'], function (args) {
+            var layer = layui.layer;
+            layer.msg('TaskSaas')
+        });
+
+    </script>
+
+{% endblock %}

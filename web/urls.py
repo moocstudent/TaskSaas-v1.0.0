@@ -37,6 +37,8 @@ urlpatterns = [
     re_path(r'^image/code/', account.image_code, name='image_code'),
     re_path(r'^send/sms/', account.send_sms, name='send_sms'),
     re_path(r'^index/', home.index, name='index'),
+    re_path(r'^help/', home.help, name='help'),
+    re_path(r'^/', home.index, name=''),
     re_path(r'^callback/gitlab/$', oauth_callback_api.callback, name='callback'),
     # re_path(r'^callback/gitlab/token/', oauth_callback_api.callback_token, name='callback_token'),
     re_path(r'^gitlab/myprofile/$', oauth_callback_api.callback_userpassword, name='git_myprofile'),
@@ -167,11 +169,11 @@ re_path(r'^manage/(?P<project_id>\d+)/', include([
 
 ], None)),
 
-re_path(r'^chat/', include([
-    path('', chat_views.chat, name='chat-url'),
-    # path('<str:room_name>/', chat_views.room, name='room'),
-    path('ws/', consumers.ChatConsumer.as_asgi()),
-], None)),
+# re_path(r'^chat/', include([
+#     path('', chat_views.chat, name='chat-url'),
+#     # path('<str:room_name>/', chat_views.room, name='room'),
+#     path('ws/', consumers.ChatConsumer.as_asgi()),
+# ], None)),
 
     # re_path('tool/',include([
     #     path('', manage.tool, name='tool'),

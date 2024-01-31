@@ -34,7 +34,10 @@ class AuthMiddleWare(MiddlewareMixin):
 
         if user_object:
             if user_object.sys_avatar == '':
-                user_object.sys_avatar = 'http://localhost:3000/static/web/image/default_profile.jpg'
+                ip_port = request.get_host()
+                host = 'http://' + ip_port
+                user_object.sys_avatar =  host+'/static/web/image/default_profile.jpg'
+                print('user_object.sys_avatar',user_object.sys_avatar)
         request.web.user = user_object
 
         print('request session get user : ', request.web.user)

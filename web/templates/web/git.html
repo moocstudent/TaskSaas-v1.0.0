@@ -1,4 +1,5 @@
 {% extends 'layout/manage.html' %}
+{% load static %}
 {% block title %}{% endblock %}
 
 {% block css %}
@@ -215,30 +216,6 @@
                                             </ul>
                                         </div>
 
-                                        {#                                        <span>#}
-                                        {#                                        <i class="fa fa-refresh" aria-hidden="true"></i>#}
-                                        {#                                            {{ item.get_status_display }}#}
-                                        {#                                    </span>#}
-                                        {#                                    {% if item.assign.username %}#}
-                                        {#                                        <span>#}
-                                        {#                                        <i class="fa fa-hand-o-right" aria-hidden="true"></i>#}
-                                        {#                                        {{ item.assign.username }}#}
-                                        {#                                    </span>#}
-                                        {#                                    {% endif %}#}
-                                        {#                                        <span>#}
-                                        {#                                        <i class="fa fa-user-o" aria-hidden="true"></i>#}
-                                        {#                                        {{ item.creator.username }}#}
-                                        {#                                    </span>#}
-                                        {#                                    {% if item.end_date %}#}
-                                        {#                                        <span>#}
-                                        {#                                        <i class="fa fa-calendar" aria-hidden="true"></i>#}
-                                        {#                                        {{ item.end_date }} 截止#}
-                                        {#                                    </span>#}
-                                        {#                                    {% endif %}#}
-                                        {#                                        <span>#}
-                                        {#                                        <i class="fa fa-clock-o" aria-hidden="true"></i>#}
-                                        {#                                        {{ item.latest_update_datetime }} 更新#}
-                                        {#                                    </span>#}
                                     </div>
                                 </td>
                             </tr>
@@ -246,73 +223,39 @@
                         </tbody>
                     </table>
 
-                    {#                    <div class="panel-heading">#}
-                    {#                        <i class="fa fa-user" aria-hidden="true"></i>#}
-                    {#                        项目Git成员#}
-                    {#                    </div>#}
-                    {#                    <div class="panel-body user-item">#}
-                    {#                        <div class="col-sm-12 title">创建者</div>#}
-                    {#                        <div class="clearfix" style="margin-bottom: 30px;">#}
-                    {#                            <div class="col-sm-4">#}
-                    {#                                       id {{ request.web.project.creator.id }}#}
-                    {#                                <a href="" onclick="showMemberWithProjInfos()">#}
-                    {#                                    <div class="avatar">{{ request.web.project.creator.username.0|upper }}</div>#}
-                    {#                                </a>#}
-                    {#                                <div class="text">{{ request.web.project.creator.username }}</div>#}
-                    {#                            </div>#}
-                    {#                        </div>#}
-                    {#                        <div class="col-sm-12 title">参与者</div>#}
-                    {#                        <div>#}
-                    {#                            {% for item in join_user %}#}
-                    {#                                <div class="col-sm-4">#}
-                    {#                                        id {{ item.0 }}#}
-                    {#                                    <a href="" onclick="showMemberWithProjInfos()">#}
-                    {#                                        <div class="avatar">{{ item.1.0 |upper }}</div>#}
-                    {#                                    </a>#}
-                    {#                                    <div class="text">{{ item.1 }}</div>#}
-                    {#                                </div>#}
-                    {#                            {% endfor %}#}
-                    {#                        </div>#}
-                    {##}
-                    {#                    </div>#}
-                    {#                </div>#}
                 </div>
             </div>
         </div>
     </div>
+
     {#    <input id="project_infos" value="{{ project_infos }}" hidden="hidden"/>#}
 {% endblock %}
 
 {% block js %}
-    <script>function myProjectTrigger() {
-        console.log('暂未实现')
-    }
+    <script>
+        function myProjectTrigger() {
+            console.log('暂未实现')
+        }
 
 
-    {#var project_infos = JSON.parse(document.getElementById("project_infos").value);#}
-    {#var project_info = JSON.parse(document.getElementById("project_info").value);#}
-    {#var project_events = JSON.parse(document.getElementById("project_events").value);#}
-    {#var project_branches = JSON.parse(document.getElementById("project_branches").value);#}
-    {#members = members.filter((member) => {#}
-    {#    return member.username.indexOf('project_') === -1 && member.username.indexOf('_bot_') === -1#}
-    {% comment %}}){% endcomment %}
-    {#console.log(members)#}
-    {#console.log(project_infos)#}
-    {#console.log(project_events)#}
-    {#console.log(project_branches)#}
 
-    function showMemberWithProjInfos() {
-        alert("暂无")
-    }
 
-    const foldBtn = document.querySelector('.foldBtn');
-    $(document).on("click", ".foldBtn", function () {
-        console.log('click foldBtn', this.id)
-        const foldable = document.querySelector('#projTr' + this.id);
-        foldable.classList.toggle('show');
-    })
-    {% comment %}foldBtn.addEventListener('click', function () {
+        function showMemberWithProjInfos() {
+            alert("暂无")
+        }
 
-    });{% endcomment %}
+        const foldBtn = document.querySelector('.foldBtn');
+        $(document).on("click", ".foldBtn", function () {
+            console.log('click foldBtn', this.id)
+            const foldable = document.querySelector('#projTr' + this.id);
+            foldable.classList.toggle('show');
+        })
+        {% comment %}foldBtn.addEventListener('click', function () {
+
+        });{% endcomment %}
+
+
+
+
     </script>
 {% endblock %}

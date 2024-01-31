@@ -26,6 +26,10 @@
     {% block css %}{% endblock %}
 </head>
 <body>
+<audio id="notifyAudio" hidden="hidden">
+    <source src="{% static 'web/audio/notify.mp3' %}" type="audio/mpeg">
+    您的浏览器不支持 audio 与元素。
+</audio>
 <nav class="navbar navbar-av">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -37,14 +41,14 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{% url 'index' %}">TaskSaas</a>
+            <a class="navbar-brand" href="{% url '' %}">TaskSaas</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 {% all_project_list request %}
-{#                {% all_glory_list request %}#}
+                {#                {% all_glory_list request %}#}
 
                 {% if request.web.project %}
                     {% manage_menu_list request %}
@@ -58,8 +62,8 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">
-                              <img src="{{ request.web.user.sys_avatar }}" alt="" class=""
-                         style="width: 18px;height:18px;">
+                        <img src="{{ request.web.user.sys_avatar }}" alt="" class=""
+                             style="width: 18px;height:18px;">
                         {{ request.web.user.username }}<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'index' %}">首 页</a></li>
@@ -71,40 +75,142 @@
                         <li><a href="{% url 'logout' %}">用户注销</a></li>
                     </ul>
                 </li>
-
             </ul>
         </div>
     </div>
+    <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
+    <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
+    <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
 </nav>
-{% block content %}{% endblock %}
+
+{% block content %}
+
+{% endblock %}
 <script src="{% static 'web/layui/layui.js' %}"></script>
 <script src="{% static 'web/js/jquery.min.js' %}"></script>
 <script src="{% static 'web/plugin/bootstrap/js/bootstrap.min.js' %}"></script>
+<script>
+    //ws
+    var project_id = eval(document.getElementById("project_id").value);
+    var user_id = eval(document.getElementById("user_id").value);
+    var username = document.getElementById("username").value;
+
+    var interval_timer = null;//计时器
+    var timer_count = 0;
+    const position = 'workbench';
+    var wsUrl = 'ws://' + window.location.host + '/cache_chat/ws/' + project_id + '/' + user_id + '/' + username
+    var ws;
+
+    createOrConnectWebSocket();	// 创建websocket
+    /**
+     * 创建websocket或掉线重连
+     */
+    function createOrConnectWebSocket() {
+        var count = 0
+        if (!ws) {
+            ws = new WebSocket(wsUrl);
+            websocketInit();
+        } else {
+            if (!isOnlineCurrUser() && count < 100) {
+                count++
+                ws = null;
+                createOrConnectWebSocket();
+            }
+        }
+        // 开启定时器
+        init_start_timer();
+    }
+
+    /**
+     * websocket 的初始化
+     */
+    function websocketInit() {
+        ws.onmessage = function (e) {
+            console.log('evt e ', e)
+            var data = JSON.parse(e.data);
+            console.log('>>>>>', data.type)
+            if (data.type == 'userlist.message') {
+                let userlistval = eval(data.message);
+                console.log(userlistval)
+                return
+            } else if (data.type == 'private.message') {
+                var message = data['message'];
+                console.log('private.message:', message)
+                {#document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');#}
+                {#localStorage.setItem((user_id+'_'+project_id)+'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                const notify_audio = document.getElementById('notifyAudio')
+                notify_audio.play();
+                {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
+                $("#badge").load(location.href + " #badge")
+                $("#remindInfoDiv").load(location.href + " #remindInfoDiv")
+
+            } else {
+                var message = data['message'];
+                console.log('message:', message)
+                {#document.querySelector('#chat-log').innerHTML += (message + '<br>');#}
+                {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
+            }
+        };
+        ws.onclose = function (e) {
+            console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean);
+        };
+
+    }
+
+    /**
+     * 设置一个 30秒的轮询监听方法，避免页面关闭
+     */
+    function init_start_timer() {
+        //重置计数器
+        timer_count = 0;
+        if (interval_timer != null) {
+            clearInterval(interval_timer);
+            interval_timer = null;
+        }
+        interval_timer = setInterval(function () {
+            myTimer()
+        }, 10000);
+    }
+
+    /**
+     *定时器具体实现方法
+     */
+    function myTimer() {
+        //TODO 如果超过半小时没有交互，则关闭计时器
+        if (timer_count >= 300000) {
+            clearInterval(interval_timer);
+        } else {
+            timer_count += 30;
+            createOrConnectWebSocket()
+            {#var online = '{"type":"timer","user_id":" + ' + user_id + '}';#}
+            {% comment %}   while (!isOnlineCurrUser()) {
+                   {#createOrConnectWebSocket()#}
+                   console.log('my timer reconnect ws')
+               }{% endcomment %}
+            {#ws.send(online);#}
+            console.log('timer_count', timer_count);
+        }
+    }
+
+    /**
+     * 判断当前用户是否 还在线
+     */
+    function isOnlineCurrUser() {
+        if (ws) {
+            if (ws.readyState == WebSocket.OPEN) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+</script>
 {% block js %}
     <script>
-        const mytaskTriggerKey = "mytaskTrigger" + '{{ request.web.user.id }}' + '_' + '{{ request.web.project.id }}'
-        console.log('mytaskTriggerKey', mytaskTriggerKey)
-
-        function storageTriggerInit() {
-            let item = localStorage.getItem(mytaskTriggerKey);
-            console.log("trigger", item)
-            if (!item) {
-                item = 'off'
-                localStorage.setItem(mytaskTriggerKey, item);
-            }
-            if (item == "on") {
-                $('input[type="checkbox"]').prop('checked', true);
-            } else {
-                $('input[type="checkbox"]').prop('checked', false);
-            }
-        }
-
-        storageTriggerInit()
-
-        function showCalendar() {
-            alert('链接钉钉、企业微信等 团队考勤展示等')
-        }
-
     </script>
 {% endblock %}
 </body>

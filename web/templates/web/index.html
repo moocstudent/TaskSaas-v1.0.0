@@ -13,28 +13,35 @@
 
 {% block content %}
 
-    <div>
-        <div class="center-block col-md-12 panel-info"
-             style="text-align: center">
+    <div class="container-fluid">
+        {#    <div class="col-md-12 panel-info"#}
+        {#         style="text-align: center">#}
 
-            <b class="col-md-6"><a href="{% url 'project_list' %}">管理中心</a></b>
+        <div style="width: 380px;" class="center-block">
+            <button type="button" onclick="goDashboard()" class="center-block layui-btn layui-btn-fluid">管理中心
+            </button>
+        </div>
 
-            <b class="col-md-6"><a href="{% url 'glory_list' %}">荣誉中心</a></b></div>
-        <canvas style="padding-top: 20px"></canvas>
-        {#        <img src="{% static 'web/image/image-1.png' %}">#}
-        {#        <img src="{% static 'web/image/image-2.png' %}">#}
-        {#        <img src="{% static 'web/image/image-3.png' %}">#}
-        {#        <img src="{% static 'web/image/image-4.png' %}">#}
+        {#        <canvas style="padding-top: 20px"></canvas>#}
+        <img src="{% static 'web/image/image-1.png' %}">
+        <img src="{% static 'web/image/image-2.png' %}">
+        <img src="{% static 'web/image/image-3.png' %}">
+        <img src="{% static 'web/image/image-4.png' %}">
+        {#    </div>#}
     </div>
 {% endblock %}
 
 {% block js %}
 
     <script>
-        let canvas = document.querySelector('canvas');
+        function goDashboard() {
+            window.location.href = "{% url 'project_list' %}";
+        }
+
+        {% comment %}let canvas = document.querySelector('canvas');
         let ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth*1;
-        canvas.height = window.innerHeight*0.85;
+        canvas.width = window.innerWidth * 1;
+        canvas.height = window.innerHeight * 0.85;
         let str = "makemestronger".split('');
         let arr = Array(Math.ceil(canvas.width / 10)).fill(0);
         let run = () => {
@@ -47,12 +54,12 @@
             });
         };
         // run()
-        setInterval(run, 40);
+        setInterval(run, 40);{% endcomment %}
 
 
-        layui.use(['layer'],function(args){
-           var layer = layui.layer;
-           layer.msg('TaskSaas')
+        layui.use(['layer'], function (args) {
+            var layer = layui.layer;
+            layer.msg('TaskSaas')
         });
 
     </script>
