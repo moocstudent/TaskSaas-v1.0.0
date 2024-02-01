@@ -126,6 +126,7 @@ class SelectFilter(object):
 
 # todo 改为对应的restframework form
 def issues(request, project_id):
+    print('issues request', project_id)
     print('issues pid ', request.web.project.id)
     q = request.GET.get('q')
     if request.method == 'GET':
