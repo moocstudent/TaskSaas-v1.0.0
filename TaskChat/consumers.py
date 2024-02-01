@@ -1,15 +1,14 @@
-import datetime
+import json
 import json
 import re
-from bs4 import BeautifulSoup
 
-from channels.db import database_sync_to_async
+from bs4 import BeautifulSoup
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from django.http import JsonResponse
 
 from TaskChat import constants
-from TaskChat.constants import private_message_key, push_message_key, userlist_message_key, chat_message_key
+from TaskChat.constants import push_message_key, userlist_message_key, chat_message_key
 from TaskSaasAPP import date_util
 from TaskSaasAPP.hash_map_util import HashMap
 from utils import encrypt
@@ -35,13 +34,15 @@ class xChatConsumer(WebsocketConsumer):
         }))
 
 
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 users = set()
 
 
 hash_map = HashMap()
+
+prevent_symbol_time_map = HashMap()
 
 
 class yChatConsumer(WebsocketConsumer):
@@ -114,6 +115,7 @@ class yChatConsumer(WebsocketConsumer):
         message = text_data_json['message']
         username = self.username
 
+        print('yChat:receive')
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -129,12 +131,14 @@ class yChatConsumer(WebsocketConsumer):
             print('hint msg receivers ',receivers)
             for receiver in receivers:
                 print('push hint msg to ',receiver)
+                print('yChat:hint msg')
                 push_message_to_group(encrypt.md5(receiver)+'__'+str(self.project_id),message,constants.private_message_key,sender)
 
     # Receive message from room group
     def chat_message(self, event):
         message = date_util.get_today_until_second() + '>> ' + event['message']
         # Send message to WebSocket
+        print('yChat:chat_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': chat_message_key
@@ -146,6 +150,7 @@ class yChatConsumer(WebsocketConsumer):
         username = self.username
         message = '❗️系统消息❗️' + event['message']
         # Send message to WebSocket
+        print('yChat:push_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': type
@@ -160,6 +165,7 @@ class yChatConsumer(WebsocketConsumer):
         message = '😄来自'+sender+'的私人消息😄' + event['message']
         type = event['type']
         # Send message to WebSocket
+        print('yChat:private_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': type
@@ -181,7 +187,7 @@ class yChatConsumer(WebsocketConsumer):
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-
+#有离线通知型的ws对话，在被通知人上线后进行通知
 class CacheChatConsumer(WebsocketConsumer):
     def connect(self):
         print('CacheChat connect')
@@ -249,10 +255,12 @@ class CacheChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
         print('msg type',type)
+
         message = text_data_json['message']
         username = self.username
-
+        project_id = self.room_group_name.split('matrix')[1]
         # Send message to room group
+        print('CacheChat:receive')
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -260,19 +268,31 @@ class CacheChatConsumer(WebsocketConsumer):
                 'message': username + ': ' + message,
             }
         )
+        room_users = hash_map.get(self.room_group_name)
+        room_users_l = list(room_users.val)
+        print('room_users_l:',room_users_l)
 
         if type == 'hint':
             receivers = text_data_json['receivers']
             sender = text_data_json['sender']
-            print('hint msg receivers ',receivers)
+            print('cache message hint msg receivers ',receivers)
+            print('users:',users)
+            print('CacheChat:hint msg')
             for receiver in receivers:
                 print('push hint msg to ',receiver)
-                push_message_to_group(encrypt.md5(receiver)+'__'+str(self.project_id),message,constants.private_message_key,sender)
+                if receiver in room_users_l:
+                    print('receiver online')
+                    push_message_to_group(encrypt.md5(receiver)+'__'+str(self.project_id),message,constants.private_message_key,sender)
+                #message to cache
+                else:
+                    print('receiver offline')
+                    save_msg_to_db_impl(message,sender,receiver,2,project_id)
 
     # Receive message from room group
     def chat_message(self, event):
         message = date_util.get_today_until_second() + '>> ' + event['message']
         # Send message to WebSocket
+        print('CacheChat:chat_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': chat_message_key
@@ -284,6 +304,7 @@ class CacheChatConsumer(WebsocketConsumer):
         username = self.username
         message = '❗️系统消息❗️' + event['message']
         # Send message to WebSocket
+        print('CacheChat:push_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': type
@@ -298,6 +319,7 @@ class CacheChatConsumer(WebsocketConsumer):
         message = '😄来自'+sender+'的私人消息😄' + event['message']
         type = event['type']
         # Send message to WebSocket
+        print('CacheChat:private_message')
         self.send(text_data=json.dumps({
             'message': message,
             'type': type
@@ -305,6 +327,32 @@ class CacheChatConsumer(WebsocketConsumer):
         print('private_message self.room_group_name ',self.room_group_name)
         save_msg_to_db_impl(message,sender,username,2,self.project_id)
 
+    def reply_message(self, event):
+        # user = await get_user(self.scope)
+        username = self.username
+        sender = event['sender']
+        print('sender: ', sender)
+        message = '😄来自' + sender + '的回复消息😄' + event['message']
+        type = event['type']
+
+        prevent_duplicate_msg_symbol = encrypt.md5(username+sender+message)
+        #todo 判定重新信息并且判定时间在几分钟之内，定时清理prevent_symbol_time_map
+        if prevent_duplicate_msg_symbol in list(prevent_symbol_time_map.keys()):
+            print('prevent duplicate msg')
+            return
+        prevent_symbol_time_map._put(prevent_duplicate_msg_symbol, date_util.get_now_no_format())
+
+        # Send message to WebSocket
+        print('CacheChat:reply_message')
+        self.send(text_data=json.dumps({
+            'message': message,
+            #这里还是通过回复信息key进行发送，除非前端多加新key reply.message的判定，这里暂时不加
+            'type': constants.private_message_key
+        }))
+
+
+        print('reply_message self.room_group_name ', self.room_group_name)
+        save_msg_to_db_impl(message, sender, username, 2, self.project_id)
 
     def userlist_message(self, event):
         username = self.username
@@ -317,82 +365,8 @@ class CacheChatConsumer(WebsocketConsumer):
         }))
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
 
-    async def connect(self):
-        print('Chat connect')
-        self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
-        self.username = self.scope["url_route"]["kwargs"]["username"]
-        self.project_id = self.scope["url_route"]["kwargs"]["project_id"]
-        # print(self.username)
-        self.room_group_name = 'matrix' + self.project_id
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        username = self.username
-        # login the user to this session.
-        # await login(self.scope, user)
-        # save the session (if the session backend does not access the db you can use `sync_to_async`)
-        # await database_sync_to_async(self.scope["session"].save)()
-        # print('self.user', self.user)
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
-        # Send message to room group
-        # await self.channel_layer.group_send(
-        #     self.room_group_name,
-        #     {
-        #         'type': 'push_message',
-        #         'message' :'😄system_info😄 : '+ +message
-        #     }
-        # )
-
-    # Receive message from room group
-    async def push_message(self, event):
-        # user = await get_user(self.scope)
-        username = self.username
-        message = event['message']
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': message
-        }))
-
-
-# class PushConsumer(AsyncWebsocketConsumer):
-#   async def connect(self):
-#     self.group_name = self.scope['url_route']['kwargs']['username']
-#     await self.channel_layer.group_add(
-#       self.group_name,
-#       self.channel_name
-#     )
-#     await self.accept()
-#   async def disconnect(self, close_code):
-#     await self.channel_layer.group_discard(
-#       self.group_name,
-#       self.channel_name
-#     )
-#     # print(PushConsumer.chats)
-#   async def push_message(self, event):
-#     print(event)
-#     await self.send(text_data=json.dumps({
-#       "event": event['event']
-#     }))
-
+# todo 更改channel字段，加入id，标识一条信息
 def push_message_to_group(group_name, message, type=None,sender=None):
     channel_layer = get_channel_layer()
     if type is None:
@@ -446,26 +420,33 @@ def extract_links_and_text(text):
         soup_link = BeautifulSoup(match[1], 'html.parser')
         text = soup_link.get_text()
         links_and_text.append((link, text))
-
     return links_and_text
 
 
 
 def send_private_hint_msg(request,project_id):
-    print('send_private_hint_msg')
+    print('send_private_hint_msg func')
     try:
         sender = request.web.user.username
         receiver = request.POST.get("receiver")
         message = request.POST.get("message")
+        type = request.POST.get("type")
         if message:
-            message = ('来自'+sender+'的回复信息:')+message
-        save_msg_to_db_impl(message,request.web.user.username,receiver,2,project_id)
-        #fixme The receiver maybe not connection
-        push_message_to_group(encrypt.md5(receiver) + '__' + str(project_id), message, constants.private_message_key,
-                              request.web.user.username)
+            # message = ('来自'+sender+'的回复信息:')+message
+            room_users = hash_map.get('matrix'+project_id)
+            room_users_l = list(room_users.val)
+            print('send_private_hint_msg room_users_l',room_users_l)
+            if receiver in room_users_l:
+                print('receiver online ',receiver)
+                push_message_to_group(encrypt.md5(receiver) + '__' + str(project_id), message,
+                                      type,sender)
+            else:
+                print('receiver offline')
+                save_msg_to_db_impl(message,sender,receiver,2,project_id)
     except:
         return JsonResponse({'status':0})
     return JsonResponse({'status': 1})
+
 
 status_hash_map = HashMap()
 status_hash_map._put('peeropen','视频会议中')

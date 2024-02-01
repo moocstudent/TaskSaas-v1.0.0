@@ -1024,7 +1024,7 @@
                                 {#let replyPromptLayer = document.getElementById('layui-layer'+index)#}
                                 if (value === '') return elem.focus();
                                 layer.msg('获得：' + util.escape(value)); // 显示 value
-                                sendReplyMsg(ri.sender, util.escape(value))
+                                sendReplyMsg(ri.sender, util.escape(value),'reply.message')
                                 // 关闭 prompt
                                 layer.close(index);
                             });
@@ -1083,13 +1083,14 @@
             });
         });
 
-        function sendReplyMsg(receiver, message) {
+        function sendReplyMsg(receiver, message,type) {
             $.ajax({
                 url: "{% url 'send_private_hint_msg' project_id=request.web.project.id %}",
                 type: "POST",
                 data: {
                     "receiver": receiver,
                     "message": message,
+                    "type": type,
                     "csrfmiddlewaretoken": $("#csrf_token").val()
                 },
                 dataType: "JSON",
@@ -1397,7 +1398,7 @@
                     return
                 } else if (data.type == 'private.message') {
                     var message = data['message'];
-                    console.log('private message:',message)
+                    console.log('private message:', message)
                     {#document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');#}
                     {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
                     const notify_audio = document.getElementById('notifyAudio')
@@ -1408,7 +1409,7 @@
 
                 } else {
                     var message = data['message'];
-                    console.log('normal message:',message)
+                    console.log('normal message:', message)
                     {#document.querySelector('#chat-log').innerHTML += (message + '<br>');#}
                     {#localStorage.setItem((user_id + '_' + project_id) + 'mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
                     {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
@@ -1507,7 +1508,7 @@
             }, 10000);
         }
 
-          /**
+        /**
          *定时器具体实现方法
          */
         function myTimer() {
@@ -1551,11 +1552,10 @@
         function priChat(id, username) {
             console.log('id,', id)
             console.log('uid,', '{{ request.web.user.id }}')
-            {% comment %}    if (id == '{{ request.web.user.id }}') {
-                    layer.msg('Can not send message to self.')
-                    return;
-                }{% endcomment %}
-            layer.msg('priChat,' + id)
+            if (id == '{{ request.web.user.id }}') {
+                layer.msg('Can not send message to self.')
+                return;
+            }
             let title = `发送给${username}的提醒信息`
             layui.use(function () {
                 var util = layui.util;
@@ -1571,6 +1571,7 @@
                             shadeClose: true,
                             resize: true,
                             minStack: true,
+                            btn: ['确认(ctrl+enter)', '取消(esc)'],
                             btn2: function () {
                                 layer.msg('取消发送')
                             }
@@ -1578,12 +1579,15 @@
                         , function (value, index, elem) {
                             console.log('prompt elem :', elem)
                             console.log('prompt index :', index)
-                            {#if (value === '') return elem.focus();#}
-                            layer.msg('获得：' + util.escape(value)); // 显示 value
-                            //send calendayDayContent to save
+                            if (value === '') {
+                                layer.msg('填写信息，否则无法发送')
+                                return elem.focus();
+                            }
+                            //send to receiver
                             if (document.querySelector(".layui-layer-input").value.length > 0) {
                                 // ws发送提醒信息
                                 triggerReply(util.escape(value), username)
+                                layer.msg('信息发送完毕')
                             } else {
                                 layer.msg("请输入信息")
                                 return;
@@ -1604,7 +1608,6 @@
                     left: '55%',
                 });
 
-
                 //when press esc (event27) then close prompt of editor
                 $(document).keyup(function (event) {
                     if (event.which === 27) {
@@ -1612,8 +1615,20 @@
                         layer.close(prompt);
                     }
                 })
+
+                //add listener to ctrl + enter to send the message
+                document.getElementById("pri_chat_prompt").addEventListener("keydown", function (event) {
+                    if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
+                        event.preventDefault();
+                        // 执行你想要的操作
+                        let msgMsg = layer.msg('message sending...');
+                        document.querySelector(".layui-layer-btn0").click()
+                        {#layer.close(msgMsg)#}
+                    }
+                });
             })
         }
+
 
     </script>
 

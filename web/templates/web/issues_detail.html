@@ -513,6 +513,7 @@
             })
         }
 
+        //add listener to ctrl + enter to send the message
         document.getElementById("commentText").addEventListener("keydown", function (event) {
             if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
                 layer.msg('提交中')

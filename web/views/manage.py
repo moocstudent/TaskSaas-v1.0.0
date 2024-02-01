@@ -490,6 +490,12 @@ def remind_status(request, project_id):
     info.save()
     return JsonResponse({'status': 1})
 
+def remind_readed_all(request,project_id):
+    reminds = models.InfoLog.objects.filter(receiver=request.web.user, project_id=project_id,status=1).order_by('status',
+                                                                                                       '-create_datetime')
+    reminds.update(status=2)
+    return JsonResponse({'status': 1})
+
 
 def collect(request, project_id):
     collects_set = Collect.objects.filter(creator=request.web.user)

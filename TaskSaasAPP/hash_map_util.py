@@ -132,6 +132,13 @@ class HashMap:
 if __name__ == '__main__':
     # 创建字典
     m1 = HashMap()
+    hash_map = HashMap()
+    room_users = set()
+    room_users.add('admin')
+    room_users.add('guo')
+    hash_map._put('matrix9', room_users)
+    result = hash_map.get("matrix9")
+    print('result:',list(result.val)[0])
 
     # 添加键值对
     m1["name"] = "马亚南"
