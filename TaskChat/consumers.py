@@ -470,7 +470,8 @@ def received_userlist_status(request,project_id):
             on_peer_user_list.append(request.web.user.username)
         elif (status=='peerclose'):
             print('peerclose')
-            on_peer_user_list.remove(request.web.user.username)
+            if request.web.user.username in on_peer_user_list:
+                on_peer_user_list.remove(request.web.user.username)
         print('on_peer_user_list ',on_peer_user_list)
         push_message_to_group('matrix' + project_id,userlist_reset(project_id), userlist_message_key)
         return JsonResponse({'status': 1})
