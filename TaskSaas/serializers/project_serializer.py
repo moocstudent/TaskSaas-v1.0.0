@@ -6,7 +6,7 @@ from web.models import Project
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
-    desc = serializers.CharField(read_only=True)
+    remark = serializers.CharField(read_only=True)
     creator_name = serializers.CharField(read_only=True)
     star = serializers.BooleanField(read_only=True)
     join_count = serializers.IntegerField(read_only=True)
@@ -18,7 +18,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "name",
-            "desc",
+            "remark",
             "creator_name",
             "star",
             "join_count",

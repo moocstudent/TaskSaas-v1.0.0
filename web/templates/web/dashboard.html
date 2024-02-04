@@ -201,7 +201,7 @@
                             <div class="panel-body">
                                 {% for key,item in status_dict.items %}
                                     <div class="col-sm-3 status-count">
-                                        <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}">
+                                        <a href="{% url 'issues' project_id=request.web.project.id %}?status={{ key }}&issues_type={{ type_ids }}&priority=danger&priority=success&priority=warning">
                                             <div class="count">{{ item.count }}</div>
                                             <div>{{ item.text }}</div>
                                         </a>
@@ -413,7 +413,7 @@
                             </tr>
                             <tr>
                                 <td class="label-left">项目描述 ：</td>
-                                <td>{{ request.web.project.desc }}</td>
+                                <td>{{ request.web.project.remark }}</td>
                             </tr>
                             <tr>
                                 <td class="label-left">创建时间 ：</td>
@@ -470,7 +470,7 @@
                                                 <a href="{% url 'issues_detail' project_id=request.web.project.id issues_id=item.issue_id %}">{% string_just item.issue_id %}</a>
                                                 {#                                            给 {{ item.assign.username }}#}
                                                 <label>【{{ item.title }}】</label>
-                                                <label>{{ item.desc }}</label>
+                                                <label>{{ item.remark }}</label>
                                             </label>
                                             <label style="width: 300px;">
                                                 更新于:{{ key }}
@@ -483,7 +483,7 @@
                                                 {#                                            给 {{ item.assign.username }}#}
                                                 <label style="text-overflow: ellipsis;">【{{ item.title }}】</label>
                                                 <br>
-                                                >> <label style="text-overflow: ellipsis;">{{ item.desc }}</label>
+                                                >> <label style="text-overflow: ellipsis;">{{ item.remark }}</label>
                                             </label>
                                             {#                                            <div>指派#}
                                             {#                                                给 {{ item.assign }}#}
@@ -678,7 +678,7 @@
             if (e.name && e.seriesName) {
                 {#alert('issues_types', (xMatchTypes.indexOf(e.seriesName)))#}
                 window.location.href = "/manage/" + pid + "/issues/?status=" + (yMatchTypes.indexOf(e.name) + 1) +
-                    "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])
+                    "&issues_type=" + (all_type_ids[(xMatchTypes.indexOf(e.seriesName))])+ '&priority=danger&priority=success&priority=warning'
             }
         })
 

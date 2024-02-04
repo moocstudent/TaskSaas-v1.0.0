@@ -211,8 +211,8 @@ def issues(request, project_id):
         form.instance.project = request.web.project
         form.instance.creator = request.web.user
         form.instance.issue_id = this_proj_max_issue_id + 1
-        if form.instance.desc is None or len(form.instance.desc) == 0:
-            form.instance.desc = form.instance.subject
+        if form.instance.remark is None or len(form.instance.remark) == 0:
+            form.instance.remark = form.instance.subject
         milestones = Milestone.objects.filter(project_id=project_id)
         ms2 = None
         if milestones:
@@ -332,7 +332,7 @@ def issues_change(request, project_id, issues_pk):
         }
         return new_reply_dict
     # 文本内容
-    if name in ['subject', 'desc', 'start_date', 'end_date']:
+    if name in ['subject', 'remark', 'start_date', 'end_date']:
         if not value:
             if not field_object.null:
                 return JsonResponse({'status': False, 'error': '您选择的值不能为空！'})

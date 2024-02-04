@@ -269,7 +269,7 @@ class Issues(models.Model):
     issues_type = models.ForeignKey(verbose_name='问题类型', to='IssuesType', null=True, on_delete=models.SET_NULL)
     module = models.ForeignKey(verbose_name='模块', to='Module', null=True, blank=True, on_delete=models.SET_NULL)
     subject = models.CharField(verbose_name='主题', max_length=80)
-    desc = models.TextField(verbose_name='问题描述', null=True, blank=True)
+    remark = models.TextField(verbose_name='问题描述', null=True, blank=True)
     priority_choices = {
         ("danger", "高"),
         ("warning", "中"),
