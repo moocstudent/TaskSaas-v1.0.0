@@ -534,6 +534,9 @@
     <script src="{% static 'web/plugin/table2excel/jquery.table2excel.min.js' %}"></script>
     <script src="{% static 'web/js/peerjs.min.js' %}"></script>
     <script>
+
+      var user_id = eval(document.getElementById("user_id").value);
+
         function setF(the) {
             this.focus()
         }
@@ -634,7 +637,7 @@
         var wait_counts = eval(document.getElementById("wait_counts").value);
         var reopen_counts = eval(document.getElementById("reopen_counts").value);
         var project_id = eval(document.getElementById("project_id").value);
-        var user_id = eval(document.getElementById("user_id").value);
+
         var all_object_list = eval(document.getElementById("all_object_list").value)
         var username = document.getElementById("username").value;
 

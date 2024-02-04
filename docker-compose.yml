@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: tasksaas:1.0.15
+    image: tasksaas:1.0.16
     container_name: web
     build: ./
     restart: always

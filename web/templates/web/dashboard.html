@@ -11,15 +11,15 @@
             min-width: 46vh;
         }
 
-        .layui-layer-btn0 {
+        {% comment %}.layui-layer-btn0 {
             width: 25%;
             position: relative;
-        }
+        }{% endcomment %}
 
-        .layui-layer-btn1 {
-            width: 25%;
-            position: relative;
-        }
+        {% comment %}  .layui-layer-btn1 {
+              width: 25%;
+              position: relative;
+          }{% endcomment %}
 
         .layui-layer-btn2 {
             width: 25%;
@@ -137,7 +137,7 @@
         }
 
         .avatar {
-              float: left;
+            float: left;
             margin-right: 10px;
             display: inline-block;
             width: 30px;
@@ -221,22 +221,23 @@
                                 </span>
 
                                 {% if request.web.project.creator == request.web.user %}
-                                <span class="col-md-2" style="float: right;"><a
-                                        class="layui-btn layui-btn-normal layui-btn-xs"
-                                        data-toggle="modal" data-target="#memberManage">成员管理</a>
+                                    <span class="col-md-2" style="float: right;"><a
+                                            class="layui-btn layui-btn-normal layui-btn-xs"
+                                            data-toggle="modal" data-target="#memberManage">成员管理</a>
                                       </span>
                                 {% endif %}
                             </div>
                             <div class="panel-body user-item">
                                 <div class="layui-col-sm12 layui-col-sm-offset1 title">创建者</div>
                                 <div class="clearfix" style="margin-bottom: 30px;">
-                                    <div class="layui-col-sm3 layui-col-sm-offset1">
+                                    <div class="layui-col-sm3 layui-col-sm-offset1"
+                                         onclick="priChat('{{ request.web.project.creator.id }}','{{ request.web.project.creator.username }}')">
                                         <div class="layui-row ws-docs-anim">
                                             {#                                       id {{ request.web.project.creator.id }}#}
                                             <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-                                                {% if  request.web.project.creator.git_avatar %}
+                                                {% if  request.web.project.creator.sys_avatar %}
                                                     <img class="avatar"
-                                                         src="{{ request.web.project.creator.git_avatar }}" alt="">
+                                                         src="{{ request.web.project.creator.sys_avatar }}" alt="">
                                                 {% else %}
                                                     {{ request.web.project.creator.username.0|upper }}
                                                 {% endif %}
@@ -249,7 +250,8 @@
                                 <div class="layui-col-sm12 layui-col-sm-offset1 title">参与者</div>
                                 <div>
                                     {% for item in join_user %}
-                                        <div class="layui-col-sm3 layui-col-sm-offset1">
+                                        <div class="layui-col-sm3 layui-col-sm-offset1"
+                                             onclick="priChat('{{ item.0 }}','{{ item.1 }}')">
                                             <div class="layui-row ws-docs-anim">
                                                 <div class="avatar layui-anim" data-anim="layui-anim-rotate">
                                                     {% if item.2 %}
@@ -320,37 +322,38 @@
                                     aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" id="myMembers">成员管理</h4>
                         </div>
-                        <div class="modal-body" style="width:300px;padding-right: 40px;word-wrap:break-word;word-break:break-all;display: block;overflow-y: scroll;">
-                            <div class="layui-col-sm12 layui-col-sm-offset1 title" ></div>
-                        <table id="memberTable"
-                               style="word-wrap:break-word;word-break:break-all;min-width:20vh;display: block;overflow-y: scroll;">
-                            <tbody>
-                           {% for item in join_user %}
-                                <tr>
-                                    <td style="min-width:300px;">
-                                       <div class="layui-col-sm3 layui-col-sm-offset1">
-                                        <div class="layui-row ws-docs-anim">
-                                            <div class="avatar layui-anim" data-anim="layui-anim-rotate">
-                                                {% if item.2 %}
-                                                    <img class="avatar" src="{{ item.2 }}" alt="">
-                                                {% else %}
-                                                    {{ item.1.0 |upper }}
-                                                {% endif %}
+                        <div class="modal-body"
+                             style="width:300px;padding-right: 40px;word-wrap:break-word;word-break:break-all;display: block;overflow-y: scroll;">
+                            <div class="layui-col-sm12 layui-col-sm-offset1 title"></div>
+                            <table id="memberTable"
+                                   style="word-wrap:break-word;word-break:break-all;min-width:20vh;display: block;overflow-y: scroll;">
+                                <tbody>
+                                {% for item in join_user %}
+                                    <tr>
+                                        <td style="min-width:300px;">
+                                            <div class="layui-col-sm3 layui-col-sm-offset1">
+                                                <div class="layui-row ws-docs-anim">
+                                                    <div class="avatar layui-anim" data-anim="layui-anim-rotate">
+                                                        {% if item.2 %}
+                                                            <img class="avatar" src="{{ item.2 }}" alt="">
+                                                        {% else %}
+                                                            {{ item.1.0 |upper }}
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="text">{{ item.1 }}</div>
+                                                <div class="text" style="min-width: 220px">加入时间:{{ item.3 }}</div>
+                                                <button onclick="removeMember({{ item.0 }})">移除成员</button>
+                                                <hr>
                                             </div>
-                                        </div>
-                                        <div class="text">{{ item.1 }}</div>
-                                        <div class="text" style="min-width: 220px">加入时间:{{ item.3 }}</div>
-                                           <button onclick="removeMember({{ item.0 }})">移除成员</button>
-                                           <hr>
-                                    </div>
-                                    </td>
+                                        </td>
 
 
-                                </tr>
+                                    </tr>
 
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                {% endfor %}
+                                </tbody>
+                            </table>
 
                         </div>
                         {% comment %} <div class="modal-body" style="padding-right: 40px;">
@@ -518,6 +521,7 @@
     <input id="all_type_ids" value="{{ all_type_ids }}" hidden="hidden"/>
     <input id="remind_infos" value="{{ remind_infos }}" hidden="hidden"/>
     <input id="username" value="{{ request.web.user.username }}" hidden="hidden"/>
+    <input id="user_id" value="{{ request.web.user.id }}" hidden="hidden"/>
     <input id="project_id" value="{{ request.web.project.id }}" hidden="hidden"/>
     <input id="csrf_token" value="{{ csrf_token }}" hidden="hidden"/>
 {% endblock %}
@@ -578,7 +582,7 @@
 
         var username = document.getElementById("username").value;
         var project_id = eval(document.getElementById("project_id").value);
-
+        var user_id = eval(document.getElementById("user_id").value);
 
         // 基于准备好的dom，初始化echarts实例
         myChart.showLoading();
@@ -851,6 +855,7 @@
             }
             legendTriggerRefresh()
         }
+
         storageTriggerInit()
         $(function () {
             bindCopyUrl();
@@ -1220,9 +1225,7 @@
                     });
                 }
             }
-
             console.log(stringifyMsg)
-
             if (isOnlineCurrUser()) {
                 let send = ws.send(stringifyMsg);
                 console.log('send', send)
@@ -1233,7 +1236,7 @@
                 console.log('reconnect ws...')
                 createOrConnectWebSocket()
                 var count = 0
-                while (!isOnlineCurrUser() && count < 100) {
+                while (!isOnlineCurrUser() && count < 10000) {
                     count++
                     {#createOrConnectWebSocket()#}
                     console.log('reconnect ws 3')
@@ -1241,7 +1244,6 @@
                 console.log('ws.send(stringifyMsg)', stringifyMsg)
                 let send = ws.send(stringifyMsg);
                 console.log('send', send)
-                messageInputDom.value = '';
                 atMemberNames = []
                 atTaskIds = []
                 atTaskFlag = false
@@ -1342,7 +1344,7 @@
                     console.log('reconnect ws...')
                     createOrConnectWebSocket()
                     var count = 0
-                    while (!isOnlineCurrUser() && count < 100) {
+                    while (!isOnlineCurrUser() && count < 1000) {
                         count++
                         {#createOrConnectWebSocket()#}
                         console.log('reconnect ws 3')
@@ -1380,32 +1382,22 @@
 
                 console.log('>>>>>', data.type)
                 if (data.type == 'userlist.message') {
-                    let userlistval = eval(data.message);
-                    console.log(userlistval)
-                    userlist_online = userlistval
-                    console.log('userlistmessage refresh userlist ')
-                    var userlist = ''
-                    for (let i = 0; i < userlistval.length; i++) {
-                        userlist += ` <li>` + userlistval[i] + `</li>`;
-                    }
-                    $("#user_list").val(userlist)
-                    $("#chatMembers").html(userlist);
                     return
                 } else if (data.type == 'private.message') {
                     var message = data['message'];
-                    document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');
-                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
+                    {#document.querySelector('#chat-log').innerHTML += ('<label style="color: hotpink">' + message + '</label>' + '<br>');#}
+                    {#localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
                     const notify_audio = document.getElementById('notifyAudio')
                     notify_audio.play();
 
-                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
                     $("#badge").load(location.href + " #badge")
 
                 } else {
                     var message = data['message'];
-                    document.querySelector('#chat-log').innerHTML += (message + '<br>');
-                    localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)
-                    document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+                    {#document.querySelector('#chat-log').innerHTML += (message + '<br>');#}
+                    {#localStorage.setItem('mychatLog' + project_id, document.querySelector('#chat-log').innerHTML)#}
+                    {#document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;#}
                 }
 
 
@@ -1468,7 +1460,7 @@
         var ws;
 
         function createOrConnectWebSocket() {
-            var wsUrl = 'ws://' + window.location.host + '/chat/ws/' + project_id + '/' + user_id + '/' + username
+            var wsUrl = 'ws://' + window.location.host + '/cache_chat/ws/' + project_id + '/' + user_id + '/' + username
             var count = 0
             if (!ws) {
                 ws = new WebSocket(wsUrl);
@@ -1503,6 +1495,134 @@
                 }
             })
         }
+
+
+        //可发离线信息
+        function priChat(id, username) {
+            console.log('id,', id)
+            console.log('uid,', '{{ request.web.user.id }}')
+            if (id == '{{ request.web.user.id }}') {
+                layer.msg('Can not send message to self.')
+                return;
+            }
+            let title = `发送给${username}的提醒信息`
+            layui.use(function () {
+                var util = layui.util;
+                var layer = layui.layer;
+                let prompt = layer.prompt({
+                            id: 'pri_chat_prompt',
+                            title: title,
+                            formType: 2,
+                            area: ['480px', '220px'],
+                            closeBtn: 1,
+                            maxlength: 2000,
+                            shade: [0.3, '#FFF'],
+                            shadeClose: true,
+                            resize: true,
+                            minStack: true,
+                            btn: ['确认(ctrl+enter)', '取消(esc)'],
+                            btn2: function () {
+                                layer.msg('取消发送')
+                            }
+                        }
+                        , function (value, index, elem) {
+                            console.log('prompt elem :', elem)
+                            console.log('prompt index :', index)
+                            if (value === '') {
+                                layer.msg('填写信息，否则无法发送')
+                                return elem.focus();
+                            }
+                            //send to receiver
+                            if (document.querySelector(".layui-layer-input").value.length > 0) {
+                                // ws发送提醒信息
+                                triggerReply(util.escape(value), username)
+                                layer.msg('信息发送完毕')
+                            } else {
+                                layer.msg("请输入信息")
+                                return;
+                            }
+
+                            setTimeout(function () {
+                                // 关闭 prompt
+                                layer.close(index);
+                                {#window.location.reload()#}
+                            }, 1000);
+                        }
+                    )
+                ;
+                layer.style(prompt, {
+                    width: '600px',
+                    height: '400px',
+                    top: '20%',
+                    left: '55%',
+                });
+
+                //when press esc (event27) then close prompt of editor
+                $(document).keyup(function (event) {
+                    if (event.which === 27) {
+                        //它获取的始终是最新弹出的某个层，值是由layer内部动态递增计算
+                        layer.close(prompt);
+                    }
+                })
+
+                //add listener to ctrl + enter to send the message
+                document.getElementById("pri_chat_prompt").addEventListener("keydown", function (event) {
+                    if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
+                        event.preventDefault();
+                        // 执行你想要的操作
+                        let msgMsg = layer.msg('message sending...');
+                        document.querySelector(".layui-layer-btn0").click()
+                        {#layer.close(msgMsg)#}
+                    }
+                });
+            })
+        }
+
+        /**
+         * 判断当前用户是否 还在线
+         */
+        function isOnlineCurrUser() {
+            if (ws) {
+                if (ws.readyState == WebSocket.OPEN) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * 设置一个 30秒的轮询监听方法，避免页面关闭
+         */
+        function init_start_timer() {
+            //重置计数器
+            timer_count = 0;
+            if (interval_timer != null) {
+                clearInterval(interval_timer);
+                interval_timer = null;
+            }
+            interval_timer = setInterval(function () {
+                myTimer()
+            }, 10000);
+        }
+
+         /**
+         *定时器具体实现方法
+         */
+        function myTimer() {
+            if (timer_count >= 300000) {
+                clearInterval(interval_timer);
+            } else {
+                timer_count += 30;
+                createOrConnectWebSocket()
+                console.log('timer_count', timer_count);
+            }
+        }
+
+        createOrConnectWebSocket()
+
 
     </script>
 
