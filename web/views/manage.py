@@ -112,7 +112,6 @@ def git(request, project_id):
         for v in relation_git_infos:
             relation_git_ids.append(v.git_project_id)
 
-    git_host = "http://39.99.215.169:8099"
     task_project_name = project.name
     project_infos = []
     if relation_git_ids:
@@ -120,10 +119,10 @@ def git(request, project_id):
             try:
                 git_project_id = str(git_info.git_project_id)
                 project_private_token = git_info.git_access_token
-                members_url = git_host + "/api/v4/projects/" + git_project_id + "/members?private_token=" + project_private_token
-                project_info_url = git_host + "/api/v4/projects/" + git_project_id + "?private_token=" + project_private_token
-                project_events_url = git_host + "/api/v4/projects/" + git_project_id + "/events?private_token=" + project_private_token
-                project_branches_url = git_host + "/api/v4/projects/" + git_project_id + "/repository/branches?private_token=" + project_private_token
+                members_url = git_info.git_host + "/api/v4/projects/" + git_project_id + "/members?private_token=" + project_private_token
+                project_info_url = git_info.git_host + "/api/v4/projects/" + git_project_id + "?private_token=" + project_private_token
+                project_events_url = git_info.git_host + "/api/v4/projects/" + git_project_id + "/events?private_token=" + project_private_token
+                project_branches_url = git_info.git_host + "/api/v4/projects/" + git_project_id + "/repository/branches?private_token=" + project_private_token
                 members_response = json.loads(requests.get(members_url).text)
                 project_info_response = json.loads(requests.get(project_info_url).text)
                 project_events_response = json.loads(requests.get(project_events_url).text)
